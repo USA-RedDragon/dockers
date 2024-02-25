@@ -1,0 +1,43 @@
+---
+on: # yamllint disable-line rule:truthy
+  push:
+    tags:
+      # i.e. release/<image>/<version>
+      'release/*/v\d+\.\d+\.\d+'
+
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.ref }}'
+  cancel-in-progress: false
+
+jobs:
+  get-tags:
+    runs-on: ubuntu-22.04
+    outputs:
+      image: ${{ steps.tags.outputs.image }}
+      version: ${{ steps.tags.outputs.version }}
+    steps:
+      - name: Get tags
+        id: tags
+        run: |
+          image="$(echo '${{ github.ref }}' | cut -d/ -f4)"
+          version="$(echo '${{ github.ref }}' | cut -d/ -f5)"
+          if [ -z "$image" ] || [ -z "$version" ]; then
+            echo "Invalid tag format"
+            exit 1
+          fi
+          echo "version=${version}" >> $GITHUB_OUTPUT
+          echo "image=${image}" >> $GITHUB_OUTPUT
+
+  release:
+    needs: [ get-tags ]
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
+    uses: USA-RedDragon/reusable-actions/.github/workflows/docker-ci.yaml@v1.0.16
+    with:
+      push: true
+      context: images/${{ needs.get-tags.outputs.image }}
+      dockerfile: images/${{ needs.get-tags.outputs.image }}/Dockerfile
+      image-name: ${{ needs.get-tags.outputs.image }}
+      version: ${{ needs.get-tags.outputs.version }}
