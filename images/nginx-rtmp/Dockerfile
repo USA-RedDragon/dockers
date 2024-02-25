@@ -10,7 +10,6 @@ ARG FFMPEG_VERSION=6.1.1
 FROM alpine:3.19.1@sha256:6457d53fb065d6f250e1504b9bc42d5b6c65941d57532c072d929dd0628977d0 as build-nginx
 ARG NGINX_VERSION
 ARG NGINX_RTMP_VERSION
-ARG MAKEFLAGS="-j4"
 
 # Build dependencies.
 RUN apk add --no-cache \
@@ -56,7 +55,7 @@ RUN \
   --with-debug \
   --with-http_stub_status_module \
   --with-cc-opt="-Wimplicit-fallthrough=0" && \
-  make && \
+  make -j"$(nproc)" && \
   make install
 
 ###############################
@@ -64,7 +63,6 @@ RUN \
 FROM alpine:3.19.1@sha256:6457d53fb065d6f250e1504b9bc42d5b6c65941d57532c072d929dd0628977d0 as build-ffmpeg
 ARG FFMPEG_VERSION
 ARG PREFIX=/usr/local
-ARG MAKEFLAGS="-j4"
 
 # FFmpeg build dependencies.
 RUN apk add --no-cache \
@@ -125,7 +123,7 @@ RUN \
   --disable-doc \
   --disable-ffplay \
   --extra-libs="-lpthread -lm" && \
-  make && \
+  make -j"$(nproc)" && \
   make install && \
   make distclean
 
