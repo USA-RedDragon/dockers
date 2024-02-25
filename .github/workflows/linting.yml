@@ -96,3 +96,38 @@ jobs:
         with:
           config_file: .yamllint.yml
           file_or_dir: .github/workflows .yamllint.yml
+
+  lint-results:
+    if: always()
+    needs: [ yamllint, markdownlint, dockerlint, shellcheck ]
+    runs-on: ubuntu-22.04
+    steps:
+      - run: |
+          result="${{ needs.yamllint.result }}"
+          if [[ "$result" == "success" || "$result" == "skipped" ]]; then
+            echo "All images linted YAML successfully"
+          else
+            echo "One or more images failed to lint YAML"
+            exit 1
+          fi
+          result="${{ needs.markdownlint.result }}"
+          if [[ "$result" == "success" || "$result" == "skipped" ]]; then
+            echo "All images linted Markdown successfully"
+          else
+            echo "One or more images failed to lint Markdown"
+            exit 1
+          fi
+          result="${{ needs.dockerlint.result }}"
+          if [[ "$result" == "success" || "$result" == "skipped" ]]; then
+            echo "All images linted Docker successfully"
+          else
+            echo "One or more images failed to lint Docker"
+            exit 1
+          fi
+          result="${{ needs.shellcheck.result }}"
+          if [[ "$result" == "success" || "$result" == "skipped" ]]; then
+            echo "All images linted Shell successfully"
+          else
+            echo "One or more images failed to lint Shell"
+            exit 1
+          fi
