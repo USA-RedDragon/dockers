@@ -1,0 +1,3 @@
+#!/bin/sh
+
+exec olsrd -f /etc/olsrd/olsrd.conf -pidfile /tmp/olsrd.pid -nofork
