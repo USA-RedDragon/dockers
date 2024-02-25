@@ -1,0 +1,5 @@
+
+#!/bin/sh
+
+exec doas -u weewx -- \
+    /usr/bin/weewxd --config ${CONFIG_OVERRIDE:-/etc/weewx/weewx.conf}
