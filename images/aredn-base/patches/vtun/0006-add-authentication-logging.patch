@@ -1,0 +1,58 @@
+From 4c9e5c92b4bd348f447f90a4e5758d5524847a48 Mon Sep 17 00:00:00 2001
+From: Jacob McSwain <jacob.a.mcswain@gmail.com>
+Date: Fri, 3 Nov 2023 20:03:22 -0500
+Subject: [PATCH 6/6] add authentication logging
+
+---
+ auth.c | 14 +++++++++++---
+ 1 file changed, 11 insertions(+), 3 deletions(-)
+
+diff --git a/auth.c b/auth.c
+index 690ddb0..b668ede 100644
+--- a/auth.c
++++ b/auth.c
+@@ -355,8 +355,10 @@ struct vtun_host * auth_server(int fd)
+ 		   if( !cs2cl(str2,chal_res) )
+ 		      break; 
+ 		   
+-		   if( !(h = find_host(host)) )
++		   if( !(h = find_host(host)) ) {
++			  vtun_syslog(LOG_ERR,"Auth failed, unknown host %s", host);
+ 		      break;
++		   }
+ 
+ 		   decrypt_chal(chal_res, h->passwd);   		
+ 	
+@@ -370,8 +372,10 @@ struct vtun_host * auth_server(int fd)
+ 		         break;
+ 		      }	
+ 		      print_p(fd,"OK FLAGS: %s\n", bf2cf(h)); 
+- 		   } else
++ 		   } else {
++			  vtun_syslog(LOG_ERR,"Auth failed, wrong hostname or password for host %s", host);
+ 		      h = NULL;
++		   }
+ 	        }
+ 		break;
+  	   }
+@@ -414,12 +418,16 @@ int auth_client(int fd, struct vtun_host *host)
+ 		      print_p(fd,"CHAL: %s\n", cl2cs(chal));
+ 
+ 		      continue;
+-	   	   }
++	   	   } else {
++			vtun_syslog(LOG_ERR,"Auth failed, server denied hostname of host %s", host->host);
++		   }
+ 		   break;	
+ 	
+ 	        case ST_CHAL:
+ 		   if( !strncmp(buf,"OK",2) && cf2bf(buf,host) )
+ 		      success = 1;
++			else
++				vtun_syslog(LOG_ERR,"Auth failed, server denied password for host %s", host->host);
+ 		   break;
+ 	   }
+ 	   break;
+-- 
+2.43.0
+
