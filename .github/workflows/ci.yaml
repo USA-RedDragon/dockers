@@ -1,4 +1,5 @@
-on:
+---
+on: # yamllint disable-line rule:truthy
   pull_request:
 
 concurrency:
@@ -16,7 +17,7 @@ jobs:
         id: images
         uses: hellofresh/action-changed-files@v3
         with:
-            pattern: images/(?P<image>[^/]+)
+          pattern: images/(?P<image>[^/]+)
 
   docker:
     needs: [ generate-matrix ]
