@@ -45,6 +45,8 @@ ARG BUILD_DEPS=" \
 
 COPY requirements.txt /tmp/requirements.txt
 
+# False-positive from hadolint
+# hadolint ignore=DL3008
 RUN export DEBIAN_FRONTEND=noninteractive \
     && apt-get update \
     && apt-get -y --no-install-recommends --no-install-suggests install \
