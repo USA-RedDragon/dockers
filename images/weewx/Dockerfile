@@ -11,7 +11,6 @@ RUN mkdir -p /var/www/html/weewx /var/lib/weewx
 RUN export DEBIAN_FRONTEND=noninteractive &&\
     apt-get update && \
     apt-get -y --no-install-recommends --no-install-suggests install \
-        wget \
         curl \
         gnupg \
         tzdata \
@@ -36,7 +35,7 @@ RUN export DEBIAN_FRONTEND=noninteractive &&\
     apt-get update && \
     apt-get install --no-install-recommends --no-install-suggests -y weewx && \
     apt-get remove -y python3-pillow && \
-    python3 -m pip install --break-system-packages Pillow==9.0.1 && \
+    python3 -m pip install --no-cache-dir --break-system-packages Pillow==9.0.1 && \
     apt-get -y remove \
         build-essential \
         python3-dev \
