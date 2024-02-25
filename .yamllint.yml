@@ -7,7 +7,9 @@ yaml-files:
 rules:
   anchors: enable
   braces: enable
-  brackets: enable
+  brackets:
+    min-spaces-inside: 0
+    max-spaces-inside: 1
   colons: enable
   commas: enable
   comments:
