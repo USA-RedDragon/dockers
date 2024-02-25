@@ -57,18 +57,18 @@ ARG WEEWX_MQTT_SHA=778c460c96bfa04bc842abdffdca81b58391188d
 # renovate: sha: datasource=git-refs depName=weewx-seasons-dark packageName=https://github.com/USA-RedDragon/weewx-seasons-dark branch=main
 ARG WEEWX_SEASONS_DARK_SHA=3f2d888d524366f6d977550711a22cfa145d2665
 
-RUN NWS_NONV_VERSION=$(echo ${WEEWX_NWS_VERSION} | sed 's/v//g') && \
-    curl -fSsL https://github.com/chaunceygardiner/weewx-nws/releases/download/${WEEWX_NWS_VERSION}/weewx-nws-${NWS_NONV_VERSION}.zip -o /tmp/weewx-nws.zip && \
+RUN NWS_NONV_VERSION=$(echo "${WEEWX_NWS_VERSION}" | sed 's/v//g') && \
+    curl -fSsL "https://github.com/chaunceygardiner/weewx-nws/releases/download/${WEEWX_NWS_VERSION}/weewx-nws-${NWS_NONV_VERSION}.zip" -o /tmp/weewx-nws.zip && \
     wee_extension --install /tmp/weewx-nws.zip && \
     rm /tmp/weewx-nws.zip && \
-    curl -fSsL https://github.com/USA-RedDragon/weewx-prometheus/archive/refs/tags/${WEEWX_PROMETHEUS_VERSION}.zip -o /tmp/weewx-prometheus.zip && \
+    curl -fSsL "https://github.com/USA-RedDragon/weewx-prometheus/archive/refs/tags/${WEEWX_PROMETHEUS_VERSION}.zip" -o /tmp/weewx-prometheus.zip && \
     wee_extension --install /tmp/weewx-prometheus.zip && \
     rm /tmp/weewx-prometheus.zip && \
-    curl -fSsL https://github.com/USA-RedDragon/weewxMQTT/archive/${WEEWX_MQTT_SHA}.zip -o /tmp/weewxMQTT.zip && \
+    curl -fSsL "https://github.com/USA-RedDragon/weewxMQTT/archive/${WEEWX_MQTT_SHA}.zip" -o /tmp/weewxMQTT.zip && \
     wee_extension --install /tmp/weewxMQTT.zip && \
     rm /tmp/weewxMQTT.zip && \
-    STACKED_WINDROSE_NONV_VERSION=$(echo ${WEEWX_STACKEDWINDROSE_VERSION} | sed 's/v//g') && \
-    curl -fSsL https://github.com/gjr80/weewx-stackedwindrose/releases/download/${WEEWX_STACKEDWINDROSE_VERSION}/stackedwindrose-${STACKED_WINDROSE_NONV_VERSION}.tar.gz -o /tmp/stackedwindrose.tar.gz && \
+    STACKED_WINDROSE_NONV_VERSION=$(echo "${WEEWX_STACKEDWINDROSE_VERSION}" | sed 's/v//g') && \
+    curl -fSsL "https://github.com/gjr80/weewx-stackedwindrose/releases/download/${WEEWX_STACKEDWINDROSE_VERSION}/stackedwindrose-${STACKED_WINDROSE_NONV_VERSION}.tar.gz" -o /tmp/stackedwindrose.tar.gz && \
     tar -zxvf /tmp/stackedwindrose.tar.gz -C /tmp && \
     cp /tmp/stackedwindrose/bin/user/stackedwindrose.py /usr/share/weewx/user && \
     cp -R /tmp/stackedwindrose/skins/* /etc/weewx/skins && \
@@ -76,7 +76,7 @@ RUN NWS_NONV_VERSION=$(echo ${WEEWX_NWS_VERSION} | sed 's/v//g') && \
     rm -rf /etc/weewx/skins/Seasons/ && \
     git clone https://github.com/USA-RedDragon/weewx-seasons-dark.git && \
     cd weewx-seasons-dark && \
-    git checkout ${WEEWX_SEASONS_DARK_SHA} && \
+    git checkout "${WEEWX_SEASONS_DARK_SHA}" && \
     cd .. && \
     mv weewx-seasons-dark/skins/Seasons /etc/weewx/skins/ && \
     rm -rf weewx-seasons-dark
