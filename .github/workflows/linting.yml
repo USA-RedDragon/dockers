@@ -1,0 +1,97 @@
+---
+name: Linting
+on:  # yamllint disable-line rule:truthy
+  pull_request:
+
+jobs:
+  generate-matrix:
+    name: Generate job matrices
+    runs-on: ubuntu-22.04
+    outputs:
+      matrix: ${{ steps.images.outputs.matrix }}
+    steps:
+      - name: Generate matrix
+        id: images
+        uses: hellofresh/action-changed-files@v3
+        with:
+            pattern: images/(?P<image>[^/]+)
+
+  shellcheck:
+    needs: [ generate-matrix ]
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+    if: ${{ fromJson(needs.generate-matrix.outputs.matrix).include[0] }}
+    name: Lint - Shell
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Shellcheck
+        uses: ludeeus/action-shellcheck@2.0.0
+        with:
+          scandir: images/${{ matrix.image }}
+
+  dockerlint:
+    needs: [ generate-matrix ]
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+    if: ${{ fromJson(needs.generate-matrix.outputs.matrix).include[0] }}
+    name: Lint - Docker
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: images/${{ matrix.image }}/Dockerfile
+
+  markdownlint:
+    needs: [ generate-matrix ]
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+    if: ${{ fromJson(needs.generate-matrix.outputs.matrix).include[0] }}
+    name: Lint - Markdown
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Lint - Markdown
+        uses: DavidAnson/markdownlint-cli2-action@v15
+        with:
+          config: ".markdownlint.jsonc"
+          globs: "images/${{ matrix.image }}/**.md"
+
+  yamllint:
+    needs: [ generate-matrix ]
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+    if: ${{ fromJson(needs.generate-matrix.outputs.matrix).include[0] }}
+    name: Lint - Yamllint
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Lint - Yamllint
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          config_file: .yamllint.yml
+          file_or_dir: images/${{ matrix.image }}
+
+  yamllint-base:
+    name: Lint - Yamllint Workflows
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Lint - Yamllint
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          config_file: .yamllint.yml
+          file_or_dir: .github/workflows .yamllint.yml
