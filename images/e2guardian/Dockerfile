@@ -51,18 +51,18 @@ ARG BUILD_DEPS=" \
 "
 
 # Runtime dependencies
-RUN apt update \
-    && apt install -y --no-install-recommends --no-install-suggests \
-        zlib1g=${ZLIB1G_VERSION} \
-        ca-certificates=${CA_CERTIFICATES_VERSION} \
-        libpcre3=${LIBPCRE3_VERSION} \
-        openssl=${OPENSSL_VERSION} \
-        clamav=${CLAMAV_VERSION} \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends --no-install-suggests \
+        zlib1g="${ZLIB1G_VERSION}" \
+        ca-certificates="${CA_CERTIFICATES_VERSION}" \
+        libpcre3="${LIBPCRE3_VERSION}" \
+        openssl="${OPENSSL_VERSION}" \
+        clamav="${CLAMAV_VERSION}" \
     && rm -rf /var/lib/apt/lists/*
 
 # Build
-RUN apt update \
-    && apt install -y --no-install-recommends --no-install-suggests \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends --no-install-suggests \
         ${BUILD_DEPS} \
         ${DEV_PACKAGES} \
     && git clone --single-branch --branch ${E2GUARDIAN_VERSION} https://github.com/e2guardian/e2guardian.git /tmp/e2guardian \
@@ -87,9 +87,9 @@ RUN apt update \
         --with-proxygroup=e2guardian \
         --with-proxyuser=e2guardian \
         CPPFLAGS=-O2 \
-    && make -j$(nproc) \
+    && make -j"$(nproc)" \
     && make install \
-    && apt remove --purge -y \
+    && apt-get remove --purge -y \
         ${BUILD_DEPS} \
         ${DEV_PACKAGES} \
     && cd / \
