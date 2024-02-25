@@ -35,7 +35,7 @@ RUN export DEBIAN_FRONTEND=noninteractive &&\
     curl -fSsL https://weewx.com/apt/weewx-python3.list | tee /etc/apt/sources.list.d/weewx.list && \
     apt-get update && \
     apt-get install --no-install-recommends --no-install-suggests -y weewx && \
-    apt remove -y python3-pillow && \
+    apt-get remove -y python3-pillow && \
     python3 -m pip install --break-system-packages Pillow==9.0.1 && \
     apt-get -y remove \
         build-essential \
