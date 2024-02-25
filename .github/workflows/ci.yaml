@@ -32,4 +32,5 @@ jobs:
     with:
       push: ${{ github.event_name != 'pull_request' }}
       context: images/${{ matrix.image }}
+      dockerfile: images/${{ matrix.image }}/Dockerfile
       image-name: ${{ matrix.image }}
