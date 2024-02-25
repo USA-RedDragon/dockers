@@ -2,6 +2,8 @@ FROM ubuntu:mantic-20231128@sha256:cbc171ba52575fec0601f01abf6fdec67f8ed227658ca
 
 WORKDIR /app
 
+SHELL [ "/bin/bash", "-o", "pipefail", "-c" ]
+
 ENV PYTHONUNBUFFERED=1
 
 RUN groupadd --system weewx && useradd --system --create-home --gid weewx weewx
