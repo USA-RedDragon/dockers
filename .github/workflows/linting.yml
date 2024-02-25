@@ -48,7 +48,9 @@ jobs:
       - uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: images/${{ matrix.image }}/Dockerfile
-          ignore: DL3059 # Multiple consecutive `RUN` instructions are used for clarity
+          # DL3059: Multiple consecutive `RUN` instructions are used for clarity
+          # DL3003: WORKDIR to switch directories isn't the pattern I want
+          ignore: DL3059,DL3003
 
   markdownlint:
     needs: [ generate-matrix ]
