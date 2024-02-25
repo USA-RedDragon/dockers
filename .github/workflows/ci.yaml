@@ -35,3 +35,17 @@ jobs:
       context: images/${{ matrix.image }}
       dockerfile: images/${{ matrix.image }}/Dockerfile
       image-name: ${{ matrix.image }}
+
+  docker-results:
+    if: always()
+    needs: [ docker ]
+    runs-on: ubuntu-22.04
+    steps:
+      - run: |
+          result="${{ needs.docker.result }}"
+          if [[ "$result" == "success" || "$result" == "skipped" ]]; then
+            echo "All images built successfully"
+          else
+            echo "One or more images failed to build"
+            exit 1
+          fi
