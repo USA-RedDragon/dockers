@@ -54,7 +54,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
       ${BUILD_DEPS} \
       ${RUNTIME_DEPS} \
     && pip install --no-cache-dir -r /tmp/requirements.txt \
-    && apt-get remove -y \
+    && apt-get remove --purge -y \
       ${DEV_PACKAGES} \
       ${BUILD_DEPS} \
     && apt-get clean && rm -rf /tmp/setup /var/lib/apt/lists/* /tmp/* /var/tmp/*
