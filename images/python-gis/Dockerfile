@@ -1,4 +1,4 @@
-FROM python:3.12.2
+FROM python:3.12.2-slim@sha256:f0c6bc1ab7b1ab270bbb612a31a67a7938d6171183ddce9121f04984ab3df44e
 
 ENV PYTHONUNBUFFERED=1
 
@@ -19,7 +19,7 @@ RUN apt-get update && \
       libopenblas0 \
       python3-pyproj \
       gfortran && \
-    pip install -r /tmp/requirements.txt && \
+    pip install --no-cache-dir -r /tmp/requirements.txt && \
     apt-get remove -y \
       build-essential \
       libgeos-dev \
