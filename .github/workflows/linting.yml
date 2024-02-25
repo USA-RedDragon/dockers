@@ -48,6 +48,7 @@ jobs:
       - uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: images/${{ matrix.image }}/Dockerfile
+          ignore: DL3059 # Multiple consecutive `RUN` instructions are used for clarity
 
   markdownlint:
     needs: [ generate-matrix ]
