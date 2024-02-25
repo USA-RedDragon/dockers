@@ -14,7 +14,7 @@ jobs:
         id: images
         uses: hellofresh/action-changed-files@v3
         with:
-            pattern: images/(?P<image>[^/]+)
+          pattern: images/(?P<image>[^/]+)
 
   shellcheck:
     needs: [ generate-matrix ]
