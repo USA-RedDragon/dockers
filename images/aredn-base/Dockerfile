@@ -63,7 +63,7 @@ RUN curl -fSsL https://downloads.sourceforge.net/project/vtun/vtun/3.0.3/vtun-3.
     && cd vtun-3.0.3 \
     # --build=unknown-unknown-linux is magic for cross-compiling
     && ./configure --prefix=/usr --build=unknown-unknown-linux \
-    && for patch in /patches/vtun/*.patch; do patch -p1 < $patch; done \
+    && for patch in /patches/vtun/*.patch; do patch -p1 < "$patch"; done \
     && make \
     && make DESTDIR=/out install \
     && cd .. \
@@ -124,6 +124,8 @@ RUN apk add --no-cache \
 RUN sed -i 's/module(load="imklog")//g' /etc/rsyslog.conf
 
 COPY --chown=root:root rootfs /
+
+SHELL [ "/bin/bash", "-o", "pipefail", "-c" ]
 
 RUN rm -f /etc/periodic/daily/logrotate \
     && (crontab -l ; echo "* * * * * /usr/sbin/logrotate /etc/logrotate.conf") | crontab - \
