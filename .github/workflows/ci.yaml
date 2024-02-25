@@ -1,0 +1,35 @@
+on:
+  pull_request:
+
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.ref }}'
+  cancel-in-progress: true
+
+jobs:
+  generate-matrix:
+    name: Generate job matrices
+    runs-on: ubuntu-22.04
+    outputs:
+      matrix: ${{ steps.images.outputs.matrix }}
+    steps:
+      - name: Generate matrix
+        id: images
+        uses: hellofresh/action-changed-files@v3
+        with:
+            pattern: images/(?P<image>[^/]+)
+
+  docker:
+    needs: [ generate-matrix ]
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+    if: ${{ fromJson(needs.generate-matrix.outputs.matrix).include[0] }}
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
+    uses: USA-RedDragon/reusable-actions/.github/workflows/docker-ci.yaml@v1.0.15
+    with:
+      push: ${{ github.event_name != 'pull_request' }}
+      context: images/${{ matrix.image }}
+      image-name: ${{ matrix.image }}
