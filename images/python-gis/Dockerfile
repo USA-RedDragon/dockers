@@ -4,9 +4,9 @@ ENV PYTHONUNBUFFERED=1
 
 COPY requirements.txt /tmp/requirements.txt
 
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && \
-    apt-get -y --no-install-recommends install \
+RUN export DEBIAN_FRONTEND=noninteractive && \
+    apt-get update && \
+    apt-get -y --no-install-recommends --no-install-suggests install \
       ca-certificates \
       build-essential \
       git \

@@ -8,9 +8,9 @@ RUN groupadd --system weewx && useradd --system --create-home --gid weewx weewx
 
 RUN mkdir -p /var/www/html/weewx /var/lib/weewx
 
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && \
-    apt-get -y --no-install-recommends install \
+RUN export DEBIAN_FRONTEND=noninteractive &&\
+    apt-get update && \
+    apt-get -y --no-install-recommends --no-install-suggests install \
         wget \
         curl \
         gnupg \
@@ -34,7 +34,7 @@ RUN apt-get update && \
     curl -fSsL https://weewx.com/keys.html | gpg --dearmor --output /etc/apt/trusted.gpg.d/weewx.gpg && \
     curl -fSsL https://weewx.com/apt/weewx-python3.list | tee /etc/apt/sources.list.d/weewx.list && \
     apt-get update && \
-    apt-get install --no-install-recommends -y weewx && \
+    apt-get install --no-install-recommends --no-install-suggests -y weewx && \
     apt remove -y python3-pillow && \
     python3 -m pip install --break-system-packages Pillow==9.0.1 && \
     apt-get -y remove \
