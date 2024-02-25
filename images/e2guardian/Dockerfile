@@ -60,7 +60,8 @@ RUN apt-get update \
         clamav="${CLAMAV_VERSION}" \
     && rm -rf /var/lib/apt/lists/*
 
-# Build
+# False-positive from hadolint
+# hadolint ignore=DL3008
 RUN apt-get update \
     && apt-get install -y --no-install-recommends --no-install-suggests \
         ${BUILD_DEPS} \
