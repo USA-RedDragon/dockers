@@ -34,12 +34,12 @@ RUN apk add --no-cache \
 WORKDIR /tmp
 
 # Get nginx source.
-RUN wget https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz && \
+RUN curl -fSsL https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz -o nginx-${NGINX_VERSION}.tar.gz && \
   tar zxf nginx-${NGINX_VERSION}.tar.gz && \
   rm nginx-${NGINX_VERSION}.tar.gz
 
 # Get nginx-rtmp module.
-RUN wget https://github.com/arut/nginx-rtmp-module/archive/v${NGINX_RTMP_VERSION}.tar.gz && \
+RUN curl -fSsL https://github.com/arut/nginx-rtmp-module/archive/v${NGINX_RTMP_VERSION}.tar.gz -o v${NGINX_RTMP_VERSION}.tar.gz && \
   tar zxf v${NGINX_RTMP_VERSION}.tar.gz && \
   rm v${NGINX_RTMP_VERSION}.tar.gz
 
@@ -70,6 +70,7 @@ ARG MAKEFLAGS="-j4"
 RUN apk add --no-cache \
   build-base \
   coreutils \
+  curl \
   freetype-dev \
   lame-dev \
   libogg-dev \
@@ -84,7 +85,6 @@ RUN apk add --no-cache \
   pkgconf \
   pkgconfig \
   rtmpdump-dev \
-  wget \
   x264-dev \
   x265-dev \
   yasm
@@ -95,7 +95,7 @@ RUN apk add --no-cache fdk-aac-dev
 WORKDIR /tmp
 
 # Get FFmpeg source.
-RUN wget https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.gz && \
+RUN curl -fSsL https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.gz -o ffmpeg-${FFMPEG_VERSION}.tar.gz && \
   tar zxf ffmpeg-${FFMPEG_VERSION}.tar.gz && \
   rm ffmpeg-${FFMPEG_VERSION}.tar.gz
 
