@@ -1,4 +1,4 @@
-on: # yamllint disable-line rule:truthy
+on:
   push:
     tags:
       # i.e. release/<image>/<version>
