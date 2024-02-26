@@ -27,11 +27,11 @@ jobs:
     outputs:
       user: ${{ steps.lowercase-username.outputs.user }}
     steps:
-    - name: Lowercase username
-      id: lowercase-username
-      run: echo "user=${OWNER,,}" >> $GITHUB_OUTPUT
-      env:
-        OWNER: ${{ github.repository_owner }}
+      - name: Lowercase username
+        id: lowercase-username
+        run: echo "user=${OWNER,,}" >> $GITHUB_OUTPUT
+        env:
+          OWNER: ${{ github.repository_owner }}
 
   docker:
     needs: [ generate-matrix, lowercase-user ]
