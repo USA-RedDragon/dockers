@@ -124,6 +124,7 @@ RUN apk add --no-cache \
 RUN sed -i 's/module(load="imklog")//g' /etc/rsyslog.conf
 
 COPY --chown=root:root rootfs /
+RUN chmod +x /etc/s6/*/run
 
 SHELL [ "/bin/bash", "-o", "pipefail", "-c" ]
 
