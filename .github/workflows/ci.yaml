@@ -22,8 +22,19 @@ jobs:
         with:
           pattern: images/(?P<image>[^/]+)
 
+  lowercase-user:
+    runs-on: ubuntu-22.04
+    outputs:
+      user: ${{ steps.lowercase-username.outputs.user }}
+    steps:
+    - name: Lowercase username
+      id: lowercase-username
+      run: echo "user=${OWNER,,}" >> $GITHUB_OUTPUT
+      env:
+        OWNER: ${{ github.repository_owner }}
+
   docker:
-    needs: [ generate-matrix ]
+    needs: [ generate-matrix, lowercase-user ]
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
@@ -37,7 +48,7 @@ jobs:
       push: ${{ github.event_name != 'pull_request' }}
       context: images/${{ matrix.image }}
       dockerfile: images/${{ matrix.image }}/Dockerfile
-      image-name: ${{ matrix.image }}
+      image-name: ${{ needs.lowercase-user.outputs.user }}/${{ matrix.image }}
 
   docker-results:
     if: always()

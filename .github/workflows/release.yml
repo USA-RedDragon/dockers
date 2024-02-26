@@ -15,6 +15,7 @@ jobs:
     outputs:
       image: ${{ steps.tags.outputs.image }}
       version: ${{ steps.tags.outputs.version }}
+      whole_image: ${{ steps.tags.outputs.whole_image }}
     steps:
       - name: Get tags
         id: tags
@@ -27,6 +28,9 @@ jobs:
           fi
           echo "version=${version}" >> $GITHUB_OUTPUT
           echo "image=${image}" >> $GITHUB_OUTPUT
+          echo "whole_image=${OWNER,,}/${image}" >> $GITHUB_OUTPUT
+        env:
+          OWNER: ${{ github.repository_owner }}
 
   release:
     needs: [ get-tags ]
@@ -39,5 +43,5 @@ jobs:
       push: true
       context: images/${{ needs.get-tags.outputs.image }}
       dockerfile: images/${{ needs.get-tags.outputs.image }}/Dockerfile
-      image-name: ${{ needs.get-tags.outputs.image }}
+      image-name: ${{ needs.get-tags.outputs.whole_image }}
       version: ${{ needs.get-tags.outputs.version }}
