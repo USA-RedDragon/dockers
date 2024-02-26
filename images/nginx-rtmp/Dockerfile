@@ -56,7 +56,7 @@ RUN \
   --with-http_stub_status_module \
   --with-cc-opt="-Wimplicit-fallthrough=0" && \
   make -j"$(nproc)" && \
-  make install
+  make DESTDIR=/out install
 
 ###############################
 # Build the FFmpeg-build image.
@@ -124,8 +124,8 @@ RUN \
   --disable-ffplay \
   --extra-libs="-lpthread -lm" && \
   make -j"$(nproc)" && \
-  make install && \
-  make distclean
+  make DESTDIR=/out install && \
+  make DESTDIR=/out distclean
 
 # Cleanup.
 RUN rm -rf /var/cache/* /tmp/*
@@ -157,10 +157,8 @@ RUN apk add --no-cache \
   x264-dev \
   x265-dev
 
-COPY --from=build-nginx /usr/local/nginx /usr/local/nginx
-COPY --from=build-nginx /etc/nginx /etc/nginx
-COPY --from=build-ffmpeg /usr/local /usr/local
-COPY --from=build-ffmpeg /usr/lib/libfdk-aac.so.2 /usr/lib/libfdk-aac.so.2
+COPY --from=build-nginx /out /
+COPY --from=build-ffmpeg /out /
 
 # Add NGINX path, config and static files.
 ENV PATH "${PATH}:/usr/local/nginx/sbin"
