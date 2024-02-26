@@ -7,7 +7,7 @@ SHELL [ "/bin/bash", "-o", "pipefail", "-c" ]
 ENV PYTHONUNBUFFERED=1
 
 # renovate: datasource=github-releases depName=weewx/weewx
-ARG WEEWX_VERSION=v5.0.1
+ARG WEEWX_VERSION=v5.0.2
 
 # renovate: datasource=repology versioning=deb depName=debian_12/freetype
 ARG FREETYPE_VERSION=2.12.1+dfsg-5
