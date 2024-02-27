@@ -44,3 +44,4 @@ jobs:
       dockerfile: images/${{ needs.get-tags.outputs.image }}/Dockerfile
       image-name: ${{ needs.get-tags.outputs.whole_image }}
       version: ${{ needs.get-tags.outputs.version }}
+      security-category: ${{ matrix.image }}
