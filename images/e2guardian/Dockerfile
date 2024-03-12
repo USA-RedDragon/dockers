@@ -97,7 +97,7 @@ RUN apt-get update \
     && rm -rf /tmp/e2guardian \
     && rm -rf /var/lib/apt/lists/*
 
-RUN sed -i 's/#dockermode = off/dockermode = on/' /etc/e2guardian/e2guardian.conf
+RUN sed -i '/#dockermode = off/!{q1}; {s/#dockermode = off/dockermode = on/}' /etc/e2guardian/e2guardian.conf
 
 RUN groupadd -r e2guardian \
     && useradd -r -g e2guardian -d /e2guardian -s /sbin/nologin -c "e2guardian user" e2guardian \
