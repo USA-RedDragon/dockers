@@ -109,6 +109,8 @@ ARG WEEWX_STACKEDWINDROSE_VERSION=v3.0.2
 ARG WEEWX_MQTT_SHA=778c460c96bfa04bc842abdffdca81b58391188d
 # renovate: sha: datasource=git-refs depName=weewx-seasons-dark packageName=https://github.com/USA-RedDragon/weewx-seasons-dark branch=main
 ARG WEEWX_SEASONS_DARK_SHA=3f2d888d524366f6d977550711a22cfa145d2665
+# renovate: datasource=github-tags depName=teeks99/weewx-json
+ARG WEEWX_JSON_VERSION=v1.2
 
 RUN curl -fSsL "https://github.com/chaunceygardiner/weewx-nws/releases/download/${WEEWX_NWS_VERSION}/weewx-nws-${WEEWX_NWS_VERSION/v/}.zip" -o /tmp/weewx-nws.zip && \
     weectl extension install -y /tmp/weewx-nws.zip && \
@@ -119,6 +121,9 @@ RUN curl -fSsL "https://github.com/chaunceygardiner/weewx-nws/releases/download/
     curl -fSsL "https://github.com/USA-RedDragon/weewxMQTT/archive/${WEEWX_MQTT_SHA}.zip" -o /tmp/weewxMQTT.zip && \
     weectl extension install -y /tmp/weewxMQTT.zip && \
     rm /tmp/weewxMQTT.zip && \
+    curl -fSsL "https://github.com/teeks99/weewx-json/releases/download/${WEEWX_JSON_VERSION}/weewx-json_${WEEWX_JSON_VERSION/v/}.tar.gz" -o /tmp/weewx-json.tar.gz && \
+    weectl extension install -y /tmp/weewx-json.tar.gz && \
+    rm /tmp/weewx-json.tar.gz && \
     curl -fSsL "https://github.com/gjr80/weewx-stackedwindrose/releases/download/${WEEWX_STACKEDWINDROSE_VERSION}/stackedwindrose-${WEEWX_STACKEDWINDROSE_VERSION/v/}.tar.gz" -o /tmp/stackedwindrose.tar.gz && \
     tar -zxvf /tmp/stackedwindrose.tar.gz -C /tmp && \
     cp /tmp/stackedwindrose/bin/user/stackedwindrose.py /etc/weewx/bin/user && \
