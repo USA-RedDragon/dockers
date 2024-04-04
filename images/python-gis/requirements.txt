@@ -1,5 +1,5 @@
 shapely==2.0.3
-matplotlib==3.8.3
+matplotlib==3.8.4
 python-awips==20.1
 numpy==1.26.4
 Cartopy==0.22.0
