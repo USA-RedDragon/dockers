@@ -22,7 +22,7 @@ ARG LZO_VERSION=2.10-r5
 # renovate: datasource=repology depName=alpine_3_19/binutils
 ARG BINUTILS_VERSION=2.41-r0
 # renovate: datasource=repology depName=alpine_3_19/openssl
-ARG OPENSSL_VERSION=3.1.4-r5
+ARG OPENSSL_VERSION=3.1.4-r6
 # renovate: datasource=repology depName=alpine_3_19/curl
 ARG CURL_VERSION=8.5.0-r0
 # renovate: datasource=repology depName=alpine_3_19/make
@@ -82,7 +82,7 @@ ARG ZLIB_VERSION=1.3.1-r0
 # renovate: datasource=repology depName=alpine_3_19/lzo
 ARG LZO_VERSION=2.10-r5
 # renovate: datasource=repology depName=alpine_3_19/openssl
-ARG OPENSSL_VERSION=3.1.4-r5
+ARG OPENSSL_VERSION=3.1.4-r6
 # renovate: datasource=repology depName=alpine_3_19/iptables
 ARG IPTABLES_VERSION=1.8.10-r3
 # renovate: datasource=repology depName=alpine_3_19/iproute2
