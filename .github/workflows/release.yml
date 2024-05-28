@@ -37,7 +37,7 @@ jobs:
       contents: read
       packages: write
       security-events: write
-    uses: USA-RedDragon/reusable-actions/.github/workflows/docker-ci.yaml@v1.0.23
+    uses: USA-RedDragon/reusable-actions/.github/workflows/docker-ci.yaml@v1.1.0
     with:
       push: true
       context: images/${{ needs.get-tags.outputs.image }}
