@@ -1,4 +1,4 @@
-FROM alpine:3.19.1@sha256:6457d53fb065d6f250e1504b9bc42d5b6c65941d57532c072d929dd0628977d0 as builder
+FROM alpine:3.20.0@sha256:216266c86fc4dcef5619930bd394245824c2af52fd21ba7c6fa0e618657d4c3b as builder
 
 WORKDIR /tmp
 RUN mkdir -p /out
@@ -69,7 +69,7 @@ RUN curl -fSsL https://downloads.sourceforge.net/project/vtun/vtun/3.0.3/vtun-3.
     && cd .. \
     && rm -rf vtun-3.0.3
 
-FROM alpine:3.19.1@sha256:6457d53fb065d6f250e1504b9bc42d5b6c65941d57532c072d929dd0628977d0
+FROM alpine:3.20.0@sha256:216266c86fc4dcef5619930bd394245824c2af52fd21ba7c6fa0e618657d4c3b
 
 COPY --from=builder /out /
 
