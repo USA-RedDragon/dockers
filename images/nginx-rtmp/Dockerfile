@@ -131,7 +131,7 @@ ARG X264_VERSION
 ARG X265_VERSION
 
 # renovate: datasource=git-tags extractVersion=^n(?<version>.*)$ depName=git://git.ffmpeg.org/ffmpeg.git
-ARG FFMPEG_VERSION=6.1.1
+ARG FFMPEG_VERSION=7.0.1
 # renovate: datasource=repology depName=alpine_3_20/pkgconf
 ARG PKGCONF_VERSION=2.2.0-r0
 # renovate: datasource=repology depName=alpine_3_20/yasm
