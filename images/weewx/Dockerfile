@@ -100,7 +100,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     && apt-get clean && rm -rf /tmp/setup /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # renovate: datasource=github-releases depName=chaunceygardiner/weewx-nws
-ARG WEEWX_NWS_VERSION=v2.3
+ARG WEEWX_NWS_VERSION=v3.1
 # renovate: datasource=github-tags depName=USA-RedDragon/weewx-prometheus
 ARG WEEWX_PROMETHEUS_VERSION=v1.1.9
 # renovate: datasource=github-releases depName=gjr80/weewx-stackedwindrose
