@@ -12,7 +12,7 @@ ARG CA_CERTIFICATES_VERSION=20230311
 # renovate: datasource=repology versioning=deb depName=debian_12/pcre3
 ARG LIBPCRE3_VERSION=2:8.39-15
 # renovate: datasource=repology versioning=deb depName=debian_12/openssl
-ARG OPENSSL_VERSION=3.0.11-1~deb12u2
+ARG OPENSSL_VERSION=3.0.13-1~deb12u1
 # renovate: datasource=repology versioning=deb depName=debian_12/clamav
 ARG CLAMAV_VERSION=1.0.5+dfsg-1~deb12u1
 
