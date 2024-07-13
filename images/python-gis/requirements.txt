@@ -1,4 +1,4 @@
-shapely==2.0.4
+shapely==2.0.5
 matplotlib==3.9.1
 python-awips==20.1
 numpy==2.0.0
