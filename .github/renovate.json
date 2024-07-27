@@ -5,11 +5,12 @@
     ],
     "regexManagers": [
         {
-            "fileMatch": ["(^|/).*Dockerfile$"],
-            "matchStrings": ["depName=alpine_(?<major>.*)_(?<minor>.*)\\/"],
-            "depNameTemplate": "alpine",
-            "versioningTemplate": "semver-coerced",
-            "datasourceTemplate": "docker"
+            "fileMatch": ["Dockerfile"],
+            "matchStrings": ["^# renovate: datasource=repology depName=alpine_(?<currentValue>\\d+[._]\\d+)"],
+            "datasourceTemplate": "docker",
+            "depNameTemplate": "docker.io/library/alpine",
+            "versioningTemplate": "regex:^(?<major>\\d+)[._](?<minor>\\d+)$",
+            "autoReplaceStringTemplate": "# renovate: datasource=repology depName=alpine_{{{newMajor}}}_{{{newMinor}}}"
         }
     ]
 }
