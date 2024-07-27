@@ -2,5 +2,14 @@
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
     "extends": [
       "local>USA-RedDragon/renovate-configs"
+    ],
+    "regexManagers": [
+        {
+            "fileMatch": ["(^|/).*Dockerfile$"],
+            "matchStrings": ["depName=alpine_(?<major>.*)_(?<minor>.*)\\/"],
+            "depNameTemplate": "alpine",
+            "versioningTemplate": "semver-coerced",
+            "datasourceTemplate": "docker"
+        }
     ]
 }
