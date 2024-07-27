@@ -7,6 +7,7 @@
         {
             "fileMatch": ["Dockerfile"],
             "matchStrings": ["^# renovate: datasource=repology depName=alpine_(?<currentValue>\\d+[._]\\d+)"],
+            "currentValueTemplate": "{{{ replace '_' '.' currentValue }}}",
             "datasourceTemplate": "docker",
             "depNameTemplate": "docker.io/library/alpine",
             "versioningTemplate": "regex:^(?<major>\\d+)[._](?<minor>\\d+)$",
