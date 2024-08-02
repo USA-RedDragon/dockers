@@ -48,7 +48,7 @@ ARG X264_VERSION=0.164_git20231001-r0
 # renovate: datasource=repology depName=alpine_3_20/x265
 ARG X265_VERSION=3.6-r0
 
-FROM alpine:3.20.0@sha256:216266c86fc4dcef5619930bd394245824c2af52fd21ba7c6fa0e618657d4c3b as build-nginx
+FROM alpine:3.20.2@sha256:eddacbc7e24bf8799a4ed3cdcfa50d4b88a323695ad80f317b6629883b2c2a78 as build-nginx
 
 ARG MUSL_VERSION
 ARG CURL_VERSION
@@ -108,7 +108,7 @@ RUN \
 
 ###############################
 # Build the FFmpeg-build image.
-FROM alpine:3.20.0@sha256:216266c86fc4dcef5619930bd394245824c2af52fd21ba7c6fa0e618657d4c3b as build-ffmpeg
+FROM alpine:3.20.2@sha256:eddacbc7e24bf8799a4ed3cdcfa50d4b88a323695ad80f317b6629883b2c2a78 as build-ffmpeg
 
 ARG MUSL_VERSION
 ARG CURL_VERSION
@@ -202,7 +202,7 @@ RUN rm -rf /var/cache/* /tmp/*
 
 ##########################
 # Build the release image.
-FROM alpine:3.20.0@sha256:216266c86fc4dcef5619930bd394245824c2af52fd21ba7c6fa0e618657d4c3b
+FROM alpine:3.20.2@sha256:eddacbc7e24bf8799a4ed3cdcfa50d4b88a323695ad80f317b6629883b2c2a78
 
 # Set default ports.
 ENV HTTP_PORT 80
