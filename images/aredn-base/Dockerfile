@@ -6,7 +6,7 @@ RUN mkdir -p /out
 COPY patches /patches
 
 # renovate: datasource=repology depName=alpine_3_20/git
-ARG GIT_VERSION=2.45.1-r0
+ARG GIT_VERSION=2.45.2-r0
 # renovate: datasource=repology depName=alpine_3_20/gcc
 ARG GCC_VERSION=13.2.1_git20240309-r0
 # renovate: datasource=repology depName=alpine_3_20/linux-headers
@@ -22,9 +22,9 @@ ARG LZO_VERSION=2.10-r5
 # renovate: datasource=repology depName=alpine_3_20/binutils
 ARG BINUTILS_VERSION=2.42-r0
 # renovate: datasource=repology depName=alpine_3_20/openssl
-ARG OPENSSL_VERSION=3.3.0-r2
+ARG OPENSSL_VERSION=3.3.1-r3
 # renovate: datasource=repology depName=alpine_3_20/curl
-ARG CURL_VERSION=8.7.1-r0
+ARG CURL_VERSION=8.9.0-r0
 # renovate: datasource=repology depName=alpine_3_20/make
 ARG MAKE_VERSION=4.4.1-r2
 # renovate: datasource=repology depName=alpine_3_20/musl
@@ -76,13 +76,13 @@ COPY --from=builder /out /
 # renovate: datasource=repology depName=alpine_3_20/bash
 ARG BASH_VERSION=5.2.26-r0
 # renovate: datasource=repology depName=alpine_3_20/curl
-ARG CURL_VERSION=8.7.1-r0
+ARG CURL_VERSION=8.9.0-r0
 # renovate: datasource=repology depName=alpine_3_20/zlib
 ARG ZLIB_VERSION=1.3.1-r1
 # renovate: datasource=repology depName=alpine_3_20/lzo
 ARG LZO_VERSION=2.10-r5
 # renovate: datasource=repology depName=alpine_3_20/openssl
-ARG OPENSSL_VERSION=3.3.0-r2
+ARG OPENSSL_VERSION=3.3.1-r3
 # renovate: datasource=repology depName=alpine_3_20/iptables
 ARG IPTABLES_VERSION=1.8.10-r3
 # renovate: datasource=repology depName=alpine_3_20/iproute2
