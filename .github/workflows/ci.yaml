@@ -48,7 +48,7 @@ jobs:
             echo -n "${VERSION}" > /tmp/version
           else
             echo "No .version.sh found"
-            echo -n "\"\"" > /tmp/version
+            touch /tmp/version
           fi
       - uses: actions/upload-artifact@v4
         with:
