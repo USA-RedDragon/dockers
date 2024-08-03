@@ -20,7 +20,7 @@ COPY public-key.pem /tmp/public-key.pem
 RUN <<EOT
   set -eu
 
-  if [[ "$MATTERMOST_VERSION" = latest ]]; then
+  if [ "$MATTERMOST_VERSION" = latest ]; then
     ref=master
   else
     ref="v$MATTERMOST_VERSION"
@@ -32,7 +32,7 @@ RUN <<EOT
   new="$(cat /tmp/public-key.pem)"
 
   echo Verifying lengths match >&2
-  if [[ "${#old}" != "${#new}" ]]; then
+  if [ "${#old}" != "${#new}" ]; then
     echo Lengths must match: "${#old}" != "${#new}" >&2
     exit 1
   fi
