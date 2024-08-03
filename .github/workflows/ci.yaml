@@ -32,8 +32,31 @@ jobs:
         env:
           OWNER: ${{ github.repository_owner }}
 
+  version:
+    needs: [ generate-matrix ]
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+    if: ${{ fromJson(needs.generate-matrix.outputs.matrix).include[0] }}
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check for .version.sh under images/${{ matrix.image }}
+        run: |
+          if [ -f images/${{ matrix.image }}/.version.sh ]; then
+            echo "Found .version.sh"
+            . ./images/${{ matrix.image }}/.version.sh
+            echo -n "${VERSION}" > /tmp/version
+          else
+            echo "No .version.sh found"
+            echo -n "\"\"" > /tmp/version
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.image }}-version
+          path: /tmp/version
+
   docker:
-    needs: [ generate-matrix, lowercase-user ]
+    needs: [ generate-matrix, lowercase-user, version ]
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
@@ -42,13 +65,14 @@ jobs:
       contents: read
       packages: write
       security-events: write
-    uses: USA-RedDragon/reusable-actions/.github/workflows/docker-ci.yaml@v1.1.2
+    uses: USA-RedDragon/reusable-actions/.github/workflows/docker-ci.yaml@v1.2.0
     with:
       push: ${{ github.event_name != 'pull_request' }}
       context: images/${{ matrix.image }}
       security-category: ${{ matrix.image }}
       dockerfile: images/${{ matrix.image }}/Dockerfile
       image-name: ${{ needs.lowercase-user.outputs.user }}/${{ matrix.image }}
+      version-from-artifact: ${{ matrix.image }}-version
 
   docker-results:
     if: always()
