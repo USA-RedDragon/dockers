@@ -1,4 +1,4 @@
-FROM alpine:3.20.2@sha256:216266c86fc4dcef5619930bd394245824c2af52fd21ba7c6fa0e618657d4c3b
+FROM alpine:3.20.2@sha256:eddacbc7e24bf8799a4ed3cdcfa50d4b88a323695ad80f317b6629883b2c2a78
 
 # renovate: datasource=repology depName=alpine_3_20/wireguard-tools
 ARG WIREGUARD_TOOLS_VERSION=1.0.20210914-r4
