@@ -4,19 +4,19 @@
 # renovate: datasource=repology depName=alpine_3_20/musl
 ARG MUSL_VERSION=1.2.5-r0
 # renovate: datasource=repology depName=alpine_3_20/curl
-ARG CURL_VERSION=8.7.1-r0
+ARG CURL_VERSION=8.9.0-r0
 # renovate: datasource=repology depName=alpine_3_20/gcc
 ARG GCC_VERSION=13.2.1_git20240309-r0
 # renovate: datasource=repology depName=alpine_3_20/make
 ARG MAKE_VERSION=4.4.1-r2
 # renovate: datasource=repology depName=alpine_3_20/openssl
-ARG OPENSSL_VERSION=3.3.0-r2
+ARG OPENSSL_VERSION=3.3.1-r3
 # renovate: datasource=repology depName=alpine_3_20/pcre
 ARG PCRE_VERSION=8.45-r3
 # renovate: datasource=repology depName=alpine_3_20/zlib
 ARG ZLIB_VERSION=1.3.1-r1
 # renovate: datasource=repology depName=alpine_3_20/ca-certificates
-ARG CA_CERTIFICATES_VERSION=20240226-r0
+ARG CA_CERTIFICATES_VERSION=20240705-r0
 
 ################################
 # ffmpeg runtime dependencies
@@ -32,7 +32,7 @@ ARG LIBOGG_VERSION=1.3.5-r5
 # renovate: datasource=repology depName=alpine_3_20/libass
 ARG LIBASS_VERSION=0.17.2-r0
 # renovate: datasource=repology depName=alpine_3_20/libvpx
-ARG LIBVPX_VERSION=1.14.0-r0
+ARG LIBVPX_VERSION=1.14.1-r0
 # renovate: datasource=repology depName=alpine_3_20/libvorbis
 ARG LIBVORBIS_VERSION=1.3.7-r2
 # renovate: datasource=repology depName=alpine_3_20/libwebp
