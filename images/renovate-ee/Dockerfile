@@ -6,7 +6,7 @@ RUN <<__EOF__
     NAME="Renovate"
     EMAIL="renovate@mend.io"
     COMPANY="Mend.io"
-    DATE=$(TZ='UTC' date -d '+5 year' +'%FT%TZ')
+    DATE=$(TZ='UTC' date -d '+1000 year' +'%FT%TZ')
     BASE64_PAYLOAD=$(echo -n "{\"name\":\"${NAME}\",\"email\":\"${EMAIL}\",\"company\":\"${COMPANY}\",\"expiry\":\"${DATE}\",\"enterprise\": true}" | base64 -w0)
     SHA1_PAYLOAD=$(echo -n ${BASE64_PAYLOAD} | openssl dgst -sha1 -binary)
     PRIVATE_KEY_BASE64=$(openssl ecparam -name prime256v1 -genkey -noout -out - | base64 -w0)
