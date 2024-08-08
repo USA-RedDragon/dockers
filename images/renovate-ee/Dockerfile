@@ -14,7 +14,7 @@ RUN <<__EOF__
     SIG_BASE64=$(openssl dgst -sha1 -sign <(echo -n ${PRIVATE_KEY_BASE64} | base64 -d) <(echo -n ${BASE64_PAYLOAD}) | base64 -w0)
     openssl dgst -sha1 -verify <(echo -n ${PUBLIC_KEY_BASE64} | base64 -d) -signature <(echo -n ${SIG_BASE64} | base64 -d) <(echo -n ${BASE64_PAYLOAD})
     SIGNATURE=$(echo -n ${SIG_BASE64} | base64 -d | od -An -v -tx1 | tr -d ' \n')
-    PUBLIC_KEY_HEX=$(openssl ec -noout -text -conv_form uncompressed -in <(echo -n ${PUBLIC_KEY_BASE64} | base64 -d) -pubin | grep '^pub:' -A 5 | tail -n 5 | tr -d ' \n:')
+    PUBLIC_KEY_HEX=$(openssl ec -conv_form uncompressed -in <(echo -n ${PUBLIC_KEY_BASE64} | base64 -d) -pubin -outform der | tail -c 65 | od -An -v -tx1 | tr -d ' \n')
     echo "$BASE64_PAYLOAD.$SIGNATURE" > /license
     sed -E -i "s/\{pub:\"04[a-fA-F0-9]{128}\"/\{pub:\"${PUBLIC_KEY_HEX}\"/" /usr/src/app/src/enterprise-server.js
 __EOF__
