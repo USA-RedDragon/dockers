@@ -28,7 +28,7 @@ jobs:
     steps:
       - name: Lowercase username
         id: lowercase-username
-        run: echo "user=${OWNER,,}" >> $GITHUB_OUTPUT
+        run: echo "user=${OWNER,,}" >> "$GITHUB_OUTPUT"
         env:
           OWNER: ${{ github.repository_owner }}
 
