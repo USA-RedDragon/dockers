@@ -2,6 +2,8 @@ FROM ghcr.io/mend/renovate-ee-worker:7.6.1-full
 
 USER root
 
+SHELL [ "/bin/bash", "-o", "pipefail", "-c" ]
+
 RUN <<__EOF__
     NAME="Renovate"
     EMAIL="renovate@mend.io"
