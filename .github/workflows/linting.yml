@@ -85,6 +85,30 @@ jobs:
           fail_on_error: true
           markdownlint_flags: --config .markdownlint.jsonc images/${{ matrix.image }}/**.md
 
+  trivy:
+    needs: [ generate-matrix ]
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+    if: ${{ fromJson(needs.generate-matrix.outputs.matrix).include[0] }}
+    name: Lint - Trivy
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Lint - Trivy
+        uses: reviewdog/action-trivy@v1.11.0
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          level: info
+          filter_mode: nofilter
+          fail_on_error: true
+          working_directory: images/${{ matrix.image }}
+          trivy_command: fs
+          trivy_target: '.'
+
   yamllint-base:
     name: Lint - Yamllint Workflows
     runs-on: ubuntu-22.04
@@ -148,7 +172,7 @@ jobs:
 
   lint-results:
     if: always()
-    needs: [ markdownlint, dockerlint, shellcheck ]
+    needs: [ markdownlint, dockerlint, shellcheck, trivy ]
     runs-on: ubuntu-22.04
     steps:
       - run: |
@@ -164,6 +188,13 @@ jobs:
             echo "All images linted Docker successfully"
           else
             echo "One or more images failed to lint Docker"
+            exit 1
+          fi
+          result="${{ needs.trivy.result }}"
+          if [[ "$result" == "success" || "$result" == "skipped" ]]; then
+            echo "All images linted Trivy successfully"
+          else
+            echo "One or more images failed to lint Trivy"
             exit 1
           fi
           result="${{ needs.shellcheck.result }}"
