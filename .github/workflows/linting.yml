@@ -116,6 +116,21 @@ jobs:
           filter_mode: nofilter
           reporter: github-pr-review
 
+  misspell:
+    name: Lint - Misspell
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Lint - Misspell
+        uses: reviewdog/action-misspell@v1.23.0
+        with:
+          github_token: ${{ secrets.github_token }}
+          fail_on_error: true
+          level: info
+          filter_mode: nofilter
+          reporter: github-pr-review
+
   lint-results:
     if: always()
     needs: [ markdownlint, dockerlint, shellcheck ]
