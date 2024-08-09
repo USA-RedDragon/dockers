@@ -56,8 +56,8 @@ jobs:
           github_token: ${{ secrets.github_token }}
           fail_on_error: true
           level: warning
-          filter_mode: nofilter
-          exclude: images/${{ matrix.image }}/Dockerfile
+          exclude: '*'
+          hadolint_flags: images/${{ matrix.image }}/Dockerfile
           # DL3059: Multiple consecutive `RUN` instructions are used for clarity
           # DL3003: WORKDIR to switch directories isn't the pattern I want
           hadolint_ignore: DL3059 DL3003
