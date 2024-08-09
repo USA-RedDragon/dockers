@@ -1,4 +1,5 @@
 #!/bin/sh
 # renovate: datasource=github-releases depName=e2guardian/e2guardian
 export E2GUARDIAN_VERSION=5.5.4r
-export VERSION=$(echo $E2GUARDIAN_VERSION | sed 's/.$//')
+VERSION="$(echo $E2GUARDIAN_VERSION | sed 's/.$//')"
+export VERSION
