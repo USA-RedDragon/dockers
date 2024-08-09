@@ -169,6 +169,7 @@ jobs:
           level: info
           filter_mode: nofilter
           reporter: github-pr-review
+          detect_secrets_flags: --exclude-files '\.git/.*'
 
   lint-results:
     if: always()
