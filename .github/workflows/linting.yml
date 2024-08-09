@@ -60,7 +60,7 @@ jobs:
           exclude: --exclude '*' images/${{ matrix.image }}/Dockerfile
           # DL3059: Multiple consecutive `RUN` instructions are used for clarity
           # DL3003: WORKDIR to switch directories isn't the pattern I want
-          hadolint_ignore: DL3059,DL3003
+          hadolint_ignore: DL3059 DL3003
 
   markdownlint:
     needs: [ generate-matrix ]
