@@ -81,10 +81,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Lint - Yamllint
-        uses: ibiqlik/action-yamllint@v3
+        uses: reviewdog/action-yamllint@v1.18.0
         with:
-          config_file: .yamllint.yml
-          file_or_dir: images/${{ matrix.image }}
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          yamllint_flags: 'images/${{ matrix.image }}/'
 
   yamllint-base:
     name: Lint - Yamllint Workflows
