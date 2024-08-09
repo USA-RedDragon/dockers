@@ -101,6 +101,21 @@ jobs:
           reporter: github-pr-review
           yamllint_flags: '.github/workflows .yamllint.yml'
 
+  actionlint:
+    name: Lint - Actionlint
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Lint - Actionlint
+        uses: reviewdog/action-actionlint@v1.54.0
+        with:
+          github_token: ${{ secrets.github_token }}
+          fail_on_error: true
+          level: info
+          filter_mode: nofilter
+          reporter: github-pr-review
+
   lint-results:
     if: always()
     needs: [ markdownlint, dockerlint, shellcheck ]
