@@ -29,9 +29,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Shellcheck
-        uses: ludeeus/action-shellcheck@2.0.0
+        uses: reviewdog/action-shellcheck@v1.26.0
         with:
-          scandir: images/${{ matrix.image }}
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          fail_on_error: true
+          path: images/${{ matrix.image }}
 
   dockerlint:
     needs: [ generate-matrix ]
