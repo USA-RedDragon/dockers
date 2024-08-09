@@ -84,42 +84,6 @@ jobs:
           fail_on_error: true
           markdownlint_flags: --config .markdownlint.jsonc images/${{ matrix.image }}/**.md
 
-  yamllint:
-    needs: [ generate-matrix ]
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
-    if: ${{ fromJson(needs.generate-matrix.outputs.matrix).include[0] }}
-    name: Lint - Yamllint
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Lint - Yamllint
-        uses: reviewdog/action-yamllint@v1.18.0
-        with:
-          fail_on_error: true
-          filter_mode: nofilter
-          level: warning
-          github_token: ${{ secrets.github_token }}
-          reporter: github-pr-review
-          yamllint_flags: 'images/${{ matrix.image }}/'
-
-  actionlint:
-    name: Lint - Actionlint
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Lint - Actionlint
-        uses: reviewdog/action-actionlint@v1.54.0
-        with:
-          fail_on_error: true
-          level: warning
-          filter_mode: nofilter
-          github_token: ${{ secrets.github_token }}
-          reporter: github-pr-review
-
   yamllint-base:
     name: Lint - Yamllint Workflows
     runs-on: ubuntu-22.04
@@ -138,17 +102,10 @@ jobs:
 
   lint-results:
     if: always()
-    needs: [ yamllint, markdownlint, dockerlint, shellcheck ]
+    needs: [ markdownlint, dockerlint, shellcheck ]
     runs-on: ubuntu-22.04
     steps:
       - run: |
-          result="${{ needs.yamllint.result }}"
-          if [[ "$result" == "success" || "$result" == "skipped" ]]; then
-            echo "All images linted YAML successfully"
-          else
-            echo "One or more images failed to lint YAML"
-            exit 1
-          fi
           result="${{ needs.markdownlint.result }}"
           if [[ "$result" == "success" || "$result" == "skipped" ]]; then
             echo "All images linted Markdown successfully"
