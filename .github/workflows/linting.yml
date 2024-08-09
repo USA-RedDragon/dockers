@@ -97,6 +97,19 @@ jobs:
           reporter: github-pr-review
           yamllint_flags: 'images/${{ matrix.image }}/'
 
+  actionlint:
+    name: Lint - Actionlint
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Lint - Actionlint
+        uses: reviewdog/action-actionlint@v1.54.0
+        with:
+          fail_on_error: true
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+
   yamllint-base:
     name: Lint - Yamllint Workflows
     runs-on: ubuntu-22.04
