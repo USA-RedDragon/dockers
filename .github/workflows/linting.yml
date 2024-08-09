@@ -36,7 +36,6 @@ jobs:
           fail_on_error: true
           level: warning
           filter_mode: nofilter
-          pattern: '*'
           path: images/${{ matrix.image }}
 
   dockerlint:
