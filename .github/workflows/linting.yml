@@ -49,6 +49,7 @@ jobs:
         with:
           reporter: github-pr-review
           github_token: ${{ secrets.github_token }}
+          fail_on_error: true
           exclude: --exclude '*' images/${{ matrix.image }}/Dockerfile
           # DL3059: Multiple consecutive `RUN` instructions are used for clarity
           # DL3003: WORKDIR to switch directories isn't the pattern I want
@@ -67,10 +68,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Lint - Markdown
-        uses: DavidAnson/markdownlint-cli2-action@v16
+        uses: reviewdog/action-markdownlint@v0.24.0
         with:
-          config: ".markdownlint.jsonc"
-          globs: "images/${{ matrix.image }}/**.md"
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          fail_on_error: true
+          markdownlint_flags: --config .markdownlint.jsonc 'images/${{ matrix.image }}/**.md'
 
   yamllint:
     needs: [ generate-matrix ]
@@ -86,6 +89,7 @@ jobs:
       - name: Lint - Yamllint
         uses: reviewdog/action-yamllint@v1.18.0
         with:
+          fail_on_error: true
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
           yamllint_flags: 'images/${{ matrix.image }}/'
@@ -100,6 +104,7 @@ jobs:
         uses: reviewdog/action-yamllint@v1.18.0
         with:
           github_token: ${{ secrets.github_token }}
+          fail_on_error: true
           reporter: github-pr-review
           yamllint_flags: '.github/workflows .yamllint.yml'
 
