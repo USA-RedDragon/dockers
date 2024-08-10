@@ -13,6 +13,8 @@ ARG CURL_VERSION=8.8.0-3ubuntu3
 ARG RIPGREP_VERSION=14.1.0-1
 # renovate: datasource=repology versioning=deb depName=ubuntu_24_10/rust-sd
 ARG SD_VERSION=1.0.0-3
+# renovate: datasource=github-releases depName=mike-engel/jwt-cli
+ARG JWT_CLI_VERSION=6.1.0
 
 RUN export DEBIAN_FRONTEND=noninteractive \
     && apt-get update \
@@ -34,7 +36,7 @@ RUN <<__EOF__
     trap "rm -f private.pem" EXIT ERR
     touch private.pem
     chmod 600 private.pem
-    curl -fSsL https://github.com/mike-engel/jwt-cli/releases/download/6.1.0/jwt-linux.tar.gz -o jwt-linux.tar.gz
+    curl -fSsL https://github.com/mike-engel/jwt-cli/releases/download/${JWT_CLI_VERSION}/jwt-linux.tar.gz -o jwt-linux.tar.gz
     tar -xvzf jwt-linux.tar.gz
     rm -rf jwt-linux.tar.gz
     chmod +x jwt
