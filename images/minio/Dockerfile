@@ -38,7 +38,7 @@ RUN <<__EOF__
     tar -xvzf jwt-linux.tar.gz
     rm -rf jwt-linux.tar.gz
     chmod +x jwt
-    PRIVATE_KEY_PKCS8="$(openssl pkcs8 -topk8 -nocrypt -in <(echo -n "${PRIVATE_KEY_PEM}") -out private.pem)"
+    openssl pkcs8 -topk8 -nocrypt -in <(echo -n "${PRIVATE_KEY_PEM}") -out private.pem
     new="$(openssl ec -in <(echo -n "${PRIVATE_KEY_PEM}") -pubout -out -)"
     old="$(curl -fsSL https://subnet.min.io/downloads/license-pubkey.pem)"
     rg --fixed-strings --quiet --multiline -- "$old" /minio
