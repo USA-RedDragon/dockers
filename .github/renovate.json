@@ -21,6 +21,11 @@
     {
       "packageNames": ["docker.io/mattermost/mattermost-enterprise-edition"],
       "allowedVersions": "<1000.0.0"
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackagePatterns": ["minio"],
+      "versioning": "regex:^RELEASE\\.(?<major>\\d+)-(?<minor>\\d+)-(?<patch>\\d+)T.*Z$"
     }
   ]
 }
