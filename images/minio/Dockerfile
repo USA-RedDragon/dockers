@@ -47,7 +47,7 @@ RUN <<__EOF__
     [ "${#old}" -ne "${#new}" ] && ( echo "old and new strings are not the same length"; exit 1 )
     sd --fixed-strings --max-replacements=1 -- "$old" "$new" /minio
     JWT="$(./jwt encode -A ES384 -P lid=minio -P org=minio -P aid=1 -P did=minio -P cap=9223372036854775807 -P plan=ENTERPRISE-PLUS --sub minio@minio.com --exp=+100Y --secret @private.pem)"
-    echo -e "#!/bin/bash\nset -euo pipefail\necho \"127.0.0.1 subnet.min.io\" >> /etc/hosts\nexport MINIO_SUBNET_LICENSE=\"${JWT}\"\nexec \"\$@\"" > /start.sh
+    echo -e "#!/bin/bash\nset -euo pipefail\nexport MINIO_SUBNET_LICENSE=\"${JWT}\"\nexec \"\$@\"" > /start.sh
 __EOF__
 
 FROM minio
