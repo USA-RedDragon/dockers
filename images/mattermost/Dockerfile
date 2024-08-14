@@ -2,7 +2,7 @@
 ARG MATTERMOST_VERSION=9.11.0
 FROM mattermost/mattermost-enterprise-edition:$MATTERMOST_VERSION AS mattermost
 
-FROM alpine:3.20.2@sha256:eddacbc7e24bf8799a4ed3cdcfa50d4b88a323695ad80f317b6629883b2c2a78 AS patcher
+FROM alpine:3.20.2@sha256:0a4eaa0eecf5f8c050e5bba433f58c052be7587ee8af3e8b3910ef9ab5fbe9f5 AS patcher
 
 # renovate: datasource=repology depName=alpine_3_20/sd
 ARG SD_VERSION=1.0.0-r0
