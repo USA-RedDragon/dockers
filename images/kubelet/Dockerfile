@@ -23,65 +23,18 @@ ARG NFS_COMMON_VERSION=1:2.6.2-4
 ARG SOCAT_VERSION=1.7.4.4-2
 # renovate: datasource=repology versioning=deb depName=debian_12/util-linux
 ARG UTIL_LINUX_VERSION=2.38.1-5+deb12u1
-# renovate: datasource=repology versioning=deb depName=debian_12/bash
-ARG BASH_VERSION=5.2.15-2+b7
-# renovate: datasource=repology versioning=deb depName=debian_12/ceph
-ARG CEPH_VERSION=16.2.11+ds-2
-# renovate: datasource=repology versioning=deb depName=debian_12/cifs-utils
-ARG CIFS_UTILS_VERSION=2:7.0-2
-# renovate: datasource=repology versioning=deb depName=debian_12/e2fsprogs
-ARG E2FSPROGS_VERSION=1.47.0-2
-# renovate: datasource=repology versioning=deb depName=debian_12/glusterfs
-ARG GLUSTERFS_VERSION=10.3-5
-# renovate: datasource=repology versioning=deb depName=debian_12/jq
-ARG JQ_VERSION=1.6-2.1
-# renovate: datasource=repology versioning=deb depName=debian_12/procps
-ARG PROCPS_VERSION=2:4.0.2-3
-# renovate: datasource=repology versioning=deb depName=debian_12/ucf
-ARG UCF_VERSION=3.0043+nmu1
-# renovate: datasource=repology versioning=deb depName=debian_12/udev
-ARG UDEV_VERSION=252.26-1~deb12u2
-# renovate: datasource=repology versioning=deb depName=debian_12/xfsprogs
-ARG XFSPROGS_VERSION=6.1.0-1
 
-RUN clean-install \
-  --allow-change-held-packages \
-  ca-certificates="${CA_CERTIFICATES_VERSION}" \
-  libcap2="${LIBCAP_VERSION}" \
-  ethtool="${ETHTOOL_VERSION}" \
-  iproute2="${IPROUTE_VERSION}" \
-  nfs-common="${NFS_COMMON_VERSION}" \
-  socat="${SOCAT_VERSION}" \
-  util-linux="${UTIL_LINUX_VERSION}" \
-  bash="${BASH_VERSION}" \
-  ceph-common="${CEPH_VERSION}" \
-  cifs-utils="${CIFS_UTILS_VERSION}" \
-  e2fsprogs="${E2FSPROGS_VERSION}" \
-  glusterfs-client="${GLUSTERFS_VERSION}" \
-  jq="${JQ_VERSION}" \
-  procps="${PROCPS_VERSION}" \
-  ucf="${UCF_VERSION}" \
-  udev="${UDEV_VERSION}" \
-  xfsprogs="${XFSPROGS_VERSION}"
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends --no-install-suggests \
+        ca-certificates="${CA_CERTIFICATES_VERSION}" \
+        libcap2="${LIBCAP_VERSION}" \
+        ethtool="${ETHTOOL_VERSION}" \
+        iproute2="${IPROUTE_VERSION}" \
+        nfs-common="${NFS_COMMON_VERSION}" \
+        socat="${SOCAT_VERSION}" \
+        util-linux="${UTIL_LINUX_VERSION}" \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /kubelet /usr/local/bin/kubelet
-
-# Add wrapper for iscsiadm
-RUN <<__DOCKER_EOF__
-set -e
-cat > /usr/local/sbin/iscsiadm <<__EOF__
-#!/usr/bin/sh
-
-iscsid_pid=\$(pgrep iscsid)
-
-if [ -z "\${iscsid_pid}"]; then
-    >&2 echo ERROR: Cannot find iscsid PID
-    exit 1
-fi
-
-exec nsenter --target=\${iscsid_pid} --mount --net -- /usr/local/sbin/iscsiadm "\$@"
-__EOF__
-chmod +x /usr/local/sbin/iscsiadm
-__DOCKER_EOF__
 
 ENTRYPOINT ["/usr/local/bin/kubelet"]
