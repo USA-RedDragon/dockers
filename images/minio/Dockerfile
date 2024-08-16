@@ -1,3 +1,12 @@
+FROM rust:1.80.1 AS jwt-cli
+
+# renovate: datasource=github-releases depName=mike-engel/jwt-cli
+ARG JWT_CLI_VERSION=6.1.0
+
+WORKDIR /usr/src/jwt-cli
+
+RUN cargo install "jwt-cli@${JWT_CLI_VERSION}"
+
 FROM quay.io/minio/minio:RELEASE.2024-08-03T04-33-23Z AS minio
 
 # Use ubuntu because sd on debian:latest is too old
@@ -13,8 +22,8 @@ ARG CURL_VERSION=8.8.0-3ubuntu3
 ARG RIPGREP_VERSION=14.1.0-1
 # renovate: datasource=repology versioning=deb depName=ubuntu_24_10/rust-sd
 ARG SD_VERSION=1.0.0-3
-# renovate: datasource=github-releases depName=mike-engel/jwt-cli
-ARG JWT_CLI_VERSION=6.1.0
+
+COPY --from=jwt-cli /usr/local/cargo/bin/jwt /usr/bin/jwt
 
 RUN export DEBIAN_FRONTEND=noninteractive \
     && apt-get update \
@@ -36,17 +45,13 @@ RUN <<__EOF__
     trap "rm -f private.pem" EXIT ERR
     touch private.pem
     chmod 600 private.pem
-    curl -fSsL https://github.com/mike-engel/jwt-cli/releases/download/${JWT_CLI_VERSION}/jwt-linux.tar.gz -o jwt-linux.tar.gz
-    tar -xvzf jwt-linux.tar.gz
-    rm -rf jwt-linux.tar.gz
-    chmod +x jwt
     openssl pkcs8 -topk8 -nocrypt -in <(echo -n "${PRIVATE_KEY_PEM}") -out private.pem
     new="$(openssl ec -in <(echo -n "${PRIVATE_KEY_PEM}") -pubout -out -)"
     old="$(curl -fsSL https://subnet.min.io/downloads/license-pubkey.pem)"
     rg --fixed-strings --quiet --multiline -- "$old" /minio
     [ "${#old}" -ne "${#new}" ] && ( echo "old and new strings are not the same length"; exit 1 )
     sd --fixed-strings --max-replacements=1 -- "$old" "$new" /minio
-    JWT="$(./jwt encode -A ES384 -P lid=minio -P org=minio -P aid=1 -P did=minio -P cap=9223372036854775807 -P plan=ENTERPRISE-PLUS --sub minio@minio.com --exp=+100Y --secret @private.pem)"
+    JWT="$(jwt encode -A ES384 -P lid=minio -P org=minio -P aid=1 -P did=minio -P cap=9223372036854775807 -P plan=ENTERPRISE-PLUS --sub minio@minio.com --exp=+100Y --secret @private.pem)"
     echo -e "#!/bin/bash\nset -euo pipefail\nexport MINIO_SUBNET_LICENSE=\"${JWT}\"\nexec \"\$@\"" > /start.sh
 __EOF__
 
