@@ -74,7 +74,7 @@ jobs:
       dockerfile: images/${{ matrix.image }}/Dockerfile
       image-name: ${{ needs.lowercase-user.outputs.user }}/${{ matrix.image }}
       version-from-artifact: ${{ matrix.image }}-version
-      platforms: ${{ matrix.image != 'minio' && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
+      platforms: 'linux/amd64,linux/arm64'
 
   docker-results:
     if: always()
