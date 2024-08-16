@@ -40,8 +40,8 @@ RUN <<EOT
   PRIVKEY="$(openssl genrsa -out - 2048)"
   PUBKEY="$(openssl rsa -in <(echo "$PRIVKEY") -pubout)"
   TODAY="$(TZ='UTC' date +'%s%3N')"
-  ISSUED_DATE="$(($TODAY-31556952000))" # - 1 year
-  EXPIRATION_DATE="$(($TODAY+31556952000000))" # + 1000 years
+  ISSUED_DATE="$((TODAY-31556952000))" # - 1 year
+  EXPIRATION_DATE="$((TODAY+31556952000000))" # + 1000 years
 
   # pragma: allowlist nextline secret
   PAYLOAD="{\"id\":\"ABCDEFGHIJKLMNOPQRSTUVWXYZ\",\"issued_at\":${ISSUED_DATE},\"starts_at\":${ISSUED_DATE},\"expires_at\":${EXPIRATION_DATE},\"customer\":{\"id\":\"ABCDEFGHIJKLMNOPQRSTUVWXYZ\",\"name\":\"\",\"email\":\"\",\"company\":\"\"},\"features\":{\"users\":9223372036854776000,\"ldap\":true,\"ldap_groups\":true,\"mfa\":true,\"google_oauth\":true,\"office365_oauth\":true,\"openid\":true,\"compliance\":true,\"cluster\":true,\"metrics\":true,\"mhpns\":true,\"saml\":true,\"elastic_search\":true,\"announcement\":true,\"theme_management\":true,\"email_notification_contents\":true,\"data_retention\":true,\"message_export\":true,\"custom_permissions_schemes\":true,\"custom_terms_of_service\":true,\"guest_accounts\":true,\"guest_accounts_permissions\":true,\"id_loaded\":true,\"lock_teammate_name_display\":true,\"enterprise_plugins\":true,\"advanced_logging\":true,\"cloud\":false,\"shared_channels\":true,\"remote_cluster_service\":true,\"outgoing_oauth_connections\":true,\"future_features\":true},\"sku_name\":\"enterprise\",\"sku_short_name\":\"enterprise\",\"is_trial\":false,\"is_gov_sku\":false,\"signup_jwt\":null}"
