@@ -10,14 +10,19 @@ ARG SD_VERSION=1.0.0-r0
 ARG RIPGREP_VERSION=14.1.0-r0
 # renovate: datasource=repology depName=alpine_3_20/openssl
 ARG OPENSSL_VERSION=3.3.1-r3
+# renovate: datasource=repology depName=alpine_3_20/bash
+ARG BASH_VERSION=5.2.26-r0
 ARG MATTERMOST_VERSION
 
 RUN apk add --no-cache \
     sd="${SD_VERSION}" \
     ripgrep="${RIPGREP_VERSION}" \
-    openssl="${OPENSSL_VERSION}"
+    openssl="${OPENSSL_VERSION}" \
+    bash="${BASH_VERSION}"
 
 COPY --from=mattermost /mattermost/bin/mattermost /
+
+SHELL [ "/bin/bash", "-o", "pipefail", "-c" ]
 
 RUN <<EOT
   set -eu
