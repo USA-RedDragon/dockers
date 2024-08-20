@@ -17,7 +17,7 @@ ARG CA_CERTIFICATES_VERSION=20240203
 # renovate: datasource=repology versioning=deb depName=ubuntu_24_10/openssl
 ARG OPENSSL_VERSION=3.2.2-1ubuntu3
 # renovate: datasource=repology versioning=deb depName=ubuntu_24_10/curl
-ARG CURL_VERSION=8.8.0-3ubuntu3
+ARG CURL_VERSION=8.9.1-2ubuntu1
 # renovate: datasource=repology versioning=deb depName=ubuntu_24_10/rust-ripgrep
 ARG RIPGREP_VERSION=14.1.0-1
 # renovate: datasource=repology versioning=deb depName=ubuntu_24_10/rust-sd
