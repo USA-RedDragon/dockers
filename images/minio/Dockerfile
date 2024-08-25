@@ -15,7 +15,7 @@ FROM ubuntu:oracular-20240617 AS patcher
 # renovate: datasource=repology versioning=deb depName=ubuntu_24_10/ca-certificates
 ARG CA_CERTIFICATES_VERSION=20240203
 # renovate: datasource=repology versioning=deb depName=ubuntu_24_10/openssl
-ARG OPENSSL_VERSION=3.2.2-1ubuntu3
+ARG OPENSSL_VERSION=3.3.1-2ubuntu1
 # renovate: datasource=repology versioning=deb depName=ubuntu_24_10/curl
 ARG CURL_VERSION=8.9.1-2ubuntu1
 # renovate: datasource=repology versioning=deb depName=ubuntu_24_10/rust-ripgrep
