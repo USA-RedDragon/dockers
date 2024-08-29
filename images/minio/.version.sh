@@ -1,3 +1,3 @@
 #!/bin/sh
 # renovate: datasource=docker depName=minio/minio
-export VERSION=RELEASE.2024-08-26T15-33-07Z
+export VERSION=RELEASE.2024-08-29T01-40-52Z
