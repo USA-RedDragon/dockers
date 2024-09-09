@@ -19,7 +19,7 @@ ARG OPENSSL_VERSION=3.3.1-2ubuntu1
 # renovate: datasource=repology versioning=deb depName=ubuntu_24_10/curl
 ARG CURL_VERSION=8.9.1-2ubuntu1
 # renovate: datasource=repology versioning=deb depName=ubuntu_24_10/rust-ripgrep
-ARG RIPGREP_VERSION=14.1.0-1
+ARG RIPGREP_VERSION=14.1.0-2
 # renovate: datasource=repology versioning=deb depName=ubuntu_24_10/rust-sd
 ARG SD_VERSION=1.0.0-3
 
