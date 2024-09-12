@@ -21,7 +21,7 @@ ARG CURL_VERSION=8.9.1-2ubuntu1
 # renovate: datasource=repology versioning=deb depName=ubuntu_24_10/rust-ripgrep
 ARG RIPGREP_VERSION=14.1.0-2
 # renovate: datasource=repology versioning=deb depName=ubuntu_24_10/rust-sd
-ARG SD_VERSION=1.0.0-3
+ARG SD_VERSION=1.0.0-3build1
 
 COPY --from=jwt-cli /usr/local/cargo/bin/jwt /usr/bin/jwt
 
