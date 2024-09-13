@@ -34,7 +34,7 @@ ARG MAKE_VERSION=4.3-4.1
 # renovate: datasource=repology versioning=deb depName=debian_12/gcc
 ARG GCC_VERSION=4:12.2.0-3
 # renovate: datasource=repology versioning=deb depName=debian_12/git
-ARG GIT_VERSION=1:2.39.2-1.1
+ARG GIT_VERSION=1:2.39.5-0+deb12u1
 
 ARG BUILD_DEPS=" \
     make=${MAKE_VERSION} \
