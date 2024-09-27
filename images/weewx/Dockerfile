@@ -1,4 +1,4 @@
-FROM debian:12.7-slim@sha256:676e29c359e455298332c3b6b168d4b4765568dd76b192da56dd427af3163da4
+FROM debian:12.7-slim@sha256:5de9e23e78fbbeea7a67efd02c2b072fecafb7efa6cf4563f355292161c53793
 
 WORKDIR /app
 
