@@ -5,7 +5,7 @@ on:
 jobs:
   generate-matrix:
     name: Generate job matrices
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       matrix: ${{ steps.images.outputs.matrix }}
     steps:
@@ -23,7 +23,7 @@ jobs:
       matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
     if: ${{ fromJson(needs.generate-matrix.outputs.matrix).include[0] }}
     name: Lint - Shell
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -45,7 +45,7 @@ jobs:
       matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
     if: ${{ fromJson(needs.generate-matrix.outputs.matrix).include[0] }}
     name: Lint - Docker
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -70,7 +70,7 @@ jobs:
       matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
     if: ${{ fromJson(needs.generate-matrix.outputs.matrix).include[0] }}
     name: Lint - Markdown
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -92,7 +92,7 @@ jobs:
       matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
     if: ${{ fromJson(needs.generate-matrix.outputs.matrix).include[0] }}
     name: Lint - Trivy
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -111,7 +111,7 @@ jobs:
 
   yamllint-base:
     name: Lint - Yamllint Workflows
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -127,7 +127,7 @@ jobs:
 
   actionlint:
     name: Lint - Actionlint
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -142,7 +142,7 @@ jobs:
 
   misspell:
     name: Lint - Misspell
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -157,7 +157,7 @@ jobs:
 
   detect-secrets:
     name: Lint - detect-secrets
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -174,7 +174,7 @@ jobs:
   lint-results:
     if: always()
     needs: [ markdownlint, dockerlint, shellcheck, trivy ]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - run: |
           result="${{ needs.markdownlint.result }}"
