@@ -1,4 +1,4 @@
-FROM ghcr.io/mend/renovate-ee-server:8.3.1
+FROM ghcr.io/mend/renovate-ee-server:8.5.0
 
 USER root
 
