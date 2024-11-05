@@ -32,6 +32,7 @@ RUN apt-get update \
         libev-dev \
         libev4 \
         libfftw3-dev \
+        libfftw3-double3 \
         libftdi1-dev \
         libftdi1 \
         libftdi-dev \
