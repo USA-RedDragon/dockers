@@ -10,6 +10,7 @@ ARG INDI_3RD_PARTY_VERSION=v2.1.0
 RUN apt-get update \
     && apt-get install -y --no-install-recommends --no-install-suggests \
         build-essential \
+        clang \
         git \
         ca-certificates \
         cmake \
@@ -63,6 +64,8 @@ RUN apt-get update \
         libzmq5 \
         zlib1g-dev \
         zlib1g \
+    && export CC=clang \
+    && export CXX=clang++ \
     && git clone --branch ${INDI_VERSION} --depth 1 https://github.com/indilib/indi.git /tmp/indi \
     && cd /tmp/indi \
     && mkdir build \
@@ -87,6 +90,7 @@ RUN apt-get update \
     && make install \
     && apt-get purge -y --auto-remove \
         build-essential \
+        clang \
         git \
         ca-certificates \
         cmake \
