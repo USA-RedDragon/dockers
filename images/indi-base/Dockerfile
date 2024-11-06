@@ -16,6 +16,7 @@ RUN apt-get update \
         cmake \
         fxload \
         pkg-config \
+        ffmpeg \
         libavcodec-dev \
         libavcodec59 \
         libavdevice-dev \
