@@ -123,4 +123,5 @@ RUN apt-get update \
         libusb-1.0-0-dev \
         libnutclient-dev \
         libzmq3-dev \
-        zlib1g-dev
+        zlib1g-dev \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
