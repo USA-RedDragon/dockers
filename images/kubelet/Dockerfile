@@ -22,7 +22,7 @@ ARG NFS_COMMON_VERSION=1:2.6.2-4
 # renovate: datasource=repology versioning=deb depName=debian_12/socat
 ARG SOCAT_VERSION=1.7.4.4-2
 # renovate: datasource=repology versioning=deb depName=debian_12/util-linux
-ARG UTIL_LINUX_VERSION=2.38.1-5+deb12u1
+ARG UTIL_LINUX_VERSION=2.38.1-5+deb12u2
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends --no-install-suggests \
