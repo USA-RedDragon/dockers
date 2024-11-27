@@ -1,7 +1,7 @@
 FROM rust:1.82.0 AS jwt-cli
 
 # renovate: datasource=github-releases depName=mike-engel/jwt-cli
-ARG JWT_CLI_VERSION=6.1.1
+ARG JWT_CLI_VERSION=6.2.0
 
 WORKDIR /usr/src/jwt-cli
 
