@@ -6,8 +6,7 @@ SHELL [ "/bin/bash", "-o", "pipefail", "-c" ]
 
 ENV PYTHONUNBUFFERED=1
 
-# renovate: datasource=github-releases depName=weewx/weewx
-ARG WEEWX_VERSION=v5.1.0
+ARG WEEWX_VERSION=postgresql
 
 # renovate: datasource=repology versioning=deb depName=debian_12/freetype
 ARG FREETYPE_VERSION=2.12.1+dfsg-5+deb12u3
@@ -89,7 +88,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
         ${DEV_PACKAGES} \
         ${BUILD_DEPS} \
         ${RUNTIME_DEPS} \
-    && git clone --branch "${WEEWX_VERSION}" https://github.com/weewx/weewx.git /tmp/weewx \
+    && git clone --branch "${WEEWX_VERSION}" https://github.com/USA-RedDragon/weewx.git /tmp/weewx \
     && cd /tmp/weewx \
     && make pypi-package \
     && cp src/weewx_data/weewx.conf /etc/weewx/weewx.conf \
