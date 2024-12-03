@@ -1,4 +1,4 @@
-FROM python:3.13.0-slim@sha256:f2d472e6f0633f885dbf5678bfa846c34ddad63e262fbb936b4a7d35ac6afac7
+FROM python:3.13.0-slim@sha256:eda73cafdf051c76185375d7c20c447fb96252d01c57e482bea7551dba2e44df
 
 ENV PYTHONUNBUFFERED=1
 
