@@ -6,5 +6,6 @@ set -eux
 # then run envsubst on each file and output the result to /out
 
 for file in /in/*.tpl; do
-  envsubst < "$file" > /out/$(basename "$file" .tpl)
+  newfile=$(basename "$file" .tpl)
+  envsubst < "$file" > "/out/${newfile}"
 done
