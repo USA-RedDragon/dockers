@@ -30,7 +30,7 @@ ARG MAKE_VERSION=4.3-4.1
 # renovate: datasource=repology versioning=deb depName=debian_12/gcc
 ARG GCC_VERSION=4:12.2.0-3
 # renovate: datasource=repology versioning=deb depName=debian_12/git
-ARG GIT_VERSION=1:2.39.5-0+deb12u1
+ARG GIT_VERSION=1:2.39.5-0+deb12u2
 # renovate: datasource=repology versioning=deb depName=debian_12/automake-1.16
 ARG AUTOMAKE_VERSION=1:1.16.5-1.3
 # renovate: datasource=repology versioning=deb depName=debian_12/autoconf

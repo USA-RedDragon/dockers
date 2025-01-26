@@ -46,7 +46,7 @@ ARG DATEUTIL_VERSION=2.8.2-2
 # renovate: datasource=repology versioning=deb depName=debian_12/pyephem
 ARG PYEPHEM_VERSION=4.1.4-2+b1
 # renovate: datasource=repology versioning=deb depName=debian_12/git
-ARG GIT_VERSION=1:2.39.5-0+deb12u1
+ARG GIT_VERSION=1:2.39.5-0+deb12u2
 
 ARG RUNTIME_DEPS=" \
     ca-certificates="${CA_CERTIFICATES_VERSION}" \
