@@ -132,7 +132,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Lint - Actionlint
-        uses: reviewdog/action-actionlint@v1.57.0
+        uses: reviewdog/action-actionlint@v1.64.1
         with:
           github_token: ${{ secrets.github_token }}
           fail_on_error: true
