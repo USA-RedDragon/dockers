@@ -1,35 +1,35 @@
-FROM alpine:3.20.2@sha256:0a4eaa0eecf5f8c050e5bba433f58c052be7587ee8af3e8b3910ef9ab5fbe9f5 AS builder
+FROM alpine:3.21.2@sha256:56fa17d2a7e7f168a043a2712e63aed1f8543aeafdcee47c58dcffe38ed51099 AS builder
 
 WORKDIR /tmp
 RUN mkdir -p /out
 
 COPY patches /patches
 
-# renovate: datasource=repology depName=alpine_3_20/git
+# renovate: datasource=repology depName=alpine_3_21/git
 ARG GIT_VERSION=2.45.2-r0
-# renovate: datasource=repology depName=alpine_3_20/gcc
+# renovate: datasource=repology depName=alpine_3_21/gcc
 ARG GCC_VERSION=13.2.1_git20240309-r0
-# renovate: datasource=repology depName=alpine_3_20/linux-headers
+# renovate: datasource=repology depName=alpine_3_21/linux-headers
 ARG LINUX_HEADERS_VERSION=6.6-r0
-# renovate: datasource=repology depName=alpine_3_20/bison
+# renovate: datasource=repology depName=alpine_3_21/bison
 ARG BISON_VERSION=3.8.2-r1
-# renovate: datasource=repology depName=alpine_3_20/flex
+# renovate: datasource=repology depName=alpine_3_21/flex
 ARG FLEX_VERSION=2.6.4-r6
-# renovate: datasource=repology depName=alpine_3_20/zlib
+# renovate: datasource=repology depName=alpine_3_21/zlib
 ARG ZLIB_VERSION=1.3.1-r1
-# renovate: datasource=repology depName=alpine_3_20/lzo
+# renovate: datasource=repology depName=alpine_3_21/lzo
 ARG LZO_VERSION=2.10-r5
-# renovate: datasource=repology depName=alpine_3_20/binutils
+# renovate: datasource=repology depName=alpine_3_21/binutils
 ARG BINUTILS_VERSION=2.42-r0
-# renovate: datasource=repology depName=alpine_3_20/openssl
+# renovate: datasource=repology depName=alpine_3_21/openssl
 ARG OPENSSL_VERSION=3.3.1-r3
-# renovate: datasource=repology depName=alpine_3_20/curl
+# renovate: datasource=repology depName=alpine_3_21/curl
 ARG CURL_VERSION=8.9.0-r0
-# renovate: datasource=repology depName=alpine_3_20/make
+# renovate: datasource=repology depName=alpine_3_21/make
 ARG MAKE_VERSION=4.4.1-r2
-# renovate: datasource=repology depName=alpine_3_20/musl
+# renovate: datasource=repology depName=alpine_3_21/musl
 ARG MUSL_VERSION=1.2.5-r0
-# renovate: datasource=repology depName=alpine_3_20/patch
+# renovate: datasource=repology depName=alpine_3_21/patch
 ARG PATCH_VERSION=2.7.6-r10
 
 RUN apk add --no-cache \
@@ -69,39 +69,39 @@ RUN curl -fSsL https://downloads.sourceforge.net/project/vtun/vtun/3.0.3/vtun-3.
     && cd .. \
     && rm -rf vtun-3.0.3
 
-FROM alpine:3.20.2@sha256:0a4eaa0eecf5f8c050e5bba433f58c052be7587ee8af3e8b3910ef9ab5fbe9f5
+FROM alpine:3.21.2@sha256:56fa17d2a7e7f168a043a2712e63aed1f8543aeafdcee47c58dcffe38ed51099
 
 COPY --from=builder /out /
 
-# renovate: datasource=repology depName=alpine_3_20/bash
+# renovate: datasource=repology depName=alpine_3_21/bash
 ARG BASH_VERSION=5.2.26-r0
-# renovate: datasource=repology depName=alpine_3_20/curl
+# renovate: datasource=repology depName=alpine_3_21/curl
 ARG CURL_VERSION=8.9.0-r0
-# renovate: datasource=repology depName=alpine_3_20/zlib
+# renovate: datasource=repology depName=alpine_3_21/zlib
 ARG ZLIB_VERSION=1.3.1-r1
-# renovate: datasource=repology depName=alpine_3_20/lzo
+# renovate: datasource=repology depName=alpine_3_21/lzo
 ARG LZO_VERSION=2.10-r5
-# renovate: datasource=repology depName=alpine_3_20/openssl
+# renovate: datasource=repology depName=alpine_3_21/openssl
 ARG OPENSSL_VERSION=3.3.1-r3
-# renovate: datasource=repology depName=alpine_3_20/iptables
+# renovate: datasource=repology depName=alpine_3_21/iptables
 ARG IPTABLES_VERSION=1.8.10-r3
-# renovate: datasource=repology depName=alpine_3_20/iproute2
+# renovate: datasource=repology depName=alpine_3_21/iproute2
 ARG IPRROUTE2_VERSION=6.9.0-r0
-# renovate: datasource=repology depName=alpine_3_20/rsyslog
+# renovate: datasource=repology depName=alpine_3_21/rsyslog
 ARG RSYSLOG_VERSION=8.2404.0-r0
-# renovate: datasource=repology depName=alpine_3_20/logrotate
+# renovate: datasource=repology depName=alpine_3_21/logrotate
 ARG LOGROTATE_VERSION=3.21.0-r1
-# renovate: datasource=repology depName=alpine_3_20/dnsmasq
+# renovate: datasource=repology depName=alpine_3_21/dnsmasq
 ARG DNSMASQ_VERSION=2.90-r3
-# renovate: datasource=repology depName=alpine_3_20/jq
+# renovate: datasource=repology depName=alpine_3_21/jq
 ARG JQ_VERSION=1.7.1-r0
-# renovate: datasource=repology depName=alpine_3_20/gettext
+# renovate: datasource=repology depName=alpine_3_21/gettext
 ARG GETTEXT_VERSION=0.22.5-r0
-# renovate: datasource=repology depName=alpine_3_20/wireguard-tools
+# renovate: datasource=repology depName=alpine_3_21/wireguard-tools
 ARG WIREGUARD_TOOLS_VERSION=1.0.20210914-r4
-# renovate: datasource=repology depName=alpine_3_20/s6
+# renovate: datasource=repology depName=alpine_3_21/s6
 ARG S6_VERSION=2.12.0.4-r0
-# renovate: datasource=repology depName=alpine_3_20/cronie
+# renovate: datasource=repology depName=alpine_3_21/cronie
 ARG CRONIE_VERSION=1.7.2-r0
 
 RUN apk add --no-cache \
