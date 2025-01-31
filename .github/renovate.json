@@ -26,6 +26,14 @@
       "matchDatasources": ["docker"],
       "matchPackagePatterns": ["minio"],
       "versioning": "regex:^RELEASE\\.(?<major>\\d+)-(?<minor>\\d+)-(?<patch>\\d+)T.*Z$"
+    },
+    {
+      "groupName": "INDI",
+      "matchDatasources": ["github-releases"],
+      "matchPackageNames": [
+        "indilib/indi-3rdparty",
+        "indilib/indi"
+      ]
     }
   ]
 }
