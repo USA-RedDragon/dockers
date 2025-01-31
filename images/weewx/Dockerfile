@@ -112,7 +112,7 @@ ARG WEEWX_SEASONS_DARK_SHA=3f2d888d524366f6d977550711a22cfa145d2665
 # renovate: datasource=github-tags depName=teeks99/weewx-json
 ARG WEEWX_JSON_VERSION=v1.3
 
-RUN curl -fSsL "https://github.com/chaunceygardiner/weewx-nws/releases/download/${WEEWX_NWS_VERSION}/weewx-nws-${WEEWX_NWS_VERSION/v/}.zip" -o /tmp/weewx-nws.zip && \
+RUN curl -fSsL "https://github.com/chaunceygardiner/weewx-nws/releases/download/${WEEWX_NWS_VERSION}/weewx-nws.zip" -o /tmp/weewx-nws.zip && \
     weectl extension install -y /tmp/weewx-nws.zip && \
     rm /tmp/weewx-nws.zip && \
     curl -fSsL "https://github.com/USA-RedDragon/weewx-prometheus/archive/refs/tags/${WEEWX_PROMETHEUS_VERSION}.zip" -o /tmp/weewx-prometheus.zip && \
