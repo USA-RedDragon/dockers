@@ -1,3 +1,3 @@
 #!/bin/sh
 # renovate: datasource=github-releases depName=indilib/indi
-export VERSION=v2.1.0
+export VERSION=v2.1.1
