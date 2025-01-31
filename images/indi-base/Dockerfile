@@ -1,4 +1,4 @@
-FROM debian:12.6-slim@sha256:2ccc7e39b0a6f504d252f807da1fc4b5bcd838e83e4dec3e2f57b2a4a64e7214 AS build-3rdparty
+FROM debian:12.9-slim@sha256:f70dc8d6a8b6a06824c92471a1a258030836b26b043881358b967bf73de7c5ab AS build-3rdparty
 
 ARG DEBIAN_FRONTEND=noninteractive
 
