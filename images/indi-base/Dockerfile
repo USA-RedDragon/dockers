@@ -5,7 +5,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 # renovate: datasource=github-releases depName=indilib/indi
 ARG INDI_VERSION=v2.1.0
 # renovate: datasource=github-releases depName=indilib/indi-3rdparty
-ARG INDI_3RD_PARTY_VERSION=v2.1.0
+ARG INDI_3RD_PARTY_VERSION=v2.1.1
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends --no-install-suggests \
