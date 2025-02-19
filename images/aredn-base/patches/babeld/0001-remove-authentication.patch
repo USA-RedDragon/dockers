@@ -1,0 +1,1660 @@
+From cb713f1cb2bf75ffd0121f6c0fe20b520a0106ae Mon Sep 17 00:00:00 2001
+From: Jacob McSwain <jacob@mcswain.dev>
+Date: Tue, 18 Feb 2025 21:04:01 -0600
+Subject: [PATCH 1/5] remove authentication
+
+---
+ .gitattributes    |   1 -
+ .gitmodules       |   6 -
+ BLAKE2            |   1 -
+ Makefile          |   8 +-
+ babeld.man        |  26 ---
+ configuration.c   | 169 --------------------
+ configuration.h   |   2 -
+ hmac.c            | 287 ---------------------------------
+ hmac.h            |  37 -----
+ interface.c       |  14 --
+ interface.h       |  14 --
+ message.c         | 245 +---------------------------
+ message.h         |   4 -
+ neighbour.c       |   1 -
+ neighbour.h       |   3 -
+ rfc6234           |   1 -
+ tests/Makefile    |   9 +-
+ tests/hmac_test.c | 400 ----------------------------------------------
+ tests/hmac_test.h |  22 ---
+ tests/main.c      |   2 -
+ 20 files changed, 8 insertions(+), 1244 deletions(-)
+ delete mode 100644 .gitmodules
+ delete mode 160000 BLAKE2
+ delete mode 100644 hmac.c
+ delete mode 100644 hmac.h
+ delete mode 160000 rfc6234
+ delete mode 100644 tests/hmac_test.c
+ delete mode 100644 tests/hmac_test.h
+
+diff --git a/.gitattributes b/.gitattributes
+index c23a296..de2f316 100644
+--- a/.gitattributes
++++ b/.gitattributes
+@@ -1,3 +1,2 @@
+ .gitignore export-ignore
+ .gitattributes export-ignore
+-.gitmodules export-ignore
+diff --git a/.gitmodules b/.gitmodules
+deleted file mode 100644
+index 8ef02f6..0000000
+--- a/.gitmodules
++++ /dev/null
+@@ -1,6 +0,0 @@
+-[submodule "rfc6234"]
+-	path = rfc6234
+-	url = https://github.com/massar/rfc6234
+-[submodule "BLAKE2"]
+-	path = BLAKE2
+-	url = https://github.com/BLAKE2/BLAKE2
+diff --git a/BLAKE2 b/BLAKE2
+deleted file mode 160000
+index 320c325..0000000
+--- a/BLAKE2
++++ /dev/null
+@@ -1 +0,0 @@
+-Subproject commit 320c325437539ae91091ce62efec1913cd8093c2
+diff --git a/Makefile b/Makefile
+index e589dbf..7f8491e 100644
+--- a/Makefile
++++ b/Makefile
+@@ -10,12 +10,10 @@ CFLAGS = $(CDEBUGFLAGS) $(DEFINES) $(EXTRA_DEFINES)
+ LDLIBS = -lrt
+ 
+ SRCS = babeld.c net.c kernel.c util.c interface.c source.c neighbour.c \
+-       route.c xroute.c message.c resend.c configuration.c local.c \
+-       hmac.c rfc6234/sha224-256.c BLAKE2/ref/blake2s-ref.c
++       route.c xroute.c message.c resend.c configuration.c local.c
+ 
+ OBJS = babeld.o net.o kernel.o util.o interface.o source.o neighbour.o \
+-       route.o xroute.o message.o resend.o configuration.o local.o \
+-       hmac.o rfc6234/sha224-256.o BLAKE2/ref/blake2s-ref.o
++       route.o xroute.o message.o resend.o configuration.o local.o
+ 
+ babeld: $(OBJS)
+ 	$(CC) $(CFLAGS) $(LDFLAGS) -o babeld $(OBJS) $(LDLIBS)
+@@ -24,7 +22,7 @@ babeld.o: babeld.c version.h
+ 
+ local.o: local.c version.h
+ 
+-kernel.o: kernel_netlink.c kernel_socket.c
++kernel.o: kernel_netlink.c
+ 
+ version.h:
+ 	./generate-version.sh > version.h
+diff --git a/babeld.man b/babeld.man
+index 4c25e7b..f193014 100644
+--- a/babeld.man
++++ b/babeld.man
+@@ -297,24 +297,6 @@ writes out its process id, and is equivalent to the command-line option
+ .BI first-rule-priority " priority"
+ This specifies smallest (highest) rule priority used with source-specific
+ routes.  The default is 100.
+-.TP
+-.BI "key id" " id" " type " \c
+-.RB { hmac-sha256 | blake2s128 } \c
+-.BI " value" " value"
+-Configure a key for use with the
+-.B key
+-interface option.  The
+-.B type
+-is one of
+-.B hmac-sha256
+-or
+-.BR blake2s128 .
+-The
+-.B value
+-is a hexadecimal string (up to 64 bytes for
+-.BR hmac-sha256 ,
+-up to 32 bytes for
+-.BR blake2s128 ).
+ .SS Interface configuration
+ An interface is configured by a line with the following format:
+ .IP
+@@ -437,14 +419,6 @@ no IPv4 address.  The default depends on the kernel version.
+ Pad all packets containing a Hello TLV to the MTU and disable
+ fragmentation.  This will avoid establishing adjacencies across links with
+ a mis-configured MTU, at the cost of slightly higher network usage.
+-.TP
+-.BI key " id"
+-Enable HMAC security on this interface, and use the key
+-.IR id .
+-.TP
+-.BR accept\-bad\-signatures " {" true | false }
+-Accept packets with no signature or an incorrect signature.  This only has
+-an effect if a key was configured on an interface.  The default is false.
+ .SS Filtering rules
+ A filtering rule is defined by a single line with the following format:
+ .IP
+diff --git a/configuration.c b/configuration.c
+index 57c4167..5312f6b 100644
+--- a/configuration.c
++++ b/configuration.c
+@@ -39,7 +39,6 @@ THE SOFTWARE.
+ #include "interface.h"
+ #include "route.h"
+ #include "kernel.h"
+-#include "hmac.h"
+ #include "configuration.h"
+ 
+ static struct filter *input_filters = NULL;
+@@ -322,39 +321,6 @@ get_interface_type(int c, int *type_r, gnc_t gnc, void *closure)
+     return c;
+ }
+ 
+-static int
+-gethex(int c, unsigned char **value_r, int *len_r, gnc_t gnc, void *closure)
+-{
+-    char *t = NULL;
+-    unsigned char *value;
+-    int len, rc;
+-    c = getword(c, &t, gnc, closure);
+-    if(c < -1) {
+-        free(t);
+-        return c;
+-    }
+-    len = strlen(t);
+-    if(len % 2 != 0) {
+-        free(t);
+-        return -2;
+-    }
+-    value = malloc(len / 2);
+-    if(value == NULL) {
+-        free(t);
+-        return -2;
+-    }
+-
+-    rc = fromhex(value, t, len);
+-    free(t);
+-    if(rc < 0) {
+-        free(value);
+-        return -2;
+-    }
+-    *value_r = value;
+-    *len_r = len / 2;
+-    return c;
+-}
+-
+ static void
+ free_filter(struct filter *f)
+ {
+@@ -658,26 +624,6 @@ parse_anonymous_ifconf(int c, gnc_t gnc, void *closure,
+             if(c < -1 || penalty <= 0 || penalty > 0xFFFF)
+                 goto error;
+             if_conf->max_rtt_penalty = penalty;
+-        } else if(strcmp(token, "key") == 0) {
+-            char *key_id;
+-            struct key *key;
+-            c = getword(c, &key_id, gnc, closure);
+-            if(c < -1)
+-                goto error;
+-            key = find_key(key_id);
+-            if(key == NULL) {
+-                fprintf(stderr, "Couldn't find key %s.\n", key_id);
+-                free(key_id);
+-                goto error;
+-            }
+-            if_conf->key = key;
+-            free(key_id);
+-        } else if(strcmp(token, "accept-bad-signatures") == 0) {
+-            int v;
+-            c = getbool(c, &v, gnc, closure);
+-            if(c < -1)
+-                goto error;
+-            if_conf->accept_bad_signatures = v;
+         } else if(strcmp(token, "v4-via-v6") == 0) {
+             int v;
+             c = getbool(c, &v, gnc, closure);
+@@ -737,112 +683,6 @@ parse_ifconf(int c, gnc_t gnc, void *closure,
+     return -2;
+ }
+ 
+-static int
+-parse_key(int c, gnc_t gnc, void *closure, struct key **key_return)
+-{
+-    char *token = NULL;
+-    struct key *key;
+-
+-    key = calloc(1, sizeof(struct key));
+-    if(key == NULL) {
+-        perror("calloc(key)");
+-        return -2;
+-    }
+-    while(1) {
+-        c = skip_whitespace(c, gnc, closure);
+-        if(c < 0 || c == '\n' || c == '#') {
+-            c = skip_to_eol(c, gnc, closure);
+-            break;
+-        }
+-        c = getword(c, &token, gnc, closure);
+-        if(c < -1 || token == NULL) {
+-            goto error;
+-        }
+-        if(strcmp(token, "id") == 0) {
+-            c = getword(c, &key->id, gnc, closure);
+-            if(c < -1 || key->id == NULL) {
+-                goto error;
+-            }
+-        } else if(strcmp(token, "type") == 0) {
+-            char *auth_type = NULL;
+-            c = getword(c, &auth_type, gnc, closure);
+-            if(c < -1 || auth_type == NULL) {
+-                free(auth_type);
+-                goto error;
+-            }
+-            if(strcmp(auth_type, "none") == 0) {
+-                key->type = AUTH_TYPE_NONE;
+-            } else if(strcmp(auth_type, "hmac-sha256") == 0) {
+-                key->type = AUTH_TYPE_SHA256;
+-            } else if(strcmp(auth_type, "blake2s128") == 0) {
+-                key->type = AUTH_TYPE_BLAKE2S128;
+-            } else {
+-                fprintf(stderr, "Key type '%s' isn't supported.\n", auth_type);
+-                free(auth_type);
+-                goto error;
+-            }
+-            free(auth_type);
+-        } else if(strcmp(token, "value") == 0) {
+-            c = gethex(c, &key->value, &key->len, gnc, closure);
+-            if(c < -1 || key->value == NULL) {
+-                fprintf(stderr, "Couldn't parse key value.\n");
+-                goto error;
+-            }
+-        } else {
+-            fprintf(stderr, "Unrecognized keyword '%s'.\n", token);
+-            goto error;
+-        }
+-        free(token);
+-        token = NULL;
+-    }
+-
+-    if(key->id == NULL) {
+-        fprintf(stderr, "No key id was given.\n");
+-        goto error;
+-    }
+-
+-    switch(key->type) {
+-    case AUTH_TYPE_SHA256: {
+-        if(key->len > 64) {
+-            fprintf(stderr, "Key length is %d, expected at most %d.\n",
+-                    key->len, 64);
+-            goto error;
+-        }
+-        if(key->len < 64) {
+-            unsigned char *v = realloc(key->value, 64);
+-            if(v == NULL) {
+-                perror("realloc(key->value)");
+-                goto error;
+-            }
+-            memset(v + key->len, 0, 64 - key->len);
+-            key->value = v;
+-            key->len = 64;
+-        }
+-        break;
+-    }
+-    case AUTH_TYPE_BLAKE2S128:
+-        if(key->len < 1 || key->len > 32) {
+-            fprintf(stderr, "Key length is %d, expected 1 to 32.\n",
+-                    key->len);
+-            goto error;
+-        }
+-        break;
+-    default:
+-        fprintf(stderr, "Key type 'none' isn't supported.\n");
+-        goto error;
+-    }
+-
+-    *key_return = key;
+-    return c;
+-
+- error:
+-    free(token);
+-    free(key->value);
+-    free(key->id);
+-    free(key);
+-    return -2;
+-}
+-
+ int
+ add_filter(struct filter *filter, int type)
+ {
+@@ -899,7 +739,6 @@ merge_ifconf(struct interface_conf *dest,
+     MERGE(lq);
+     MERGE(faraway);
+     MERGE(unicast);
+-    MERGE(accept_bad_signatures);
+     MERGE(enable_timestamps);
+     MERGE(rfc6126);
+     MERGE(rtt_decay);
+@@ -908,7 +747,6 @@ merge_ifconf(struct interface_conf *dest,
+     MERGE(max_rtt_penalty);
+     MERGE(v4viav6);
+     MERGE(probe_mtu);
+-    MERGE(key);
+ 
+ #undef MERGE
+ }
+@@ -1249,13 +1087,6 @@ parse_config_line(int c, gnc_t gnc, void *closure,
+         if(c < -1 || !action_return)
+             goto fail;
+         reopen_logfile();
+-    } else if(strcmp(token, "key") == 0) {
+-        struct key *key = NULL;
+-        c = parse_key(c, gnc, closure, &key);
+-        if(c < -1)
+-            goto fail;
+-        add_key(key->id, key->type, key->len, key->value);
+-        free(key);
+     } else {
+         c = parse_option(c, gnc, closure, token);
+         if(c < -1)
+diff --git a/configuration.h b/configuration.h
+index 4e10fa0..defc03a 100644
+--- a/configuration.h
++++ b/configuration.h
+@@ -30,8 +30,6 @@ THE SOFTWARE.
+ #define CONFIG_ACTION_NO 5
+ 
+ #define AUTH_TYPE_NONE 0
+-#define AUTH_TYPE_SHA256 1
+-#define AUTH_TYPE_BLAKE2S128 2
+ 
+ #define FILTER_TYPE_INPUT 0
+ #define FILTER_TYPE_OUTPUT 1
+diff --git a/hmac.c b/hmac.c
+deleted file mode 100644
+index 0b81cc0..0000000
+--- a/hmac.c
++++ /dev/null
+@@ -1,287 +0,0 @@
+-/*
+-Copyright (c) 2018 by Clara Dô and Weronika Kolodziejak
+-
+-Permission is hereby granted, free of charge, to any person obtaining a copy
+-of this software and associated documentation files (the "Software"), to deal
+-in the Software without restriction, including without limitation the rights
+-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+-copies of the Software, and to permit persons to whom the Software is
+-furnished to do so, subject to the following conditions:
+-
+-The above copyright notice and this permission notice shall be included in
+-all copies or substantial portions of the Software.
+-
+-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+-THE SOFTWARE.
+-*/
+-
+-#include <stdlib.h>
+-#include <string.h>
+-#include <stdio.h>
+-#include <assert.h>
+-#include <sys/time.h>
+-#include <netinet/in.h>
+-
+-#include "rfc6234/sha.h"
+-#include "BLAKE2/ref/blake2.h"
+-
+-#include "babeld.h"
+-#include "interface.h"
+-#include "neighbour.h"
+-#include "util.h"
+-#include "hmac.h"
+-#include "configuration.h"
+-#include "message.h"
+-
+-struct key **keys = NULL;
+-int numkeys = 0, maxkeys = 0;
+-
+-struct key *
+-find_key(const char *id)
+-{
+-    int i;
+-    for(i = 0; i < numkeys; i++) {
+-        if(strcmp(keys[i]->id, id) == 0)
+-            return retain_key(keys[i]);
+-    }
+-    return NULL;
+-}
+-
+-struct key *
+-retain_key(struct key *key)
+-{
+-    assert(key->ref_count < 0xffff);
+-    key->ref_count++;
+-    return key;
+-}
+-
+-void
+-release_key(struct key *key)
+-{
+-    assert(key->ref_count > 0);
+-    key->ref_count--;
+-}
+-
+-struct key *
+-add_key(char *id, int type, int len, unsigned char *value)
+-{
+-    struct key *key;
+-
+-    assert(value != NULL && type != AUTH_TYPE_NONE);
+-
+-    key = find_key(id);
+-    if(key) {
+-        key->type = type;
+-        key->len = len;
+-        key->value = value;
+-        return key;
+-    }
+-
+-    if(type == AUTH_TYPE_NONE)
+-        return NULL;
+-    if(numkeys >= maxkeys) {
+-        struct key **new_keys;
+-        int n = maxkeys < 1 ? 8 : 2 * maxkeys;
+-        new_keys = realloc(keys, n * sizeof(struct key*));
+-        if(new_keys == NULL)
+-            return NULL;
+-        maxkeys = n;
+-        keys = new_keys;
+-    }
+-
+-    key = calloc(1, sizeof(struct key));
+-    if(key == NULL)
+-        return NULL;
+-    key->id = id;
+-    key->type = type;
+-    key->len = len;
+-    key->value = value;
+-
+-    keys[numkeys++] = key;
+-    return key;
+-}
+-
+-int
+-compute_hmac(const unsigned char *src, const unsigned char *dst,
+-             const unsigned char *packet_header,
+-             const unsigned char *body, int bodylen, struct key *key,
+-             unsigned char *hmac_return)
+-{
+-    unsigned char port[2];
+-    int rc;
+-
+-    DO_HTONS(port, (unsigned short)protocol_port);
+-    switch(key->type) {
+-    case AUTH_TYPE_SHA256: {
+-        SHA256Context inner, outer;
+-        unsigned char ipad[64], ihash[32], opad[64];
+-        if(key->len != 64)
+-            return -1;
+-        for(int i = 0; i < 64; i++)
+-            ipad[i] = key->value[i] ^ 0x36;
+-        rc = SHA256Reset(&inner);
+-        if(rc < 0)
+-            return -1;
+-        rc = SHA256Input(&inner, ipad, 64);
+-        if(rc < 0)
+-            return -1;
+-
+-        rc = SHA256Input(&inner, src, 16);
+-        if(rc != 0)
+-            return -1;
+-        rc = SHA256Input(&inner, port, 2);
+-        if(rc != 0)
+-            return -1;
+-        rc = SHA256Input(&inner, dst, 16);
+-        if(rc != 0)
+-            return -1;
+-        rc = SHA256Input(&inner, port, 2);
+-        if(rc != 0)
+-            return -1;
+-        rc = SHA256Input(&inner, packet_header, 4);
+-        if(rc != 0)
+-            return -1;
+-        rc = SHA256Input(&inner, body, bodylen);
+-        if(rc != 0)
+-            return -1;
+-
+-        rc = SHA256Result(&inner, ihash);
+-        if(rc != 0)
+-            return -1;
+-
+-        for(int i = 0; i < 64; i++)
+-            opad[i] = key->value[i] ^ 0x5c;
+-
+-        rc = SHA256Reset(&outer);
+-        if(rc != 0)
+-            return -1;
+-        rc = SHA256Input(&outer, opad, 64);
+-        if(rc != 0)
+-            return -1;
+-        rc = SHA256Input(&outer, ihash, 32);
+-        if(rc != 0)
+-            return -1;
+-        rc = SHA256Result(&outer, hmac_return);
+-        if(rc < 0)
+-            return -1;
+-        return 32;
+-    }
+-    case AUTH_TYPE_BLAKE2S128: {
+-        blake2s_state s;
+-        if(key->len > 32)
+-            return -1;
+-        rc = blake2s_init_key(&s, 16, key->value, key->len);
+-        if(rc < 0)
+-            return -1;
+-        rc = blake2s_update(&s, src, 16);
+-        if(rc < 0)
+-            return -1;
+-        rc = blake2s_update(&s, port, 2);
+-        if(rc < 0)
+-            return -1;
+-        rc = blake2s_update(&s, dst, 16);
+-        if(rc < 0)
+-            return -1;
+-        rc = blake2s_update(&s, port, 2);
+-        if(rc < 0)
+-            return -1;
+-        rc = blake2s_update(&s, packet_header, 4);
+-        if(rc < 0)
+-            return -1;
+-        rc = blake2s_update(&s, body, bodylen);
+-        if(rc < 0)
+-            return -1;
+-        rc = blake2s_final(&s, hmac_return, 16);
+-        if(rc < 0)
+-            return -1;
+-
+-        return 16;
+-    }
+-    default:
+-        return -1;
+-    }
+-}
+-
+-int
+-add_hmac(struct buffered *buf, struct interface *ifp,
+-         unsigned char *packet_header)
+-{
+-    int hmaclen;
+-    int i = buf->len;
+-    unsigned char *dst = buf->sin6.sin6_addr.s6_addr;
+-    unsigned char *src;
+-
+-    if(ifp->numll < 1) {
+-        fprintf(stderr, "add_hmac: no link-local address.\n");
+-        return -1;
+-    }
+-    src = ifp->ll[0];
+-
+-    if(buf->len + 2 + MAX_DIGEST_LEN > buf->size) {
+-        fprintf(stderr, "Buffer overflow in add_hmac.\n");
+-        return -1;
+-    }
+-
+-    hmaclen = compute_hmac(src, dst, packet_header,
+-                           buf->buf, buf->len, ifp->key,
+-                           buf->buf + i + 2);
+-    if(hmaclen < 0)
+-        return -1;
+-    buf->buf[i++] = MESSAGE_MAC;
+-    buf->buf[i++] = hmaclen;
+-    i += hmaclen;
+-    return i;
+-}
+-
+-
+-static int
+-compare_hmac(const unsigned char *src, const unsigned char *dst,
+-             const unsigned char *packet, int bodylen,
+-             const unsigned char *hmac, int hmaclen,
+-             struct key *key)
+-{
+-    unsigned char buf[MAX_DIGEST_LEN];
+-    int len;
+-
+-    len = compute_hmac(src, dst, packet, packet + 4, bodylen, key, buf);
+-    return len == hmaclen && (memcmp(buf, hmac, hmaclen) == 0);
+-}
+-
+-int
+-check_hmac(const unsigned char *packet, int packetlen, int bodylen,
+-           const unsigned char *src, const unsigned char *dst,
+-           struct interface *ifp)
+-{
+-    int i = bodylen + 4;
+-    int len;
+-    int rc = -1;
+-
+-    debugf("check_hmac %s -> %s\n",
+-           format_address(src), format_address(dst));
+-    while(i < packetlen) {
+-        if(i + 2 > packetlen) {
+-            fprintf(stderr, "Received truncated message.\n");
+-            break;
+-        }
+-        len = packet[i + 1];
+-        if(packet[i] == MESSAGE_MAC) {
+-            int ok;
+-            if(i + len + 2 > packetlen) {
+-                fprintf(stderr, "Received truncated message.\n");
+-                return -1;
+-            }
+-            ok = compare_hmac(src, dst, packet, bodylen,
+-                              packet + i + 2, len, ifp->key);
+-            if(ok)
+-                return 1;
+-            rc = 0;
+-        }
+-        i += len + 2;
+-    }
+-    return rc;
+-}
+diff --git a/hmac.h b/hmac.h
+deleted file mode 100644
+index cb0e30e..0000000
+--- a/hmac.h
++++ /dev/null
+@@ -1,37 +0,0 @@
+-/*
+-Copyright (c) 2018 by Clara Dô and Weronika Kolodziejak
+-
+-Permission is hereby granted, free of charge, to any person obtaining a copy
+-of this software and associated documentation files (the "Software"), to deal
+-in the Software without restriction, including without limitation the rights
+-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+-copies of the Software, and to permit persons to whom the Software is
+-furnished to do so, subject to the following conditions:
+-
+-The above copyright notice and this permission notice shall be included in
+-all copies or substantial portions of the Software.
+-
+-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+-THE SOFTWARE.
+-*/
+-
+-#define MAX_DIGEST_LEN 32
+-
+-struct key *find_key(const char *id);
+-struct key *retain_key(struct key *key);
+-void release_key(struct key *key);
+-struct key *add_key(char *id, int type, int len, unsigned char *value);
+-int compute_hmac(const unsigned char *src, const unsigned char *dst,
+-                 const unsigned char *packet_header,
+-                 const unsigned char *body, int bodylen, struct key *key,
+-                 unsigned char *hmac_return);
+-int add_hmac(struct buffered *buf, struct interface *ifp,
+-             unsigned char *packet_header);
+-int check_hmac(const unsigned char *packet, int packetlen, int bodylen,
+-               const unsigned char *src, const unsigned char *dst,
+-               struct interface *ifp);
+diff --git a/interface.c b/interface.c
+index e8d4b1e..359326c 100644
+--- a/interface.c
++++ b/interface.c
+@@ -43,7 +43,6 @@ THE SOFTWARE.
+ #include "configuration.h"
+ #include "local.h"
+ #include "xroute.h"
+-#include "hmac.h"
+ 
+ #define MIN_MTU 512
+ 
+@@ -375,10 +374,6 @@ interface_updown(struct interface *ifp, int up)
+ 
+         if(IF_CONF(ifp, unicast) == CONFIG_YES)
+             ifp->flags |= IF_UNICAST;
+-        if(IF_CONF(ifp, accept_bad_signatures) == CONFIG_YES)
+-            ifp->flags |= IF_ACCEPT_BAD_SIGNATURES;
+-        else
+-            ifp->flags &= ~IF_ACCEPT_BAD_SIGNATURES;
+         if(IF_CONF(ifp, hello_interval) > 0)
+             ifp->hello_interval = IF_CONF(ifp, hello_interval);
+         else if(type == IF_TYPE_WIRELESS)
+@@ -466,15 +461,6 @@ interface_updown(struct interface *ifp, int up)
+         update_interface_metric(ifp);
+         rc = check_interface_ipv4(ifp);
+ 
+-        if(IF_CONF(ifp, key) != ifp->key) {
+-            if(ifp->key != NULL)
+-                release_key(ifp->key);
+-            if(IF_CONF(ifp, key) != NULL)
+-                ifp->key = retain_key(IF_CONF(ifp, key));
+-            else
+-                ifp->key = NULL;
+-        }
+-
+         debugf("Upped interface %s (cost=%d%s).\n",
+                ifp->name,
+                ifp->cost,
+diff --git a/interface.h b/interface.h
+index 653635b..3aa69e7 100644
+--- a/interface.h
++++ b/interface.h
+@@ -34,15 +34,6 @@ struct buffered_update {
+ #define IF_TYPE_WIRELESS 2
+ #define IF_TYPE_TUNNEL 3
+ 
+-/* If you modify this structure, also modify the merge_ifconf function. */
+-struct key {
+-    char *id;
+-    int type;
+-    int len;
+-    unsigned char *value;
+-    unsigned short ref_count;
+-};
+-
+ struct interface_conf {
+     char *ifname;
+     unsigned hello_interval;
+@@ -55,14 +46,12 @@ struct interface_conf {
+     char unicast;
+     char enable_timestamps;
+     char rfc6126;
+-    char accept_bad_signatures;
+     char v4viav6;
+     char probe_mtu;
+     unsigned int rtt_decay;
+     unsigned int rtt_min;
+     unsigned int rtt_max;
+     unsigned int max_rtt_penalty;
+-    struct key *key;
+     struct interface_conf *next;
+ };
+ 
+@@ -86,8 +75,6 @@ struct interface_conf {
+ #define IF_TIMESTAMPS (1 << 6)
+ /* Remain compatible with RFC 6126. */
+ #define IF_RFC6126 (1 << 7)
+-/* Accept packets even if incorrectly signed. */
+-#define IF_ACCEPT_BAD_SIGNATURES (1 << 8)
+ /* Use Babel over DTLS on this interface. */
+ #define IF_DTLS (1 << 9)
+ /* Announce v4-via-v6 routes through this interface. */
+@@ -148,7 +135,6 @@ struct interface {
+     unsigned int rtt_min;
+     unsigned int rtt_max;
+     unsigned int max_rtt_penalty;
+-    struct key *key;
+     unsigned int pc;
+     unsigned char index[INDEX_LEN];
+ };
+diff --git a/message.c b/message.c
+index ff7dee8..5f03b80 100644
+--- a/message.c
++++ b/message.c
+@@ -28,6 +28,7 @@ THE SOFTWARE.
+ #include <netinet/in.h>
+ #include <arpa/inet.h>
+ #include <time.h>
++#include <errno.h>
+ 
+ #include "babeld.h"
+ #include "util.h"
+@@ -41,7 +42,6 @@ THE SOFTWARE.
+ #include "resend.h"
+ #include "message.h"
+ #include "configuration.h"
+-#include "hmac.h"
+ 
+ unsigned char packet_header[4] = {42, 2};
+ 
+@@ -429,147 +429,6 @@ network_address(int ae, const unsigned char *a, unsigned int len,
+     return network_prefix(ae, -1, 0, a, NULL, len, a_r);
+ }
+ 
+-static struct neighbour *
+-preparse_packet(const unsigned char *from, struct interface *ifp,
+-                const unsigned char *body, int bodylen,
+-                const unsigned char *to)
+-{
+-    int rc, i;
+-    struct neighbour *neigh = NULL;
+-    int challenge_success = 0, accept_packet = 0;
+-    const unsigned char *pc = NULL, *index = NULL, *nonce = NULL;
+-    int index_len, nonce_len = 0;
+-
+-    i = 0;
+-    while(i < bodylen) {
+-        const unsigned char *message = body + 4 + i;
+-        unsigned char len, type = message[0];
+-        if(type == MESSAGE_PAD1) {
+-            i++;
+-            continue;
+-        }
+-        if(i + 2 > bodylen) {
+-            fprintf(stderr, "Received truncated message.\n");
+-            break;
+-        }
+-        len = message[1];
+-        if(i + len + 2 > bodylen) {
+-            fprintf(stderr, "Received truncated message.\n");
+-            break;
+-        }
+-        if(type == MESSAGE_PC) {
+-            unsigned int pcnat;
+-
+-            if(index != NULL)
+-                goto done;
+-
+-            if(len < 4) {
+-                fprintf(stderr, "Received truncated PC TLV.\n");
+-                break;
+-            }
+-            if(len > 4 + 32) {
+-                fprintf(stderr, "Overlong PC TLV.\n");
+-                break;
+-            }
+-
+-            pc = message + 2;
+-            index = message + 6;
+-            index_len = len - 4;
+-
+-            memcpy(&pcnat, pc, 4);
+-            debugf("Received PC %u from %s.\n",
+-                   ntohl(pcnat), format_address(from));
+-        } else if(type == MESSAGE_CHALLENGE_REQUEST) {
+-            if(to[0] == 0xff)   /* multicast */
+-                goto done;
+-
+-            if(len > 192) {
+-                fprintf(stderr, "Overlong challenge request TLV.\n");
+-                break;
+-            }
+-
+-            nonce = message + 2;
+-            nonce_len = len;
+-
+-            debugf("Received challenge request from %s.\n",
+-                   format_address(from));
+-        } else if(type == MESSAGE_CHALLENGE_REPLY) {
+-            if(len > 192) {
+-                fprintf(stderr, "Overlong challenge reply TLV.\n");
+-                break;
+-            }
+-
+-            debugf("Received challenge reply from %s.\n",
+-                   format_address(from));
+-
+-            neigh = neigh != NULL ? neigh : find_neighbour(from, ifp);
+-            if(neigh == NULL)
+-                goto done;
+-
+-            gettime(&now);
+-            if(timeval_compare(&now, &neigh->challenge_deadline) > 0) {
+-                debugf("No pending challenge.\n");
+-                goto done;
+-            }
+-
+-            if(len == sizeof(neigh->nonce) &&
+-               memcmp(neigh->nonce, message + 2, len) == 0) {
+-                const struct timeval zero = {0, 0};
+-                challenge_success = 1;
+-                neigh->challenge_deadline = zero;
+-                debugf("Challenge succeeded!\n");
+-            } else {
+-                debugf("Challenge failed.\n");
+-            }
+-        }
+-    done:
+-        i += len + 2;
+-    }
+-
+-    if(index == NULL) {
+-        debugf("No PC in packet.\n");
+-    } else if(challenge_success) {
+-        neigh->index_len = index_len;
+-        memcpy(neigh->index, index, index_len);
+-        memcpy(neigh->pc_m, pc, 4);
+-        memcpy(neigh->pc_u, pc, 4);
+-        accept_packet = 1;
+-    } else {
+-        neigh = neigh != NULL ? neigh : find_neighbour(from, ifp);
+-        if(neigh == NULL)
+-            return NULL;
+-        if(neigh->index_len == -1 ||
+-           neigh->index_len != index_len ||
+-           memcmp(index, neigh->index, index_len) != 0) {
+-            rc = send_challenge_request(neigh);
+-            if(rc < -1)
+-                fputs("Could not send challenge request.\n", stderr);
+-        } else {
+-            unsigned char *last_pc;
+-            if(to[0] == 0xff)
+-                last_pc = neigh->pc_m;
+-            else
+-                last_pc = neigh->pc_u;
+-            if(memcmp(pc, last_pc, 4) <= 0) {
+-                debugf("Out of order PC.\n");
+-                nonce = NULL;
+-            } else {
+-                memcpy(last_pc, pc, 4);
+-                accept_packet = 1;
+-            }
+-        }
+-    }
+-
+-    if(nonce != NULL) { /* a challenge request was received */
+-        neigh = neigh != NULL ? neigh : find_neighbour(from, ifp);
+-        if(neigh == NULL)
+-            return NULL;
+-        send_challenge_reply(neigh, nonce, nonce_len);
+-    }
+-    debugf("accept_packet: %d, neigh: %p.\n", accept_packet, (void*)neigh);
+-    return accept_packet ? neigh : NULL;
+-}
+-
+ void
+ parse_packet(const unsigned char *from, struct interface *ifp,
+              const unsigned char *packet, int packetlen,
+@@ -621,24 +480,6 @@ parse_packet(const unsigned char *from, struct interface *ifp,
+         bodylen = packetlen - 4;
+     }
+ 
+-    if(ifp->key != NULL) {
+-        int rc = check_hmac(packet, packetlen, bodylen, from, to, ifp);
+-        if(rc <= 0) {
+-            if(rc < 0)
+-                debugf("Received unsigned packet.\n");
+-            else
+-                debugf("Received packet with bad signature.\n");
+-            if(!(ifp->flags & IF_ACCEPT_BAD_SIGNATURES))
+-                return;
+-        } else {
+-            neigh = preparse_packet(from, ifp, packet, bodylen, to);
+-            if(neigh == NULL) {
+-                debugf("PC check failed.\n");
+-                return;
+-            }
+-        }
+-    }
+-
+     if(neigh == NULL)
+         neigh = find_neighbour(from, ifp);
+     if(neigh == NULL) {
+@@ -1137,18 +978,9 @@ flushbuf(struct buffered *buf, struct interface *ifp)
+ 
+     if(buf->len > 0) {
+         int probe;
+-        if(ifp->key != NULL && ifp->key->type != AUTH_TYPE_NONE)
+-            send_pc(buf, ifp);
+         debugf("  (flushing %d buffered bytes)\n", buf->len);
+         DO_HTONS(packet_header + 2, buf->len);
+         fill_rtt_message(buf, ifp);
+-        if(ifp->key != NULL && ifp->key->type != AUTH_TYPE_NONE) {
+-            end = add_hmac(buf, ifp, packet_header);
+-            if(end < 0) {
+-                fprintf(stderr, "Couldn't add HMAC.\n");
+-                return;
+-            }
+-        }
+         probe = (ifp->flags & IF_PROBE_MTU) != 0 && ifp->buf.hello >= 0;
+         if(probe) {
+             /* pad the packet to the MTU */
+@@ -1177,7 +1009,7 @@ flushbuf(struct buffered *buf, struct interface *ifp)
+                         (struct sockaddr*)&buf->sin6,
+                         sizeof(buf->sin6), probe);
+         if(rc < 0)
+-            perror("send");
++            debugf("send: %s\n", strerror(errno));
+     }
+     VALGRIND_MAKE_MEM_UNDEFINED(buf->buf, buf->size);
+     buf->len = 0;
+@@ -1213,8 +1045,6 @@ schedule_flush_now(struct buffered *buf)
+ static void
+ ensure_space(struct buffered *buf, struct interface *ifp, int space)
+ {
+-    if(ifp->key != NULL)
+-        space += MAX_HMAC_SPACE + 6 + INDEX_LEN;
+     if(buf->size - buf->len < space)
+         flushbuf(buf, ifp);
+ }
+@@ -1222,9 +1052,7 @@ ensure_space(struct buffered *buf, struct interface *ifp, int space)
+ static void
+ start_message(struct buffered *buf, struct interface *ifp, int type, int len)
+ {
+-    int space = ifp->key == NULL
+-        ? len + 2
+-        : len + 2 + MAX_HMAC_SPACE + 6 + INDEX_LEN;
++    int space = len + 2;
+     if(buf->size - buf->len < space)
+         flushbuf(buf, ifp);
+     buf->buf[buf->len++] = type;
+@@ -1268,28 +1096,6 @@ accumulate_bytes(struct buffered *buf,
+     buf->len += len;
+ }
+ 
+-int
+-send_pc(struct buffered *buf, struct interface *ifp)
+-{
+-    int space = MAX_HMAC_SPACE + 6 + INDEX_LEN;
+-    if(buf->size - buf->len < space) {
+-        fputs("send_pc: no space left to accumulate pc.\n", stderr);
+-        return -1;
+-    }
+-    if(ifp->pc == 0) {
+-        int rc;
+-        rc = read_random_bytes(ifp->index, INDEX_LEN);
+-        if(rc < INDEX_LEN)
+-            return -1;
+-    }
+-    accumulate_byte(buf, MESSAGE_PC);
+-    accumulate_byte(buf, 4 + INDEX_LEN);
+-    accumulate_int(buf, ifp->pc);
+-    accumulate_bytes(buf, ifp->index, INDEX_LEN);
+-    ifp->pc++;
+-    return 0;
+-}
+-
+ void
+ send_ack(struct neighbour *neigh, unsigned short nonce, unsigned short interval)
+ {
+@@ -1302,51 +1108,6 @@ send_ack(struct neighbour *neigh, unsigned short nonce, unsigned short interval)
+     schedule_flush_ms(&neigh->buf, roughly(interval * 6));
+ }
+ 
+-int
+-send_challenge_request(struct neighbour *neigh)
+-{
+-    int rc;
+-
+-    gettime(&now);
+-    if(timeval_compare(&now, &neigh->challenge_request_limitation) <= 0)
+-        return -1;
+-
+-    debugf("Sending challenge request to %s on %s.\n",
+-           format_address(neigh->address), neigh->ifp->name);
+-    rc = read_random_bytes(neigh->nonce, NONCE_LEN);
+-    if(rc < NONCE_LEN) {
+-        perror("read_random_bytes");
+-        return -2;
+-    }
+-    start_message(&neigh->buf, neigh->ifp, MESSAGE_CHALLENGE_REQUEST, NONCE_LEN);
+-    accumulate_bytes(&neigh->buf, neigh->nonce, NONCE_LEN);
+-    end_message(&neigh->buf, MESSAGE_CHALLENGE_REQUEST, NONCE_LEN);
+-    gettime(&now);
+-    timeval_add_msec(&neigh->challenge_deadline, &now, 30000);
+-    timeval_add_msec(&neigh->challenge_request_limitation, &now, 300);
+-    schedule_flush_now(&neigh->buf);
+-    return 0;
+-}
+-
+-int
+-send_challenge_reply(struct neighbour *neigh, const unsigned char *crypto_nonce,
+-                     int len)
+-{
+-    gettime(&now);
+-    if(timeval_compare(&now, &neigh->challenge_reply_limitation) <= 0)
+-        return -1;
+-
+-    debugf("Sending challenge reply to %s on %s.\n",
+-           format_address(neigh->address), neigh->ifp->name);
+-    start_message(&neigh->buf, neigh->ifp, MESSAGE_CHALLENGE_REPLY, len);
+-    accumulate_bytes(&neigh->buf, crypto_nonce, len);
+-    end_message(&neigh->buf, MESSAGE_CHALLENGE_REPLY, len);
+-    gettime(&now);
+-    timeval_add_msec(&neigh->challenge_reply_limitation, &now, 300);
+-    schedule_flush_now(&neigh->buf);
+-    return 0;
+-}
+-
+ static void
+ buffer_hello(struct buffered *buf, struct interface *ifp,
+              unsigned short seqno, unsigned interval, int unicast)
+diff --git a/message.h b/message.h
+index 061ad78..27ed280 100644
+--- a/message.h
++++ b/message.h
+@@ -67,12 +67,8 @@ void parse_packet(const unsigned char *from, struct interface *ifp,
+                   const unsigned char *to);
+ void flushbuf(struct buffered *buf, struct interface *ifp);
+ void flushupdates(struct interface *ifp);
+-int send_pc(struct buffered *buf, struct interface *ifp);
+ void send_ack(struct neighbour *neigh, unsigned short nonce,
+               unsigned short interval);
+-int send_challenge_request(struct neighbour *neigh);
+-int send_challenge_reply(struct neighbour *neigh,
+-                         const unsigned char *crypto_nonce, int len);
+ void send_multicast_hello(struct interface *ifp, unsigned interval, int force);
+ void send_unicast_hello(struct neighbour *neigh, unsigned interval, int force);
+ void send_hello(struct interface *ifp);
+diff --git a/neighbour.c b/neighbour.c
+index 8b785c7..d47100c 100644
+--- a/neighbour.c
++++ b/neighbour.c
+@@ -34,7 +34,6 @@ THE SOFTWARE.
+ #include "interface.h"
+ #include "neighbour.h"
+ #include "source.h"
+-#include "hmac.h"
+ #include "route.h"
+ #include "message.h"
+ #include "resend.h"
+diff --git a/neighbour.h b/neighbour.h
+index e34065e..e67be29 100644
+--- a/neighbour.h
++++ b/neighbour.h
+@@ -27,8 +27,6 @@ struct hello_history {
+     struct timeval time;
+ };
+ 
+-#define NONCE_LEN 8
+-
+ struct neighbour {
+     struct neighbour *next;
+     /* This is -1 when unknown, so don't make it unsigned */
+@@ -50,7 +48,6 @@ struct neighbour {
+     unsigned char pc_u[4], pc_m[4];
+     int index_len; /* This is -1 when index is undefined */
+     unsigned char index[32];
+-    unsigned char nonce[NONCE_LEN];
+     struct timeval challenge_deadline;
+     struct timeval challenge_request_limitation;
+     struct timeval challenge_reply_limitation;
+diff --git a/rfc6234 b/rfc6234
+deleted file mode 160000
+index 285c8b8..0000000
+--- a/rfc6234
++++ /dev/null
+@@ -1 +0,0 @@
+-Subproject commit 285c8b86c0c6b8e9ffe1c420c5b09fa229629a30
+diff --git a/tests/Makefile b/tests/Makefile
+index 2c8aacd..7b396a1 100644
+--- a/tests/Makefile
++++ b/tests/Makefile
+@@ -6,11 +6,9 @@ CFLAGS = -Os -g -Wall
+ 
+ OBJS = ../babeld.o ../net.o ../kernel.o ../util.o ../interface.o ../source.o \
+ 	   ../neighbour.o ../route.o ../xroute.o ../message.o ../resend.o \
+-	   ../configuration.o ../local.o ../hmac.o ../rfc6234/sha224-256.o \
+-	   ../BLAKE2/ref/blake2s-ref.o test_utilities.o util_test.o \
+-	   hmac_test.o route_test.o
++	   ../configuration.o ../local.o test_utilities.o util_test.o route_test.o
+ 
+-main: main.c test_utilities.o util_test.o hmac_test.o route_test.o
++main: main.c test_utilities.o util_test.o route_test.o
+ 	$(CC) $(CFLAGS) -o main main.c $(OBJS)
+ 
+ test_utilities.o: test_utilities.h test_utilities.c
+@@ -19,9 +17,6 @@ test_utilities.o: test_utilities.h test_utilities.c
+ util_test.o: util_test.c util_test.h
+ 	$(CC) $(CFLAGS) -c util_test.c
+ 
+-hmac_test.o: hmac_test.c hmac_test.h
+-	$(CC) $(CFLAGS) -c hmac_test.c
+-
+ route_test.o: route_test.c route_test.h
+ 	$(CC) $(CFLAGS) -c route_test.c
+ 
+diff --git a/tests/hmac_test.c b/tests/hmac_test.c
+deleted file mode 100644
+index b748c31..0000000
+--- a/tests/hmac_test.c
++++ /dev/null
+@@ -1,400 +0,0 @@
+-/*
+-   Copyright (c) 2024 by Tomaz Mascarenhas
+-
+-   Permission is hereby granted, free of charge, to any person obtaining a copy
+-   of this software and associated documentation files (the "Software"), to deal
+-   in the Software without restriction, including without limitation the rights
+-   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+-   copies of the Software, and to permit persons to whom the Software is
+-   furnished to do so, subject to the following conditions:
+-
+-   The above copyright notice and this permission notice shall be included in
+-   all copies or substantial portions of the Software.
+-
+-   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+-   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+-   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+-   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+-   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+-   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+-   THE SOFTWARE.
+-   */
+-
+-#include <netinet/in.h>
+-#include <stdio.h>
+-#include <stdlib.h>
+-#include <string.h>
+-
+-#include "test_utilities.h"
+-#include "../rfc6234/sha.h"
+-#include "../BLAKE2/ref/blake2.h"
+-
+-#include "../babeld.h"
+-#include "../interface.h"
+-#include "../hmac.h"
+-#include "../configuration.h"
+-
+-#define PACKET_HEADER_SIZE 4
+-#define MAX_PACKET_BODYLEN 500
+-#define HMAC_MAX_SIZE 32
+-#define KEY_MAX_SIZE 64
+-
+-void add_key_test(void)
+-{
+-    int i, num_of_cases, type, len, test_ok;
+-    char *id;
+-    unsigned char *value;
+-    struct key *key;
+-
+-    typedef struct test_case {
+-        char *id_val;
+-        int type_val;
+-        int len_val;
+-        unsigned char *value_val;
+-    } test_case;
+-
+-    test_case tcs[] =
+-    {
+-        {
+-            .id_val = "k1",
+-            .type_val = AUTH_TYPE_SHA256,
+-            .len_val = 64,
+-            .value_val =
+-                (unsigned char[])
+-                    {54, 16,  17, 18, 192, 255, 238, 0, 0, 0,
+-                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+-                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+-                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+-                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+-        },
+-        {
+-            .id_val = "k2",
+-            .type_val = AUTH_TYPE_BLAKE2S128,
+-            .len_val = 32,
+-            .value_val =
+-                (unsigned char[])
+-                    {184, 17, 96, 231, 142, 203, 75, 118,
+-                     42, 213, 55, 90, 176, 66, 15, 104, 19,
+-                     214, 60, 175, 10, 203, 125, 180, 142,
+-                     232, 123, 168, 191, 50, 173, 44},
+-        },
+-    };
+-
+-    num_of_cases = sizeof(tcs) / sizeof(test_case);
+-    for(i = 0; i < num_of_cases; ++i) {
+-        id = tcs[i].id_val;
+-        type = tcs[i].type_val;
+-        len = tcs[i].len_val;
+-        value = tcs[i].value_val;
+-
+-        key = add_key(id, type, len, value);
+-
+-        test_ok = strcmp(id, key->id) == 0;
+-        test_ok &= type == key->type;
+-        test_ok &= len == key->len;
+-        test_ok &= memcmp(value, tcs[i].value_val, len) == 0;
+-        if(!babel_check(test_ok)) {
+-            fprintf(stderr, "-----------------------------------------------\n");
+-            fprintf(stderr,
+-                "add_key(%s, %d, %d, %s) =\n{ %s, %d, %d, %s }\nexpected: { %s, %d, %d, %s }.\n",
+-                id,
+-                type,
+-                len,
+-                str_of_array(value, len),
+-                key->id,
+-                key->type,
+-                key->len,
+-                str_of_array(key->value, key->len),
+-                id,
+-                type,
+-                len,
+-                str_of_array(value, len)
+-            );
+-        }
+-    }
+-}
+-
+-void compute_hmac_test(void)
+-{
+-    unsigned char *src, *dst, *packet_header, *body, *hmac;
+-    int i, num_of_cases, bodylen;
+-    struct key *key;
+-    int hmac_len;
+-
+-    typedef struct test_case {
+-        unsigned char src_val[ADDRESS_ARRAY_SIZE];
+-        unsigned char dst_val[ADDRESS_ARRAY_SIZE];
+-        unsigned char packet_header_val[PACKET_HEADER_SIZE];
+-        unsigned char body_val[MAX_PACKET_BODYLEN];
+-        int bodylen_val;
+-        struct key key_val;
+-        unsigned char hmac_expected[HMAC_MAX_SIZE];
+-    } test_case;
+-
+-    test_case tcs[] =
+-    {
+-        {
+-            .src_val = {254, 128, 0, 0, 0, 0, 0, 0, 2, 22, 62, 255, 254, 197,
+-                225, 239},
+-            .dst_val = {255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 6},
+-            .packet_header_val = {42, 2, 0, 34},
+-            .body_val = {8, 10, 0, 0, 0, 0, 255, 255, 105, 131, 255, 255, 4, 6,
+-                0, 0, 138, 241, 0, 10, 17, 12, 0, 0, 0, 13, 111, 180,
+-                121, 202, 112, 51, 238, 237},
+-            .bodylen_val = 34,
+-            .key_val = {
+-                .type = AUTH_TYPE_SHA256,
+-                .len = 64,
+-                .value =
+-                    (unsigned char[])
+-                        {54, 16,  17, 18, 192, 255, 238, 0, 0, 0,
+-                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+-                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+-                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+-                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+-            },
+-            .hmac_expected = {12, 124, 238, 71, 58, 55, 173, 152, 18, 174, 138,
+-                113, 75, 180, 31, 220, 144, 195, 126, 213, 130,
+-                199, 97, 20, 69, 93, 210, 180, 41, 147, 141, 49},
+-        },
+-        {
+-            .src_val = {254, 128, 0, 0, 0, 0, 0, 0, 2, 22, 62, 255, 254, 0, 0,
+-                0},
+-            .dst_val = {255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 6},
+-            .packet_header_val = {42, 2, 0, 22},
+-            .body_val =
+-                {4, 6, 0, 0, 47, 84, 1, 144, 17, 12, 0, 0, 0, 14, 57,
+-                 72, 181, 138, 248, 108, 171, 133},
+-            .bodylen_val = 22,
+-            .key_val = {
+-                .type = AUTH_TYPE_BLAKE2S128,
+-                .len = 32,
+-                .value =
+-                    (unsigned char[])
+-                        {184, 17, 96, 231, 142, 203, 75, 118,
+-                         42, 213, 55, 90, 176, 66, 15, 104, 19,
+-                         214, 60, 175, 10, 203, 125, 180, 142,
+-                         232, 123, 168, 191, 50, 173, 44},
+-            },
+-            .hmac_expected =
+-                {237, 164, 28, 31, 153, 50, 126, 166, 67, 195, 21,
+-                 19, 123, 77, 57, 46, 112, 39, 177, 23, 146, 86, 0,
+-                 0, 246, 0, 0, 0, 0, 0, 0, 0}
+-        }
+-    };
+-
+-    hmac = malloc(HMAC_MAX_SIZE);
+-    num_of_cases = sizeof(tcs) / sizeof(test_case);
+-    for(i = 0; i < num_of_cases; ++i) {
+-        src = tcs[i].src_val;
+-        dst = tcs[i].dst_val;
+-        packet_header = tcs[i].packet_header_val;
+-        body = tcs[i].body_val;
+-        bodylen = tcs[i].bodylen_val;
+-        key = &tcs[i].key_val;
+-
+-        compute_hmac(src, dst, packet_header, body, bodylen, key, hmac);
+-
+-        hmac_len = tcs[i].key_val.type == AUTH_TYPE_SHA256 ? 32 : 16;
+-        if(!babel_check(memcmp(hmac, tcs[i].hmac_expected, hmac_len) == 0)) {
+-            fprintf(stderr, "-----------------------------------------------\n");
+-            fprintf(stderr, "Failed test on compute_hmac:\n");
+-            fprintf(stderr, "src: %s\n", str_of_array(src, ADDRESS_ARRAY_SIZE));
+-            fprintf(stderr, "dst: %s\n", str_of_array(dst, ADDRESS_ARRAY_SIZE));
+-            fprintf(stderr, "packet_header: %s\n", str_of_array(packet_header, PACKET_HEADER_SIZE));
+-            fprintf(stderr, "body: %s\n", str_of_array(body, bodylen));
+-            fprintf(stderr, "bodylen: %d\n", bodylen);
+-            fprintf(stderr, "key value: %s\n", str_of_array(key->value, key->len));
+-            fprintf(stderr, "hmac computed: %s\n", str_of_array(hmac, hmac_len));
+-            fprintf(stderr, "hmac expected: %s\n", str_of_array(tcs[i].hmac_expected, hmac_len));
+-        }
+-    }
+-}
+-
+-void add_hmac_test(void)
+-{
+-    int i, num_of_cases, new_buf_len;
+-    struct buffered buf;
+-    struct interface ifp;
+-    unsigned char *packet_header;
+-
+-    typedef struct test_case {
+-        struct in6_addr sin6_addr;
+-        unsigned char* buf_buf_val;
+-        int buf_len_val;
+-        int buf_size_val;
+-        unsigned char ll0_val[16];
+-        int numll_val;
+-        unsigned char *packet_header_val;
+-        struct key key_val;
+-        int expected_buf_len;
+-        unsigned char *expected_buf_val;
+-    } test_case;
+-
+-    test_case tcs[] =
+-    {
+-        {
+-            .sin6_addr = { .s6_addr = { 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 6 }},
+-            .buf_buf_val = (unsigned char [])
+-                {4, 6, 0, 0, 172, 80, 0, 10, 17, 12, 0, 0, 0, 16, 101, 161, 234, 241, 60, 193, 123, 197},
+-            .buf_len_val = 22,
+-            .buf_size_val = 1448,
+-            .ll0_val = {254, 128, 0, 0, 0, 0, 0, 0, 2, 22, 62, 255, 254, 208, 154, 166},
+-            .numll_val = 1,
+-            .packet_header_val = (unsigned char []) {42, 2, 0, 22},
+-            .key_val = {
+-                .type = AUTH_TYPE_BLAKE2S128,
+-                .len = 32,
+-                .value = (unsigned char [])
+-                    {184, 17, 96, 231, 142, 203, 75, 118, 42, 213, 55, 90, 176, 66, 15, 104, 19,
+-                     214, 60, 175, 10, 203, 125, 180, 142, 232, 123, 168, 191, 50, 173, 44}
+-            },
+-            .expected_buf_len = 40,
+-            .expected_buf_val = (unsigned char [])
+-                {4, 6, 0, 0, 172, 80, 0, 10, 17, 12, 0, 0, 0, 16, 101, 161, 234, 241, 60, 193, 123,
+-                 197, 16, 16, 114, 37, 115, 35, 6, 165, 73, 235, 15, 109, 39, 142, 171, 237, 105,
+-                 190}
+-        },
+-    };
+-
+-    num_of_cases = sizeof(tcs) / sizeof(test_case);
+-    ifp.ll = malloc(16);
+-
+-    for(i = 0; i < num_of_cases; i++) {
+-        buf.len = tcs[i].buf_len_val;
+-        buf.size = tcs[i].buf_size_val;
+-        buf.buf = tcs[i].buf_buf_val;
+-        buf.sin6.sin6_addr = tcs[i].sin6_addr;
+-        ifp.key = &tcs[i].key_val;
+-        memcpy(*(ifp.ll), tcs[i].ll0_val, 16);
+-        ifp.numll = tcs[i].numll_val;
+-        packet_header = tcs[i].packet_header_val;
+-
+-        new_buf_len = add_hmac(&buf, &ifp, packet_header);
+-
+-        if(!babel_check(new_buf_len == tcs[i].expected_buf_len)) {
+-            fprintf(stderr, "-----------------------------------------------\n");
+-            fprintf(stderr,
+-                    "Failed test on add_hmac:\n"
+-                    "add_hmac return code was %d, expected %d.\n",
+-                    new_buf_len,
+-                    tcs[i].expected_buf_len);
+-        } else if(!babel_check(memcmp(buf.buf, tcs[i].expected_buf_val, new_buf_len) == 0)) {
+-            fprintf(stderr, "-----------------------------------------------\n");
+-            fprintf(stderr, "Failed test on add_hmac:\n");
+-            fprintf(stderr, "ifp.ll[0]: %s\n", str_of_array(ifp.ll[0], 16));
+-            fprintf(stderr, "ifp.numll: %d\n", ifp.numll);
+-            fprintf(stderr, "ifp.key.type: AUTH_TYPE_%s\n",
+-                      ifp.key->type == AUTH_TYPE_SHA256 ? "SHA256" : "BLAKE2S128");
+-            fprintf(stderr, "ifp.key.len: %d\n", ifp.key->len);
+-            fprintf(stderr, "ifp.key.value: %s\n", str_of_array(ifp.key->value, ifp.key->len));
+-            fprintf(stderr, "buf.len: %d\n", buf.len);
+-            fprintf(stderr, "buf.size: %d\n", buf.size);
+-            fprintf(stderr, "original buf.buf: %s\n", str_of_array(tcs[i].buf_buf_val, tcs[i].buf_len_val));
+-            fprintf(stderr, "buf.sin6.sin6_addr: %s\n",
+-                      str_of_array(buf.sin6.sin6_addr.s6_addr, ADDRESS_ARRAY_SIZE));
+-            fprintf(stderr, "packet_header: %s\n", str_of_array(packet_header, PACKET_HEADER_SIZE));
+-            fprintf(stderr, "resulting buf: %s\n", str_of_array(buf.buf, new_buf_len));
+-            fprintf(stderr, "expected buf: %s\n", str_of_array(tcs[i].expected_buf_val, tcs[i].expected_buf_len));
+-        }
+-    }
+-
+-    free(ifp.ll);
+-}
+-
+-void check_hmac_test(void)
+-{
+-    int i, num_of_cases, packetlen, bodylen, rc;
+-    unsigned char *packet, *src, *dst;
+-    struct interface ifp;
+-
+-    typedef struct test_case {
+-        unsigned char *packet_val;
+-        int packetlen_val;
+-        int bodylen_val;
+-        unsigned char src_val[ADDRESS_ARRAY_SIZE];
+-        unsigned char dst_val[ADDRESS_ARRAY_SIZE];
+-        struct key key_val;
+-        int expected_rc;
+-    } test_case;
+-
+-    test_case tcs[] =
+-    {
+-        {
+-            .packet_val = (unsigned char[])
+-                {42, 2, 0, 38, 4, 6, 0, 0, 41, 222, 1, 144, 5, 14, 3, 0, 255, 255, 4, 176, 206, 28,
+-                 12, 0, 201, 49, 72, 251, 17, 12, 0, 0, 0, 11, 120, 212, 188, 48, 134, 68, 203, 254,
+-                 16, 16, 132, 247, 70, 15, 217, 7, 16, 58, 31, 87, 47, 237, 228, 51, 34, 45},
+-            .packetlen_val = 60,
+-            .bodylen_val = 38,
+-            .src_val = {254, 128, 0, 0, 0, 0, 0, 0, 28, 106, 200, 156, 164, 179, 1, 90},
+-            .dst_val = {255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 6},
+-            .key_val = {
+-                .value = (unsigned char [])
+-                    {184, 17, 96, 231, 142, 203, 75, 118, 42, 213, 55, 90, 176, 66, 15, 104, 19,
+-                     214, 60, 175, 10, 203, 125, 180, 142, 232, 123, 168, 191, 50, 173, 44},
+-                .len = 32,
+-                .type = AUTH_TYPE_BLAKE2S128
+-            },
+-            .expected_rc = 1
+-        },
+-        {
+-            .packet_val = (unsigned char[])
+-                {42, 2, 0, 22, 4, 6, 0, 0, 204, 139, 1, 144, 17, 12, 0, 0, 0, 4, 80, 128, 214,
+-                 66, 231, 209, 171, 31, 16, 16, 213, 145, 25, 162, 84, 23, 13, 58, 217, 218,
+-                 90, 8, 163, 228, 206, 121},
+-            .packetlen_val = 44,
+-            .bodylen_val = 22,
+-            .src_val = {254, 128, 0, 0, 0, 0, 0, 0, 2, 22, 62, 255, 254, 208, 154, 166},
+-            .dst_val = {255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 6},
+-            .key_val = {
+-                .value = (unsigned char[])
+-                    {184, 17, 96, 231, 142, 203, 75, 118, 42, 213, 55, 90, 176, 66, 15, 104, 19,
+-                     214, 60, 175, 10, 203, 125, 180, 142, 232, 123, 168, 191, 50, 173, 44},
+-                .len = 32,
+-                .type = AUTH_TYPE_BLAKE2S128
+-            },
+-            .expected_rc = 0
+-        }
+-    };
+-
+-    num_of_cases = sizeof(tcs) / sizeof(test_case);
+-
+-    for(i = 0; i < num_of_cases; ++i) {
+-        packet = tcs[i].packet_val;
+-        packetlen = tcs[i].packetlen_val;
+-        bodylen = tcs[i].bodylen_val;
+-        src = tcs[i].src_val;
+-        dst = tcs[i].dst_val;
+-        ifp.key = &tcs[i].key_val;
+-
+-        rc = check_hmac(packet, packetlen, bodylen, src, dst, &ifp);
+-
+-        if(!babel_check(rc == tcs[i].expected_rc)) {
+-            fprintf(stderr, "-----------------------------------------------\n");
+-            fprintf(stderr, "Failed test on check_hmac:\n");
+-            fprintf(stderr, "src: %s\n", str_of_array(src, ADDRESS_ARRAY_SIZE));
+-            fprintf(stderr, "dst: %s\n", str_of_array(dst, ADDRESS_ARRAY_SIZE));
+-            fprintf(stderr, "packetlen: %d\n", packetlen);
+-            fprintf(stderr, "packet: %s\n", str_of_array(packet, packetlen));
+-            fprintf(stderr, "bodylen: %d\n", bodylen);
+-            fprintf(stderr, "key value: %s\n", str_of_array(ifp.key->value, ifp.key->len));
+-            fprintf(stderr, "rc computed: %d\n", rc);
+-            fprintf(stderr, "rc expected: %d\n", tcs[i].expected_rc);
+-        }
+-    }
+-}
+-
+-void setup(void)
+-{
+-    protocol_port = 6696;
+-}
+-
+-void hmac_test_suite(void)
+-{
+-    setup();
+-    run_test(add_key_test, "add_key_test");
+-    run_test(compute_hmac_test, "compute_hmac_test");
+-    run_test(add_hmac_test, "add_hmac_test");
+-    run_test(check_hmac_test, "check_hmac_test");
+-}
+diff --git a/tests/hmac_test.h b/tests/hmac_test.h
+deleted file mode 100644
+index 59f0763..0000000
+--- a/tests/hmac_test.h
++++ /dev/null
+@@ -1,22 +0,0 @@
+-/*
+-   Copyright (c) 2024 by Tomaz Mascarenhas
+-
+-   Permission is hereby granted, free of charge, to any person obtaining a copy
+-   of this software and associated documentation files (the "Software"), to deal
+-   in the Software without restriction, including without limitation the rights
+-   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+-   copies of the Software, and to permit persons to whom the Software is
+-   furnished to do so, subject to the following conditions:
+-
+-   The above copyright notice and this permission notice shall be included in
+-   all copies or substantial portions of the Software.
+-
+-   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+-   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+-   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+-   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+-   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+-   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+-   THE SOFTWARE.
+-   */
+-void hmac_test_suite(void);
+diff --git a/tests/main.c b/tests/main.c
+index 1663ad5..7294ebd 100644
+--- a/tests/main.c
++++ b/tests/main.c
+@@ -20,7 +20,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ */
+ 
+-#include "hmac_test.h"
+ #include "route_test.h"
+ #include "test_utilities.h"
+ #include "util_test.h"
+@@ -28,7 +27,6 @@ THE SOFTWARE.
+ int main(int argc, char **argv)
+ {
+     run_suite(util_test_suite, "util.c");
+-    run_suite(hmac_test_suite, "hmac.c");
+     run_suite(route_test_suite, "route.c");
+     return tests_failed;
+ }
+-- 
+2.48.1
+

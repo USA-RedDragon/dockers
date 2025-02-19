@@ -6,29 +6,29 @@ RUN mkdir -p /out
 COPY patches /patches
 
 # renovate: datasource=repology depName=alpine_3_21/git
-ARG GIT_VERSION=2.45.2-r0
+ARG GIT_VERSION=2.47.2-r0
 # renovate: datasource=repology depName=alpine_3_21/gcc
-ARG GCC_VERSION=13.2.1_git20240309-r0
+ARG GCC_VERSION=14.2.0-r4
 # renovate: datasource=repology depName=alpine_3_21/linux-headers
-ARG LINUX_HEADERS_VERSION=6.6-r0
+ARG LINUX_HEADERS_VERSION=6.6-r1
 # renovate: datasource=repology depName=alpine_3_21/bison
 ARG BISON_VERSION=3.8.2-r1
 # renovate: datasource=repology depName=alpine_3_21/flex
 ARG FLEX_VERSION=2.6.4-r6
 # renovate: datasource=repology depName=alpine_3_21/zlib
-ARG ZLIB_VERSION=1.3.1-r1
+ARG ZLIB_VERSION=1.3.1-r2
 # renovate: datasource=repology depName=alpine_3_21/lzo
 ARG LZO_VERSION=2.10-r5
 # renovate: datasource=repology depName=alpine_3_21/binutils
-ARG BINUTILS_VERSION=2.42-r0
+ARG BINUTILS_VERSION=2.43.1-r1
 # renovate: datasource=repology depName=alpine_3_21/openssl
-ARG OPENSSL_VERSION=3.3.1-r3
+ARG OPENSSL_VERSION=3.3.3-r0
 # renovate: datasource=repology depName=alpine_3_21/curl
-ARG CURL_VERSION=8.9.0-r0
+ARG CURL_VERSION=8.12.1-r0
 # renovate: datasource=repology depName=alpine_3_21/make
 ARG MAKE_VERSION=4.4.1-r2
 # renovate: datasource=repology depName=alpine_3_21/musl
-ARG MUSL_VERSION=1.2.5-r0
+ARG MUSL_VERSION=1.2.5-r9
 # renovate: datasource=repology depName=alpine_3_21/patch
 ARG PATCH_VERSION=2.7.6-r10
 
@@ -56,6 +56,17 @@ RUN git clone https://github.com/USA-RedDragon/olsrd.git \
     && cd .. \
     && rm -rf olsrd
 
+# Build and install babeld
+RUN git clone https://github.com/jech/babeld.git \
+    && cd babeld \
+    && git checkout 950992f282d6139ce543f225564a35ac564ca1c2 \
+    && for patch in /patches/babeld/*.patch; do patch -p1 < "$patch"; done \
+    && make \
+    && make PREFIX=/usr DESTDIR=/out install \
+    && cd .. \
+    && rm -rf babeld \
+    && rm -rf /out/usr/share
+
 # Build and install vtun
 RUN curl -fSsL https://downloads.sourceforge.net/project/vtun/vtun/3.0.3/vtun-3.0.3.tar.gz -o vtun-3.0.3.tar.gz \
     && tar -xzf vtun-3.0.3.tar.gz \
@@ -74,21 +85,21 @@ FROM alpine:3.21.2@sha256:56fa17d2a7e7f168a043a2712e63aed1f8543aeafdcee47c58dcff
 COPY --from=builder /out /
 
 # renovate: datasource=repology depName=alpine_3_21/bash
-ARG BASH_VERSION=5.2.26-r0
+ARG BASH_VERSION=5.2.37-r0
 # renovate: datasource=repology depName=alpine_3_21/curl
-ARG CURL_VERSION=8.9.0-r0
+ARG CURL_VERSION=8.12.1-r0
 # renovate: datasource=repology depName=alpine_3_21/zlib
-ARG ZLIB_VERSION=1.3.1-r1
+ARG ZLIB_VERSION=1.3.1-r2
 # renovate: datasource=repology depName=alpine_3_21/lzo
 ARG LZO_VERSION=2.10-r5
 # renovate: datasource=repology depName=alpine_3_21/openssl
-ARG OPENSSL_VERSION=3.3.1-r3
+ARG OPENSSL_VERSION=3.3.3-r0
 # renovate: datasource=repology depName=alpine_3_21/iptables
-ARG IPTABLES_VERSION=1.8.10-r3
+ARG IPTABLES_VERSION=1.8.11-r1
 # renovate: datasource=repology depName=alpine_3_21/iproute2
-ARG IPRROUTE2_VERSION=6.9.0-r0
+ARG IPRROUTE2_VERSION=6.11.0-r0
 # renovate: datasource=repology depName=alpine_3_21/rsyslog
-ARG RSYSLOG_VERSION=8.2404.0-r0
+ARG RSYSLOG_VERSION=8.2410.0-r0
 # renovate: datasource=repology depName=alpine_3_21/logrotate
 ARG LOGROTATE_VERSION=3.21.0-r1
 # renovate: datasource=repology depName=alpine_3_21/dnsmasq
@@ -100,7 +111,7 @@ ARG GETTEXT_VERSION=0.22.5-r0
 # renovate: datasource=repology depName=alpine_3_21/wireguard-tools
 ARG WIREGUARD_TOOLS_VERSION=1.0.20210914-r4
 # renovate: datasource=repology depName=alpine_3_21/s6
-ARG S6_VERSION=2.12.0.4-r0
+ARG S6_VERSION=2.13.1.0-r0
 # renovate: datasource=repology depName=alpine_3_21/cronie
 ARG CRONIE_VERSION=1.7.2-r0
 
