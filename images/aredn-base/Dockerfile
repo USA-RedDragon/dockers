@@ -62,10 +62,9 @@ RUN git clone https://github.com/jech/babeld.git \
     && git checkout 950992f282d6139ce543f225564a35ac564ca1c2 \
     && for patch in /patches/babeld/*.patch; do patch -p1 < "$patch"; done \
     && make \
-    && make PREFIX=/usr DESTDIR=/out install \
+    && make PREFIX=/usr DESTDIR=/out install.minimal \
     && cd .. \
-    && rm -rf babeld \
-    && rm -rf /out/usr/share
+    && rm -rf babeld
 
 # Build and install vtun
 RUN curl -fSsL https://downloads.sourceforge.net/project/vtun/vtun/3.0.3/vtun-3.0.3.tar.gz -o vtun-3.0.3.tar.gz \
