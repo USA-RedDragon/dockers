@@ -1,7 +1,7 @@
 From 74810c0c96c11b7e933328860f6befb964d2824d Mon Sep 17 00:00:00 2001
 From: Jacob McSwain <jacob@mcswain.dev>
 Date: Tue, 18 Feb 2025 21:06:35 -0600
-Subject: [PATCH 4/5] filter: add error codes
+Subject: [PATCH 4/6] filter: add error codes
 
 ---
  configuration.c | 44 +++++++++++++++++++++++++-------------------

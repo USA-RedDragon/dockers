@@ -1,7 +1,7 @@
 From 6491cbe895c93fab3e3b0c2e905b5f33669fa6bf Mon Sep 17 00:00:00 2001
 From: Jacob McSwain <jacob@mcswain.dev>
 Date: Tue, 18 Feb 2025 21:05:22 -0600
-Subject: [PATCH 2/5] debug logging
+Subject: [PATCH 2/6] debug logging
 
 ---
  kernel_netlink.c | 21 +++++++++++++++++----
