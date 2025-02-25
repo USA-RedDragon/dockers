@@ -1,0 +1,4 @@
+#!/bin/sh -e
+
+node --max-old-space-size=16384 /app/Tdarr_Node/srcug/main.js &
+exec node --max-old-space-size=16384 /app/Tdarr_Server/srcug/main.js
