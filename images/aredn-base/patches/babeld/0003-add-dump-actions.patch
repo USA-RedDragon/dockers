@@ -1,7 +1,7 @@
 From 92d3ab31204346c14040082bac965b4705e5c2d5 Mon Sep 17 00:00:00 2001
 From: Jacob McSwain <jacob@mcswain.dev>
 Date: Tue, 18 Feb 2025 21:06:23 -0600
-Subject: [PATCH 3/6] add dump actions
+Subject: [PATCH 3/5] add dump actions
 
 ---
  configuration.c | 15 +++++++++++++++

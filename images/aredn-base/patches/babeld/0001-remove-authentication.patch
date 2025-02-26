@@ -1,7 +1,7 @@
 From cb713f1cb2bf75ffd0121f6c0fe20b520a0106ae Mon Sep 17 00:00:00 2001
 From: Jacob McSwain <jacob@mcswain.dev>
 Date: Tue, 18 Feb 2025 21:04:01 -0600
-Subject: [PATCH 1/6] remove authentication
+Subject: [PATCH 1/5] remove authentication
 
 ---
  .gitattributes    |   1 -
