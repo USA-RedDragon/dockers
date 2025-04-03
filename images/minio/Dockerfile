@@ -1,4 +1,4 @@
-FROM rust:1.85.1 AS jwt-cli
+FROM rust:1.86.0 AS jwt-cli
 
 # renovate: datasource=github-releases depName=mike-engel/jwt-cli
 ARG JWT_CLI_VERSION=6.2.0
