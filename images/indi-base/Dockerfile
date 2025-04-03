@@ -3,9 +3,9 @@ FROM debian:12.9-slim@sha256:12c396bd585df7ec21d5679bb6a83d4878bc4415ce926c9e5ea
 ARG DEBIAN_FRONTEND=noninteractive
 
 # renovate: datasource=github-releases depName=indilib/indi
-ARG INDI_VERSION=v2.1.2
+ARG INDI_VERSION=v2.1.3
 # renovate: datasource=github-releases depName=indilib/indi-3rdparty
-ARG INDI_3RD_PARTY_VERSION=v2.1.2
+ARG INDI_3RD_PARTY_VERSION=v2.1.3
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends --no-install-suggests \
