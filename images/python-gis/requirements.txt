@@ -1,7 +1,7 @@
 shapely==2.1.0
 matplotlib==3.10.1
 python-awips==20.1
-numpy==2.2.4
+numpy==2.2.5
 Cartopy==0.24.1
 MetPy==1.6.3
 pyshp==2.3.1
