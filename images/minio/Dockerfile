@@ -7,7 +7,7 @@ WORKDIR /usr/src/jwt-cli
 
 RUN cargo install "jwt-cli@${JWT_CLI_VERSION}"
 
-FROM quay.io/minio/minio:RELEASE.2025-04-08T15-41-24Z AS minio
+FROM quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z AS minio
 
 # Use ubuntu because sd on debian:latest is too old
 FROM ubuntu:oracular-20250225 AS patcher
