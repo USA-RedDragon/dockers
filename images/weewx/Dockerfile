@@ -10,7 +10,7 @@ ENV PYTHONUNBUFFERED=1
 ARG WEEWX_VERSION=v5.1.0
 
 # renovate: datasource=repology versioning=deb depName=debian_12/freetype
-ARG FREETYPE_VERSION=2.12.1+dfsg-5+deb12u3
+ARG FREETYPE_VERSION=2.12.1+dfsg-5+deb12u4
 # renovate: datasource=repology versioning=deb depName=debian_12/python3-defaults
 ARG PYTHON3_VERSION=3.11.2-1+b1
 # renovate: datasource=repology versioning=deb depName=debian_12/libjpeg-turbo
