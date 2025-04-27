@@ -5,6 +5,7 @@ USER root
 SHELL [ "/bin/bash", "-o", "pipefail", "-c" ]
 
 RUN <<__EOF__
+    set -eu
     NAME="Renovate"
     EMAIL="renovate@mend.io"
     COMPANY="Mend.io"
