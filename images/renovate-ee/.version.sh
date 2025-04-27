@@ -1,3 +1,3 @@
 #!/bin/sh
 # renovate: datasource=docker depName=ghcr.io/mend/renovate-ee-server
-export VERSION=9.6.0
+export VERSION=9.7.0
