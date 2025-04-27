@@ -38,6 +38,14 @@
         "indilib/indi-3rdparty",
         "indilib/indi"
       ]
+    },
+    {
+      "groupName": "Renovate",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": [
+        "ghcr.io/mend/renovate-ee-worker",
+        "ghcr.io/mend/renovate-ee-server"
+      ]
     }
   ]
 }
