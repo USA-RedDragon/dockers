@@ -10,7 +10,7 @@ ENV PYTHONUNBUFFERED=1
 ARG WEEWX_VERSION=v5.1.0
 
 # renovate: datasource=repology versioning=deb depName=debian_12/freetype
-ARG FREETYPE_VERSION=2.12.1+dfsg-5+deb12u3
+ARG FREETYPE_VERSION=2.12.1+dfsg-5+deb12u4
 # renovate: datasource=repology versioning=deb depName=debian_12/python3-defaults
 ARG PYTHON3_VERSION=3.11.2-1+b1
 # renovate: datasource=repology versioning=deb depName=debian_12/libjpeg-turbo
@@ -28,7 +28,7 @@ ARG DEV_PACKAGES=" \
 # renovate: datasource=repology versioning=deb depName=debian_12/ca-certificates
 ARG CA_CERTIFICATES_VERSION=20230311
 # renovate: datasource=repology versioning=deb depName=debian_12/curl
-ARG CURL_VERSION=7.88.1-10+deb12u8
+ARG CURL_VERSION=7.88.1-10+deb12u12
 # renovate: datasource=repology versioning=deb depName=debian_12/tzdata
 ARG TZDATA_VERSION=2025b-0+deb12u1
 # renovate: datasource=repology versioning=deb depName=debian_12/fonts-freefont
@@ -36,7 +36,7 @@ ARG FONTS_FREEFONT_VERSION=20120503-10
 # renovate: datasource=repology versioning=deb depName=debian_12/s6
 ARG S6_VERSION=2.11.3.2-1
 # renovate: datasource=repology versioning=deb depName=debian_12/nginx
-ARG NGINX_VERSION=1.22.1-9
+ARG NGINX_VERSION=1.22.1-9+deb12u1
 # renovate: datasource=repology versioning=deb depName=debian_12/requests
 ARG REQUESTS_VERSION=2.28.1+dfsg-1
 # renovate: datasource=repology versioning=deb depName=debian_12/python-paho-mqtt
