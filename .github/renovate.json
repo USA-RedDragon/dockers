@@ -3,6 +3,10 @@
   "extends": [
     "local>USA-RedDragon/renovate-configs"
   ],
+  "separateMinorPatch": true,
+  "separateMultipleMinor": true,
+  "separateMultipleMajor": true,
+  "separateMajorMinor": true,
   "customManagers": [
     {
       "customType": "regex",
