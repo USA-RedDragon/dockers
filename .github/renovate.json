@@ -46,6 +46,14 @@
         "ghcr.io/mend/renovate-ee-worker",
         "ghcr.io/mend/renovate-ee-server"
       ]
+    },
+    {
+      "groupName": "Mattermost",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": [
+        "docker.io/mattermost/mattermost-enterprise-edition",
+        "mattermost/mattermost-enterprise-edition"
+      ]
     }
   ]
 }
