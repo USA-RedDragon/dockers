@@ -10,7 +10,9 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": [".*Dockerfile$"],
+      "fileMatch": [
+        ".*Dockerfile$"
+      ],
       "matchStrings": [
         "# renovate: datasource=repology depName=alpine_(?<currentValue>\\d+[._]\\d+)"
       ],
@@ -23,11 +25,15 @@
   ],
   "packageRules": [
     {
-      "packageNames": ["docker.io/mattermost/mattermost-enterprise-edition"],
+      "matchPackageNames": [
+        "docker.io/mattermost/mattermost-enterprise-edition"
+      ],
       "allowedVersions": "<1000.0.0"
     },
     {
-      "matchDatasources": ["docker"],
+      "matchDatasources": [
+        "docker"
+      ],
       "matchPackageNames": [
         "/minio/"
       ],
@@ -35,7 +41,9 @@
     },
     {
       "groupName": "INDI",
-      "matchDatasources": ["github-releases"],
+      "matchDatasources": [
+        "github-releases"
+      ],
       "matchPackageNames": [
         "indilib/indi-3rdparty",
         "indilib/indi"
@@ -43,7 +51,9 @@
     },
     {
       "groupName": "Renovate",
-      "matchDatasources": ["docker"],
+      "matchDatasources": [
+        "docker"
+      ],
       "matchPackageNames": [
         "ghcr.io/mend/renovate-ee-worker",
         "ghcr.io/mend/renovate-ee-server"
@@ -51,7 +61,9 @@
     },
     {
       "groupName": "Mattermost",
-      "matchDatasources": ["docker"],
+      "matchDatasources": [
+        "docker"
+      ],
       "matchPackageNames": [
         "docker.io/mattermost/mattermost-enterprise-edition",
         "mattermost/mattermost-enterprise-edition"
