@@ -1,10 +1,10 @@
-FROM debian:12.10-slim@sha256:b1211f6d19afd012477bd34fdcabb6b663d680e0f4b0537da6e6b0fd057a3ec3 AS build-3rdparty
+FROM ubuntu:24.04@sha256:1e622c5f073b4f6bfad6632f2616c7f59ef256e96fe78bf6a595d1dc4376ac02
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-# renovate: datasource=github-releases versioning=regex:^v(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(\.(?<build>\d+))?$ depName=indilib/indi
+# renovate: datasource=github-releases depName=indilib/indi
 ARG INDI_VERSION=v2.1.3
-# renovate: datasource=github-releases versioning=regex:^v(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(\.(?<build>\d+))?$ depName=indilib/indi-3rdparty
+# renovate: datasource=github-releases depName=indilib/indi-3rdparty
 ARG INDI_3RD_PARTY_VERSION=v2.1.3
 
 RUN apt-get update \
@@ -18,9 +18,9 @@ RUN apt-get update \
         pkg-config \
         ffmpeg \
         libavcodec-dev \
-        libavcodec59 \
+        libavcodec60 \
         libavdevice-dev \
-        libavdevice59 \
+        libavdevice60 \
         libboost-dev \
         libboost-regex-dev \
         libboost-regex1.74.0 \
@@ -41,19 +41,19 @@ RUN apt-get update \
         libgphoto2-dev \
         libgphoto2-6 \
         libgps-dev \
-        libgps28 \
+        libgps30 \
         libgsl-dev \
         libgsl27 \
         libjpeg-dev \
-        libjpeg62-turbo \
+        libjpeg8 \
         liblimesuite-dev \
-        liblimesuite22.09-1 \
+        liblimesuite23.11-1 \
         libnova-dev \
         libnova-0.16-0 \
         libraw-dev \
-        libraw20 \
+        libraw23 \
         librtlsdr-dev \
-        librtlsdr0 \
+        librtlsdr2 \
         libtheora-dev \
         libtheora0 \
         libtiff-dev \
