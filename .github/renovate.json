@@ -23,7 +23,7 @@
   ],
   "packageRules": [
     {
-      "packageNames": ["docker.io/mattermost/mattermost-enterprise-edition"],
+      "matchPackageNames": ["docker.io/mattermost/mattermost-enterprise-edition"],
       "allowedVersions": "<1000.0.0"
     },
     {
