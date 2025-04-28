@@ -39,7 +39,8 @@
       "matchPackageNames": [
         "indilib/indi-3rdparty",
         "indilib/indi"
-      ]
+      ],
+      "versioning": "regex:^v(?<major>\\d+).(?<minor>\\d+).(?<patch>\\d+).?(?<build>\\d+)?$"
     },
     {
       "groupName": "Renovate",
