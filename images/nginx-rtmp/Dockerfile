@@ -2,21 +2,21 @@
 # common dependencies
 ################################
 # renovate: datasource=repology depName=alpine_3_21/musl
-ARG MUSL_VERSION=1.2.5-r0
+ARG MUSL_VERSION=1.2.5-r9
 # renovate: datasource=repology depName=alpine_3_21/curl
-ARG CURL_VERSION=8.9.0-r0
+ARG CURL_VERSION=8.12.1-r1
 # renovate: datasource=repology depName=alpine_3_21/gcc
-ARG GCC_VERSION=13.2.1_git20240309-r0
+ARG GCC_VERSION=14.2.0-r4
 # renovate: datasource=repology depName=alpine_3_21/make
 ARG MAKE_VERSION=4.4.1-r2
 # renovate: datasource=repology depName=alpine_3_21/openssl
-ARG OPENSSL_VERSION=3.3.1-r3
+ARG OPENSSL_VERSION=3.3.3-r0
 # renovate: datasource=repology depName=alpine_3_21/pcre
 ARG PCRE_VERSION=8.45-r3
 # renovate: datasource=repology depName=alpine_3_21/zlib
-ARG ZLIB_VERSION=1.3.1-r1
+ARG ZLIB_VERSION=1.3.1-r2
 # renovate: datasource=repology depName=alpine_3_21/ca-certificates
-ARG CA_CERTIFICATES_VERSION=20240705-r0
+ARG CA_CERTIFICATES_VERSION=20241121-r1
 
 ################################
 # ffmpeg runtime dependencies
@@ -24,27 +24,27 @@ ARG CA_CERTIFICATES_VERSION=20240705-r0
 # renovate: datasource=repology depName=alpine_3_21/fdk-aac
 ARG FDK_AAC_VERSION=2.0.2-r4
 # renovate: datasource=repology depName=alpine_3_21/freetype
-ARG FREETYPE_VERSION=2.13.2-r0
+ARG FREETYPE_VERSION=2.13.3-r0
 # renovate: datasource=repology depName=alpine_3_21/lame
 ARG LAME_VERSION=3.100-r5
 # renovate: datasource=repology depName=alpine_3_21/libogg
 ARG LIBOGG_VERSION=1.3.5-r5
 # renovate: datasource=repology depName=alpine_3_21/libass
-ARG LIBASS_VERSION=0.17.2-r0
+ARG LIBASS_VERSION=0.17.3-r0
 # renovate: datasource=repology depName=alpine_3_21/libvpx
-ARG LIBVPX_VERSION=1.14.1-r0
+ARG LIBVPX_VERSION=1.15.0-r0
 # renovate: datasource=repology depName=alpine_3_21/libvorbis
 ARG LIBVORBIS_VERSION=1.3.7-r2
 # renovate: datasource=repology depName=alpine_3_21/libwebp
-ARG LIBWEBP_VERSION=1.3.2-r0
+ARG LIBWEBP_VERSION=1.4.0-r0
 # renovate: datasource=repology depName=alpine_3_21/libtheora
 ARG LIBTHEORA_VERSION=1.1.1-r18
 # renovate: datasource=repology depName=alpine_3_21/opus
-ARG OPUS_VERSION=1.5.2-r0
+ARG OPUS_VERSION=1.5.2-r1
 # renovate: datasource=repology depName=alpine_3_21/rtmpdump
-ARG RTMPDUMP_VERSION=2.4_git20190330-r4
+ARG RTMPDUMP_VERSION=2.4_git20190330-r5
 # renovate: datasource=repology depName=alpine_3_21/x264
-ARG X264_VERSION=0.164_git20231001-r0
+ARG X264_VERSION=0.164.3108-r0
 # renovate: datasource=repology depName=alpine_3_21/x265
 ARG X265_VERSION=3.6-r0
 
@@ -64,7 +64,7 @@ ARG NGINX_VERSION=1.28.0
 # renovate: datasource=git-tags extractVersion=^v(?<version>.*)$ depName=https://github.com/arut/nginx-rtmp-module.git
 ARG NGINX_RTMP_VERSION=1.2.2
 # renovate: datasource=repology depName=alpine_3_21/linux-headers
-ARG LINUX_HEADERS_VERSION=6.6-r0
+ARG LINUX_HEADERS_VERSION=6.6-r1
 
 # Build dependencies.
 RUN apk add --no-cache \
@@ -131,9 +131,9 @@ ARG X264_VERSION
 ARG X265_VERSION
 
 # renovate: datasource=git-tags extractVersion=^n(?<version>.*)$ depName=git://git.ffmpeg.org/ffmpeg.git
-ARG FFMPEG_VERSION=7.1
+ARG FFMPEG_VERSION=7.1.1
 # renovate: datasource=repology depName=alpine_3_21/pkgconf
-ARG PKGCONF_VERSION=2.2.0-r0
+ARG PKGCONF_VERSION=2.3.0-r0
 # renovate: datasource=repology depName=alpine_3_21/yasm
 ARG YASM_VERSION=1.3.0-r4
 
