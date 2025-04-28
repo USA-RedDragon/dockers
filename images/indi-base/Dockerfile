@@ -3,9 +3,9 @@ FROM debian:12.10-slim@sha256:b1211f6d19afd012477bd34fdcabb6b663d680e0f4b0537da6
 ARG DEBIAN_FRONTEND=noninteractive
 
 # renovate: datasource=github-releases versioning=regex:^v(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(\.(?<build>\d+))?$ depName=indilib/indi
-ARG INDI_VERSION=v2.1.2
+ARG INDI_VERSION=v2.1.3
 # renovate: datasource=github-releases versioning=regex:^v(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(\.(?<build>\d+))?$ depName=indilib/indi-3rdparty
-ARG INDI_3RD_PARTY_VERSION=v2.1.2
+ARG INDI_3RD_PARTY_VERSION=v2.1.3
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends --no-install-suggests \
