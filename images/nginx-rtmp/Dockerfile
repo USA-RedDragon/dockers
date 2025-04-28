@@ -60,7 +60,7 @@ ARG ZLIB_VERSION
 ARG CA_CERTIFICATES_VERSION
 
 # renovate: datasource=git-tags extractVersion=^release-(?<version>.*)$ depName=https://github.com/nginx/nginx.git
-ARG NGINX_VERSION=1.27.4
+ARG NGINX_VERSION=1.27.5
 # renovate: datasource=git-tags extractVersion=^v(?<version>.*)$ depName=https://github.com/arut/nginx-rtmp-module.git
 ARG NGINX_RTMP_VERSION=1.2.2
 # renovate: datasource=repology depName=alpine_3_21/linux-headers
