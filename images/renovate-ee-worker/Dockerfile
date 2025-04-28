@@ -1,4 +1,4 @@
-FROM ghcr.io/mend/renovate-ee-worker:9.8.0-full
+FROM ghcr.io/mend/renovate-ee-worker:9.9.2-full
 
 USER root
 
@@ -18,7 +18,7 @@ RUN <<__EOF__
     SIGNATURE="$(echo -n "${SIG_BASE64}" | base64 -d | od -An -v -tx1 | tr -d ' \n')"
     PUBLIC_KEY_HEX="$(openssl ec -conv_form uncompressed -in <(echo -n "${PUBLIC_KEY_BASE64}" | base64 -d) -pubin -outform der | tail -c 65 | od -An -v -tx1 | tr -d ' \n')"
     echo "$BASE64_PAYLOAD.$SIGNATURE" > /license
-    sed -E -i "s/\{pub:\"04[a-fA-F0-9]{128}\"/\{pub:\"""${PUBLIC_KEY_HEX}""\"/" /usr/src/app/src/enterprise-worker.js
+    sed -E -i "s/\{pub:\"04[a-fA-F0-9]{128}\"/\{pub:\"""${PUBLIC_KEY_HEX}""\"/" /usr/src/mend/src/enterprise-worker.js
     echo -e "#!/bin/bash\nset -euo pipefail\nexport MEND_RNV_LICENSE_KEY=\"$BASE64_PAYLOAD.$SIGNATURE\"\nexec \"\$@\"" > /start.sh
 __EOF__
 
