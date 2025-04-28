@@ -20,11 +20,11 @@ ARG ZLIB_VERSION=1.3.1-r2
 # renovate: datasource=repology depName=alpine_3_21/lzo
 ARG LZO_VERSION=2.10-r5
 # renovate: datasource=repology depName=alpine_3_21/binutils
-ARG BINUTILS_VERSION=2.43.1-r1
+ARG BINUTILS_VERSION=2.43.1-r2
 # renovate: datasource=repology depName=alpine_3_21/openssl
 ARG OPENSSL_VERSION=3.3.3-r0
 # renovate: datasource=repology depName=alpine_3_21/curl
-ARG CURL_VERSION=8.12.1-r0
+ARG CURL_VERSION=8.12.1-r1
 # renovate: datasource=repology depName=alpine_3_21/make
 ARG MAKE_VERSION=4.4.1-r2
 # renovate: datasource=repology depName=alpine_3_21/musl
@@ -87,7 +87,7 @@ COPY --from=builder /out /
 # renovate: datasource=repology depName=alpine_3_21/bash
 ARG BASH_VERSION=5.2.37-r0
 # renovate: datasource=repology depName=alpine_3_21/curl
-ARG CURL_VERSION=8.12.1-r0
+ARG CURL_VERSION=8.12.1-r1
 # renovate: datasource=repology depName=alpine_3_21/zlib
 ARG ZLIB_VERSION=1.3.1-r2
 # renovate: datasource=repology depName=alpine_3_21/lzo
