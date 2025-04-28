@@ -24,5 +24,5 @@ __EOF__
 
 USER ubuntu
 
-ENTRYPOINT ["/bin/bash", "/start.sh", "docker-entrypoint.sh"]
-CMD ["node", "src/enterprise-worker.js"]
+ENTRYPOINT ["/bin/bash", "/start.sh", "/usr/local/sbin/renovate-entrypoint.sh"]
+CMD ["/usr/src/mend/node_opts_exec.sh", "node_default", "/usr/src/mend/src/enterprise-worker.js"]
