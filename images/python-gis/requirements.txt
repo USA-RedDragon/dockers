@@ -3,6 +3,6 @@ matplotlib==3.10.1
 python-awips==23.1
 numpy==2.2.5
 Cartopy==0.24.1
-MetPy==1.6.3
+MetPy==1.7.0
 pyshp==2.3.1
 descartes==1.1.0
