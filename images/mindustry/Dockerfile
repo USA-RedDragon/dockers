@@ -1,7 +1,7 @@
 FROM amazoncorretto:17.0.15-alpine@sha256:0dda2abcd0353b8d1ca5089b713c7b8859bd4aacb2677c3d100362007da81eed
 
 # renovate: datasource=github-releases depName=Anuken/Mindustry
-ARG MINDUSTRY_VERSION=v145.1
+ARG MINDUSTRY_VERSION=v146
 
 # renovate: datasource=repology depName=alpine_3_21/curl
 ARG CURL_VERSION=8.12.1-r1
