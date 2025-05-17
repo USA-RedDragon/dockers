@@ -32,7 +32,7 @@
  * version
  */
 
-let DEBUG = false;
+let DEBUG = true;
 
 const VERSION = "0.0.1";
 
