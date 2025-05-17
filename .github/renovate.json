@@ -19,6 +19,15 @@
       "depNameTemplate": "alpine",
       "versioningTemplate": "regex:^(?<major>\\d+)[._](?<minor>\\d+)$",
       "autoReplaceStringTemplate": "# renovate: datasource=repology depName=alpine_{{{newMajor}}}_{{{newMinor}}}"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": [".*Dockerfile$"],
+      "matchStrings": ["ARG UCODE_VERSION=(?<currentDigest>.*?)\\n"],
+      "currentValueTemplate": "master",
+      "depNameTemplate": "ucode",
+      "packageNameTemplate": "https://github.com/jow-/ucode",
+      "datasourceTemplate": "git-refs"
     }
   ],
   "packageRules": [
