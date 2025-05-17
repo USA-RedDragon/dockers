@@ -31,6 +31,13 @@ ARG MAKE_VERSION=4.4.1-r2
 ARG MUSL_VERSION=1.2.5-r9
 # renovate: datasource=repology depName=alpine_3_21/patch
 ARG PATCH_VERSION=2.7.6-r10
+# renovate: datasource=repology depName=alpine_3_21/cmake
+ARG CMAKE_VERSION=3.31.1-r0
+# renovate: datasource=repology depName=alpine_3_21/json-c
+ARG JSONC_VERSION=0.18-r0
+
+# renovate: datasource=github-tags depName=jow-/ucode
+ARG UCODE_VERSION=v0.0.20231102
 
 RUN apk add --no-cache \
     git="${GIT_VERSION}" \
@@ -45,7 +52,9 @@ RUN apk add --no-cache \
     curl="${CURL_VERSION}" \
     make="${MAKE_VERSION}" \
     musl-dev="${MUSL_VERSION}" \
-    patch="${PATCH_VERSION}"
+    patch="${PATCH_VERSION}" \
+    cmake="${CMAKE_VERSION}" \
+    json-c-dev="${JSONC_VERSION}"
 
 # Build and install olsrd
 RUN git clone https://github.com/USA-RedDragon/olsrd.git \
@@ -63,6 +72,14 @@ RUN git clone https://github.com/USA-RedDragon/babeld.git \
     && make PREFIX=/usr DESTDIR=/out install.minimal \
     && cd .. \
     && rm -rf babeld
+
+RUN git clone https://github.com/jow-/ucode.git \
+    && cd ucode \
+    && git checkout "${UCODE_VERSION}" \
+    && cmake -DUCI_SUPPORT=OFF -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release . \
+    && make DESTDIR=/out install \
+    && cd .. \
+    && rm -rf ucode
 
 # Build and install vtun
 RUN curl -fSsL https://downloads.sourceforge.net/project/vtun/vtun/3.0.3/vtun-3.0.3.tar.gz -o vtun-3.0.3.tar.gz \
@@ -112,8 +129,8 @@ ARG WIREGUARD_TOOLS_VERSION=1.0.20210914-r4
 ARG S6_VERSION=2.13.1.0-r0
 # renovate: datasource=repology depName=alpine_3_21/cronie
 ARG CRONIE_VERSION=1.7.2-r0
-# renovate: datasource=repology depName=alpine_3_21/ucode
-ARG UCODE_VERSION=0.0.20220812-r0
+# renovate: datasource=repology depName=alpine_3_21/json-c
+ARG JSONC_VERSION=0.18-r0
 
 RUN apk add --no-cache \
     bash="${BASH_VERSION}" \
@@ -131,7 +148,7 @@ RUN apk add --no-cache \
     wireguard-tools="${WIREGUARD_TOOLS_VERSION}" \
     s6="${S6_VERSION}" \
     cronie="${CRONIE_VERSION}" \
-    ucode="${UCODE_VERSION}"
+    json-c="${JSONC_VERSION}"
 
 RUN sed -i 's/module(load="imklog")//g' /etc/rsyslog.conf
 
