@@ -57,10 +57,8 @@ RUN git clone https://github.com/USA-RedDragon/olsrd.git \
     && rm -rf olsrd
 
 # Build and install babeld
-RUN git clone https://github.com/jech/babeld.git \
+RUN git clone https://github.com/USA-RedDragon/babeld.git \
     && cd babeld \
-    && git checkout 950992f282d6139ce543f225564a35ac564ca1c2 \
-    && for patch in /patches/babeld/*.patch; do patch -p1 < "$patch"; done \
     && make \
     && make PREFIX=/usr DESTDIR=/out install.minimal \
     && cd .. \
@@ -114,6 +112,8 @@ ARG WIREGUARD_TOOLS_VERSION=1.0.20210914-r4
 ARG S6_VERSION=2.13.1.0-r0
 # renovate: datasource=repology depName=alpine_3_21/cronie
 ARG CRONIE_VERSION=1.7.2-r0
+# renovate: datasource=repology depName=alpine_3_21/ucode
+ARG UCODE_VERSION=0.0.20220812-r0
 
 RUN apk add --no-cache \
     bash="${BASH_VERSION}" \
@@ -130,7 +130,8 @@ RUN apk add --no-cache \
     gettext="${GETTEXT_VERSION}" \
     wireguard-tools="${WIREGUARD_TOOLS_VERSION}" \
     s6="${S6_VERSION}" \
-    cronie="${CRONIE_VERSION}"
+    cronie="${CRONIE_VERSION}" \
+    ucode="${UCODE_VERSION}"
 
 RUN sed -i 's/module(load="imklog")//g' /etc/rsyslog.conf
 
