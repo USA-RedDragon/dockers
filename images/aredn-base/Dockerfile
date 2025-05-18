@@ -37,6 +37,8 @@ ARG CMAKE_VERSION=3.31.1-r0
 ARG JSONC_VERSION=0.18-r0
 
 ARG UCODE_VERSION=f499de690c33fd635f5de490e15a48cb848c5458
+ARG BABELD_VERSION=8a23549bc745ef38fc5784f5dd177f62388103be
+ARG OLSRD_VERSION=ce99d7d1fa630f7272dce66295c4c02e392b5c22
 
 RUN apk add --no-cache \
     git="${GIT_VERSION}" \
@@ -58,7 +60,7 @@ RUN apk add --no-cache \
 # Build and install olsrd
 RUN git clone https://github.com/USA-RedDragon/olsrd.git \
     && cd olsrd \
-    && git checkout aredn \
+    && git checkout "${OLSRD_VERSION}" \
     && make prefix=/usr \
     && make prefix=/usr DESTDIR=/out install arprefresh_install txtinfo_install jsoninfo_install dot_draw_install watchdog_install nameservice_install \
     && cd .. \
@@ -67,6 +69,7 @@ RUN git clone https://github.com/USA-RedDragon/olsrd.git \
 # Build and install babeld
 RUN git clone https://github.com/USA-RedDragon/babeld.git \
     && cd babeld \
+    && git checkout "${BABELD_VERSION}" \
     && make \
     && make PREFIX=/usr DESTDIR=/out install.minimal \
     && cd .. \
