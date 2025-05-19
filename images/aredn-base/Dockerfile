@@ -3,8 +3,6 @@ FROM alpine:3.21.3@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff45
 WORKDIR /tmp
 RUN mkdir -p /out
 
-COPY patches /patches
-
 # renovate: datasource=repology depName=alpine_3_21/git
 ARG GIT_VERSION=2.47.2-r0
 # renovate: datasource=repology depName=alpine_3_21/gcc
