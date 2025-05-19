@@ -83,20 +83,6 @@ RUN git clone https://github.com/jow-/ucode.git \
     && cd .. \
     && rm -rf ucode
 
-# Build and install vtun
-RUN curl -fSsL https://downloads.sourceforge.net/project/vtun/vtun/3.0.3/vtun-3.0.3.tar.gz -o vtun-3.0.3.tar.gz \
-    && tar -xzf vtun-3.0.3.tar.gz \
-    && rm vtun-3.0.3.tar.gz \
-    && cd vtun-3.0.3 \
-    # --build=unknown-unknown-linux is magic for cross-compiling
-    && ./configure --prefix=/usr --build=unknown-unknown-linux \
-    && for patch in /patches/vtun/*.patch; do patch -p1 < "$patch"; done \
-    && make \
-    && make DESTDIR=/out install \
-    && cd .. \
-    && rm -rf vtun-3.0.3 \
-    && rm -rf /out/usr/man
-
 FROM alpine:3.21.3@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c
 
 COPY --from=builder /out /
