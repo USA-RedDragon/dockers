@@ -288,10 +288,10 @@ function buildMessage(cmd, ipv4addr, hop, payload) {
 const keepaliveMsg = buildMessage(CMD_KEEPALIVE, myipv4address, 1);
 
 //
-// Build a targetted sync message.
+// Build a targeted sync message.
 //
-function buildTargettedSyncMessage(target) {
-    DEBUG && print("buildTargettedSyncMessage:");
+function buildTargetedSyncMessage(target) {
+    DEBUG && print("buildTargetedSyncMessage:");
     let sync = "";
     for (let ip in hostroutes) {
         if (ip !== myipv4address && hostroutes[ip] === target) {
@@ -534,7 +534,7 @@ function channelProcess(event) {
                         this.incoming = "";
                         statistics.outgoing.version++;
                         statistics.outgoing.sync++;
-                        this.outgoing = buildMessage(CMD_VERSION, myipv4address, 1, VERSION) + buildTargettedSyncMessage(this.interface);
+                        this.outgoing = buildMessage(CMD_VERSION, myipv4address, 1, VERSION) + buildTargetedSyncMessage(this.interface);
                     }
                     break;
                 case NEWADDRESS:
@@ -615,7 +615,7 @@ function channelProcess(event) {
             this.incoming = "";
             statistics.outgoing.version++;
             statistics.outgoing.sync++;
-            this.outgoing = buildMessage(CMD_VERSION, myipv4address, 1, VERSION) + buildTargettedSyncMessage(this.interface);
+            this.outgoing = buildMessage(CMD_VERSION, myipv4address, 1, VERSION) + buildTargetedSyncMessage(this.interface);
             this.state = "CONNECTED_INCOMING";
             this.keepalive = 0;
             this.keepalivetime = when(KEEPALIVE_POLL);
