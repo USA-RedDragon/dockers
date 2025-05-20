@@ -117,6 +117,8 @@ ARG S6_VERSION=2.13.1.0-r0
 ARG CRONIE_VERSION=1.7.2-r0
 # renovate: datasource=repology depName=alpine_3_21/json-c
 ARG JSONC_VERSION=0.18-r0
+# renovate: datasource=repology depName=alpine_3_21/ca-certificates
+ARG CA_CERTIFICATES_VERSION=20241121-r1
 
 RUN apk add --no-cache \
     bash="${BASH_VERSION}" \
@@ -134,7 +136,8 @@ RUN apk add --no-cache \
     wireguard-tools="${WIREGUARD_TOOLS_VERSION}" \
     s6="${S6_VERSION}" \
     cronie="${CRONIE_VERSION}" \
-    json-c="${JSONC_VERSION}"
+    json-c="${JSONC_VERSION}" \
+    ca-certificates="${CA_CERTIFICATES_VERSION}"
 
 RUN sed -i 's/module(load="imklog")//g' /etc/rsyslog.conf
 
