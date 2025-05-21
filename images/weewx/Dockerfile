@@ -36,7 +36,7 @@ ARG FONTS_FREEFONT_VERSION=20120503-10
 # renovate: datasource=repology versioning=deb depName=debian_12/s6
 ARG S6_VERSION=2.11.3.2-1
 # renovate: datasource=repology versioning=deb depName=debian_12/nginx
-ARG NGINX_VERSION=1.22.1-9+deb12u1
+ARG NGINX_VERSION=1.22.1-9+deb12u2
 # renovate: datasource=repology versioning=deb depName=debian_12/requests
 ARG REQUESTS_VERSION=2.28.1+dfsg-1
 # renovate: datasource=repology versioning=deb depName=debian_12/python-paho-mqtt
