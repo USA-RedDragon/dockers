@@ -10,7 +10,7 @@ RUN cargo install "jwt-cli@${JWT_CLI_VERSION}"
 FROM quay.io/minio/minio:RELEASE.2025-05-24T17-08-30Z AS minio
 
 # Use ubuntu because sd on debian:latest is too old
-FROM ubuntu:oracular-20250225 AS patcher
+FROM ubuntu:oracular-20250428 AS patcher
 
 # renovate: datasource=repology versioning=deb depName=ubuntu_24_10/ca-certificates
 ARG CA_CERTIFICATES_VERSION=20240203
