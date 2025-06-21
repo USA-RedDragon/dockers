@@ -1,3 +1,3 @@
-FROM ghcr.io/haveagitgat/tdarr:2.43.01@sha256:55d3044b657f27d1efab20319a4b9dc3951ee2825b9650394eb8ae411dd8b233 AS source
+FROM ghcr.io/haveagitgat/tdarr:2.44.01@sha256:59c55da122b38e59c24e354592e6e14aa4aa1a5870f35d193e0480bda1828064 AS source
 
 COPY ./rootfs /
