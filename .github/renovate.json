@@ -21,6 +21,26 @@
       "autoReplaceStringTemplate": "# renovate: datasource=repology depName=alpine_{{{newMajor}}}_{{{newMinor}}}"
     }
   ],
+  "regexManagers": [
+    {
+      "fileMatch": [
+        ".*"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>.*?)(?:\\s+extractVersion=(?<extractVersion>.+?))?(?:\\s+versioning=(?<versioning>.+?))?\\s+depName=(?<depName>.+?)?\\s(?:\\s*.*_?(?:version|VERSION)[:=]\\s*(?<currentValue>.*))?(?:\\s.*_(?:ref|REF)[:=]\\s*(?<currentDigest>.*))?"
+      ],
+      "versioningTemplate": "{{#if versioning}}{{versioning}}{{else}}semver-coerced{{/if}}"
+    },
+    {
+      "fileMatch": [
+        ".*"
+      ],
+      "matchStrings": [
+        "# renovate: sha: datasource=(?<datasource>.*?)(?:\\s+extractVersion=(?<extractVersion>.+?))?(?:\\s+versioning=(?<versioning>.+?))?\\s+depName=(?<depName>.+?)?\\s+packageName=(?<packageName>.+?)?\\s+branch=(?<currentValue>.+?)?\\s(?:\\s*.*_?(?:sha|SHA)[:=]\\s*(?<currentDigest>.*))"
+      ],
+      "versioningTemplate": "{{#if versioning}}{{versioning}}{{else}}semver-coerced{{/if}}"
+    }
+  ],
   "packageRules": [
     {
       "matchPackageNames": ["docker.io/mattermost/mattermost-enterprise-edition"],
