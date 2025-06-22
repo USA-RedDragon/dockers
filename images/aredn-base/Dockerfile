@@ -18,8 +18,7 @@ ARG MAKE_VERSION=4.4.1-r2
 # renovate: datasource=repology depName=alpine_3_21/musl
 ARG MUSL_VERSION=1.2.5-r9
 
-# renovate: sha: datasource=git-refs depName=olsrd packageName=https://github.com/USA-RedDragon/olsrd branch=aredn
-ARG OLSRD_SHA=6a77e736fb95392e2088f5e6a70f2cb1ce6e1603
+ARG OLSRD_VERSION=6a77e736fb95392e2088f5e6a70f2cb1ce6e1603
 
 RUN apk add --no-cache \
     git="${GIT_VERSION}" \
@@ -33,7 +32,7 @@ RUN apk add --no-cache \
 # Build and install olsrd
 RUN git clone https://github.com/USA-RedDragon/olsrd.git \
     && cd olsrd \
-    && git checkout "${OLSRD_SHA}" \
+    && git checkout "${OLSRD_VERSION}" \
     && make prefix=/usr \
     && make prefix=/usr DESTDIR=/out install arprefresh_install txtinfo_install jsoninfo_install dot_draw_install watchdog_install nameservice_install \
     && cd .. \
@@ -55,8 +54,7 @@ ARG MAKE_VERSION=4.4.1-r2
 # renovate: datasource=repology depName=alpine_3_21/musl
 ARG MUSL_VERSION=1.2.5-r9
 
-# renovate: sha: datasource=git-refs depName=babeld packageName=https://github.com/USA-RedDragon/babeld branch=main
-ARG BABELD_SHA=c21fe609f3fc2a199126ea1cd55733fb9399c956
+ARG BABELD_VERSION=c21fe609f3fc2a199126ea1cd55733fb9399c956
 
 RUN apk add --no-cache \
     git="${GIT_VERSION}" \
@@ -68,7 +66,7 @@ RUN apk add --no-cache \
 # Build and install babeld
 RUN git clone https://github.com/USA-RedDragon/babeld.git \
     && cd babeld \
-    && git checkout "${BABELD_SHA}" \
+    && git checkout "${BABELD_VERSION}" \
     && make \
     && make PREFIX=/usr DESTDIR=/out install.minimal \
     && cd .. \
@@ -96,8 +94,7 @@ ARG CMAKE_VERSION=3.31.1-r0
 # renovate: datasource=repology depName=alpine_3_21/json-c
 ARG JSONC_VERSION=0.18-r0
 
-# renovate: sha: datasource=git-refs depName=ucode packageName=https://github.com/jow-/ucode branch=master
-ARG UCODE_SHA=37ac8f112af63e64c1ea2d13ae63c134b62a5681
+ARG UCODE_VERSION=37ac8f112af63e64c1ea2d13ae63c134b62a5681
 
 RUN apk add --no-cache \
     git="${GIT_VERSION}" \
@@ -111,7 +108,7 @@ RUN apk add --no-cache \
 
 RUN git clone https://github.com/jow-/ucode.git \
     && cd ucode \
-    && git checkout "${UCODE_SHA}" \
+    && git checkout "${UCODE_VERSION}" \
     && cmake -DUCI_SUPPORT=OFF -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release . \
     && make DESTDIR=/out install \
     && cd .. \

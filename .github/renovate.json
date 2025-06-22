@@ -19,26 +19,33 @@
       "depNameTemplate": "alpine",
       "versioningTemplate": "regex:^(?<major>\\d+)[._](?<minor>\\d+)$",
       "autoReplaceStringTemplate": "# renovate: datasource=repology depName=alpine_{{{newMajor}}}_{{{newMinor}}}"
-    }
-  ],
-  "regexManagers": [
-    {
-      "fileMatch": [
-        ".*"
-      ],
-      "matchStrings": [
-        "# renovate: datasource=(?<datasource>.*?)(?:\\s+extractVersion=(?<extractVersion>.+?))?(?:\\s+versioning=(?<versioning>.+?))?\\s+depName=(?<depName>.+?)?\\s(?:\\s*.*_?(?:version|VERSION)[:=]\\s*(?<currentValue>.*))?(?:\\s.*_(?:ref|REF)[:=]\\s*(?<currentDigest>.*))?"
-      ],
-      "versioningTemplate": "{{#if versioning}}{{versioning}}{{else}}semver-coerced{{/if}}"
     },
     {
-      "fileMatch": [
-        ".*"
-      ],
-      "matchStrings": [
-        "# renovate: sha: datasource=(?<datasource>.*?)(?:\\s+extractVersion=(?<extractVersion>.+?))?(?:\\s+versioning=(?<versioning>.+?))?\\s+depName=(?<depName>.+?)?\\s+packageName=(?<packageName>.+?)?\\s+branch=(?<currentValue>.+?)?\\s(?:\\s*.*_?(?:sha|SHA)[:=]\\s*(?<currentDigest>.*))"
-      ],
-      "versioningTemplate": "{{#if versioning}}{{versioning}}{{else}}semver-coerced{{/if}}"
+      "customType": "regex",
+      "fileMatch": [".*Dockerfile$"],
+      "matchStrings": ["ARG UCODE_VERSION=(?<currentDigest>.*?)\\n"],
+      "currentValueTemplate": "master",
+      "depNameTemplate": "ucode",
+      "packageNameTemplate": "https://github.com/jow-/ucode",
+      "datasourceTemplate": "git-refs"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": [".*Dockerfile$"],
+      "matchStrings": ["ARG OLSRD_VERSION=(?<currentDigest>.*?)\\n"],
+      "currentValueTemplate": "aredn",
+      "depNameTemplate": "olsrd",
+      "packageNameTemplate": "https://github.com/USA-RedDragon/olsrd",
+      "datasourceTemplate": "git-refs"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": [".*Dockerfile$"],
+      "matchStrings": ["ARG BABELD_VERSION=(?<currentDigest>.*?)\\n"],
+      "currentValueTemplate": "main",
+      "depNameTemplate": "babeld",
+      "packageNameTemplate": "https://github.com/USA-RedDragon/babeld",
+      "datasourceTemplate": "git-refs"
     }
   ],
   "packageRules": [
