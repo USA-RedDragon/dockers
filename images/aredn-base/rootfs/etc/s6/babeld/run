@@ -1,3 +1,5 @@
 #!/bin/sh
 
+kill -9 $(cat /var/run/babeld.pid) 2>/dev/null || true
+rm -f /var/run/babeld.pid
 exec babeld -c /etc/babel.conf -c /tmp/babel-generated.conf
