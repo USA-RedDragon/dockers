@@ -97,6 +97,15 @@ const resources = [
     { name: "subscribe", dir: "/var/run/arednlink/subscribe/",  cmd: CMD_UPDATE_SUBSCRIBE   }
 ];
 //
+// Signals
+//
+const signals = {
+    hosts: null,
+    services: null,
+    publish: null,
+    subscribe: null
+};
+//
 // Default hop count for messages.
 //
 const HOP_DEFAULT           = 64;
@@ -176,6 +185,17 @@ const myipv4iparr = iptoarr(myipv4address);
 let channelId = 1;
 let exiting = false;
 const poller = { fn: null, len: -1 };
+
+//
+// Run a signal script (if it exists).
+//
+function runSignal(name) {
+    const script = signals[name];
+    if (!script) {
+        return null;
+    }
+    return system(script, 5000) < 0 ? false : true;
+}
 
 //
 // Compare two addresses and select the best/highest one.
@@ -365,6 +385,7 @@ function processMessage(cmd, hop, srcipv4, payload)
                         return false;
                     }
                     fs.writefile(path, payload);
+                    runSignal(res.name);
                     return true;
                 }
             }
@@ -710,10 +731,25 @@ function commandProcess(cmd) {
                     fs.writefile(path, data);
                     const count = sendMsgToAll(buildMessage(res.cmd, myipv4address, HOP_DEFAULT, data));
                     statistics.outgoing[res.name] += count;
+                    runSignal(res.name);
                     return old ? "ok updated" : "ok new";
                 }
             }
             return "bad name";
+        }
+        case "signal":
+        {
+            const tf = split(cv[1], " ", 2);
+            const type = tf[0];
+            const script = trim(tf[1]);
+            if (type in signals) {
+                signals[type] = null;
+                if (length(script)) {
+                    signals[type] = script;
+                }
+                return "ok";
+            }
+            return "bad signal";
         }
         case "dump":
         {
@@ -912,6 +948,11 @@ function routeProcess(event) {
                 }
             }
         }
+    }
+
+    // Call any signals we need toAdd commentMore actions
+    for (let name in sigs) {
+        runSignal(name);
     }
 
     // Sync our neighbors for information about the new routes
