@@ -5,7 +5,12 @@ if [ "$SUPERNODE" = "1" ]; then
   isolation="isolate br-dtdlink"
 fi
 
-arednlink -C "upload hosts /etc/arednlink/hosts" -C "upload services /etc/arednlink/services" -C "${isolation}" &
+arednlink \
+  -C "upload hosts /etc/arednlink/hosts" \
+  -C "upload services /etc/arednlink/services" \
+  -C "upload publish /etc/arednlink/publish" \
+  -C "upload subscribe /etc/arednlink/subscribe" \
+  -C "${isolation}" &
 pid=$!
 echo -n "$pid" > /var/run/arednlink.pid
 wait $pid
