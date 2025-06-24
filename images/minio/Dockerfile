@@ -45,7 +45,7 @@ RUN <<__EOF__
     rg --fixed-strings --quiet --multiline -- "$old" /minio
     [ "${#old}" -ne "${#new}" ] && ( echo "old and new strings are not the same length"; exit 1 )
     sd --fixed-strings --max-replacements=1 -- "$old" "$new" /minio
-    jwt encode -A ES384 -P lid=minio -P org=minio -P aid=1 -P did=minio -P cap=9223372036854775807 -P plan=ENTERPRISE-PLUS --sub minio@minio.com --exp=+1000Y --secret @private.pem > /minio.license
+    jwt encode -A ES384 -P lid=minio -P org=minio -P aid=1 -P did=minio -P cap=9223372036854775807 -P plan=ENTERPRISE-PLUS --iss subnet@min.io --exp=+1000Y --secret @private.pem > /minio.license
 __EOF__
 
 FROM minio
