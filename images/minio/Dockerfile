@@ -33,8 +33,6 @@ RUN apk add --no-cache \
 
 COPY --from=minio /usr/bin/minio /
 
-SHELL [ "/bin/bash", "-o", "pipefail", "-c" ]
-
 RUN <<__EOF__
     set -eu
     PRIVATE_KEY_PEM="$(openssl ecparam -noout -name secp384r1 -genkey -out -)"
@@ -52,5 +50,5 @@ __EOF__
 
 FROM minio
 
-COPY --from=patcher /start.sh /start.sh
+COPY --from=patcher /minio.license /
 COPY --from=patcher /minio /usr/bin/minio
