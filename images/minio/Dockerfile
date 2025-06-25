@@ -50,5 +50,7 @@ __EOF__
 
 FROM minio
 
+ENV MINIO_UPDATE=false
+
 COPY --from=patcher /minio.license /
 COPY --from=patcher /minio /usr/bin/minio
