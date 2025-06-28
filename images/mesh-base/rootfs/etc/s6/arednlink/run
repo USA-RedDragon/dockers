@@ -1,0 +1,21 @@
+#!/bin/sh
+
+isolation=""
+if [ "$SUPERNODE" = "1" ]; then
+  isolation="isolate br-dtdlink"
+fi
+
+meshlink \
+  -C "upload hosts /etc/meshlink/hosts" \
+  -C "upload services /etc/meshlink/services" \
+  -C "upload publish /etc/meshlink/publish" \
+  -C "upload subscribe /etc/meshlink/subscribe" \
+  -C "${isolation}" &
+pid=$!
+echo -n "$pid" > /var/run/meshlink.pid
+wait $pid
+ret=$?
+if [ $ret -ne 0 ]; then
+  echo "meshlink exited with code $ret"
+  exit $ret
+fi

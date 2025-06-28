@@ -5,7 +5,7 @@ This repository contains a collection of Dockerfiles for various projects. The i
 ## Images
 
 - [archlinux-pkgbuild](images/archlinux-pkgbuild/README.md)
-- [AREDN Base](images/aredn-base/README.md)
+- [Mesh Base](images/mesh-base/README.md)
 - [E2Guardian](images/e2guardian/README.md)
 - [Nginx RTMP](images/nginx-rtmp/README.md)
 - [Python GIS](images/python-gis/README.md)

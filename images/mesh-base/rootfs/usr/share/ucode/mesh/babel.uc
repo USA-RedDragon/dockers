@@ -35,7 +35,7 @@ import * as fs from "fs";
 import * as socket from "socket";
 
 export const MANAGER = { path: "/var/run/babel.sock" };
-export const LINK = { path: "/var/run/arednlink.sock" };
+export const LINK = { path: "/var/run/meshlink.sock" };
 export const ROUTING_TABLE = 20;
 export const ROUTING_TABLE_SUPERNODE = 21;
 export const ROUTING_TABLE_DEFAULT = 22;
