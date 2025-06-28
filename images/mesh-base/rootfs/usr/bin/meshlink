@@ -38,7 +38,7 @@ const VERSION = "0.0.1";
 
 import * as fs from "fs";
 import * as socket from "socket";
-import * as babel from "aredn.babel";
+import * as babel from "mesh.babel";
 
 //
 // Events
@@ -85,16 +85,16 @@ const CHANNEL_CONN_TIMEOUT  = 10;
 //
 // Communications
 //
-const AREDNLINK_PORT        = 9623;
-const AREDNLINK_MGR         = "/var/run/arednlink.sock";
+const MESHLINK_PORT        = 9623;
+const MESHLINK_MGR         = "/var/run/meshlink.sock";
 //
 // Resources
 //
 const resources = [
-    { name: "hosts",     dir: "/var/run/arednlink/hosts/",      cmd: CMD_UPDATE_HOSTS       },
-    { name: "services",  dir: "/var/run/arednlink/services/",   cmd: CMD_UPDATE_SERVICES    },
-    { name: "publish",   dir: "/var/run/arednlink/publish/",    cmd: CMD_UPDATE_PUBLISH     },
-    { name: "subscribe", dir: "/var/run/arednlink/subscribe/",  cmd: CMD_UPDATE_SUBSCRIBE   }
+    { name: "hosts",     dir: "/var/run/meshlink/hosts/",      cmd: CMD_UPDATE_HOSTS       },
+    { name: "services",  dir: "/var/run/meshlink/services/",   cmd: CMD_UPDATE_SERVICES    },
+    { name: "publish",   dir: "/var/run/meshlink/publish/",    cmd: CMD_UPDATE_PUBLISH     },
+    { name: "subscribe", dir: "/var/run/meshlink/subscribe/",  cmd: CMD_UPDATE_SUBSCRIBE   }
 ];
 //
 // Signals
@@ -318,10 +318,10 @@ function sendMsgToAll(msg, from) {
 //
 const main = socket.create(socket.AF_INET6, socket.SOCK_STREAM);
 main.setopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1);
-main.bind({ address: "::", port: AREDNLINK_PORT });                             
+main.bind({ address: "::", port: MESHLINK_PORT });                             
 main.listen();
-fs.unlink(AREDNLINK_MGR);
-const mgr = socket.listen({ path: AREDNLINK_MGR }, null, { socktype: socket.SOCK_STREAM });
+fs.unlink(MESHLINK_MGR);
+const mgr = socket.listen({ path: MESHLINK_MGR }, null, { socktype: socket.SOCK_STREAM });
 
 //
 // Process incoming message locally.
@@ -498,7 +498,7 @@ function channelProcess(event) {
                 case POLLTIMER:
                     statistics.outgoing.connection++;
                     DEBUG && print(`Connecting to ${this.address} on ${this.interface}\n`);
-                    this.connection = socket.connect({ interface: this.interface, address: this.address, port: AREDNLINK_PORT }, null, null, CHANNEL_CONN_TIMEOUT * 1000);
+                    this.connection = socket.connect({ interface: this.interface, address: this.address, port: MESHLINK_PORT }, null, null, CHANNEL_CONN_TIMEOUT * 1000);
                     DEBUG && print(`Connection: ${this.connection}\n`);
                     if (!this.connection) {
                         // Failed to connect
@@ -802,7 +802,7 @@ function commandProcess(cmd) {
 function managerProcess(event) {
     switch (this.state) {
         case "INCOMING":
-            this.connection.send(`AREDNLink ${VERSION}\n`);
+            this.connection.send(`MeshLink ${VERSION}\n`);
             this.state = "READING";
             this.polling &= ~POLLOUT;
             // Fall through
