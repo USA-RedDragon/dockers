@@ -133,7 +133,7 @@ ARG MUSL_VERSION=1.2.5-r9
 # We need to build dnsmasq from source due to this bug: https://thekelleys.org.uk/gitweb/?p=dnsmasq.git;a=commit;h=5846f749e5d878b6b5f7c20f6975bc96b95e4aae
 # The bug is fixed in dnsmasq 2.92test11, but the latest release is 2.91.
 # renovate: datasource=git-tags depName=https://thekelleys.org.uk/git/dnsmasq.git
-ARG DNSMASQ_VERSION=v2.92test14
+ARG DNSMASQ_VERSION=v2.92test15
 
 RUN apk add --no-cache \
     git="${GIT_VERSION}" \
