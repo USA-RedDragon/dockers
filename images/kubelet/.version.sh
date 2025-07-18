@@ -1,3 +1,3 @@
 #!/bin/sh
 # renovate: datasource=github-tags depName=kubernetes/kubernetes
-export VERSION=v1.33.2
+export VERSION=v1.33.3
