@@ -8,7 +8,7 @@ ARG E2GUARDIAN_VERSION=v5.5.4r
 # renovate: datasource=repology versioning=deb depName=debian_12/zlib
 ARG ZLIB1G_VERSION=1:1.2.13.dfsg-1
 # renovate: datasource=repology versioning=deb depName=debian_12/ca-certificates
-ARG CA_CERTIFICATES_VERSION=20230311
+ARG CA_CERTIFICATES_VERSION=20230311+deb12u1
 # renovate: datasource=repology versioning=deb depName=debian_12/pcre3
 ARG LIBPCRE3_VERSION=2:8.39-15
 # renovate: datasource=repology versioning=deb depName=debian_12/openssl
