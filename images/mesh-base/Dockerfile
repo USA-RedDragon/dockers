@@ -4,7 +4,7 @@ WORKDIR /tmp
 RUN mkdir -p /out
 
 # renovate: datasource=repology depName=alpine_3_21/git
-ARG GIT_VERSION=2.47.2-r0
+ARG GIT_VERSION=2.47.3-r0
 # renovate: datasource=repology depName=alpine_3_21/gcc
 ARG GCC_VERSION=14.2.0-r4
 # renovate: datasource=repology depName=alpine_3_21/linux-headers
@@ -44,7 +44,7 @@ WORKDIR /tmp
 RUN mkdir -p /out
 
 # renovate: datasource=repology depName=alpine_3_21/git
-ARG GIT_VERSION=2.47.2-r0
+ARG GIT_VERSION=2.47.3-r0
 # renovate: datasource=repology depName=alpine_3_21/gcc
 ARG GCC_VERSION=14.2.0-r4
 # renovate: datasource=repology depName=alpine_3_21/linux-headers
@@ -78,7 +78,7 @@ WORKDIR /tmp
 RUN mkdir -p /out
 
 # renovate: datasource=repology depName=alpine_3_21/git
-ARG GIT_VERSION=2.47.2-r0
+ARG GIT_VERSION=2.47.3-r0
 # renovate: datasource=repology depName=alpine_3_21/gcc
 ARG GCC_VERSION=14.2.0-r4
 # renovate: datasource=repology depName=alpine_3_21/linux-headers
@@ -120,7 +120,7 @@ WORKDIR /tmp
 RUN mkdir -p /out
 
 # renovate: datasource=repology depName=alpine_3_21/git
-ARG GIT_VERSION=2.47.2-r0
+ARG GIT_VERSION=2.47.3-r0
 # renovate: datasource=repology depName=alpine_3_21/gcc
 ARG GCC_VERSION=14.2.0-r4
 # renovate: datasource=repology depName=alpine_3_21/linux-headers
