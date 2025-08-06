@@ -591,7 +591,7 @@ function processRequest() {
         if (forward) {
             if (hop > 1) {
                 // Build and forward message
-                const count = sendMsgToAll(cmd, srcipv4str, cmd, hop - 1, srcipv4[0], srcipv4[1], srcipv4[2], srcipv4[3]) + payload, this);
+                const count = sendMsgToAll(cmd, srcipv4str, hop - 1, payload, this);
                 for (let r = 0; r < length(resources); r++) {
                     const res = resources[r];
                     if (cmd === res.cmd) {
