@@ -252,13 +252,6 @@ function isNetworkSymmetric(iface) {
     let mode = netmodes[iface.name];
     if (mode === null) {
         mode = true;
-        if (index(iface.name, "wlan") === 0) {
-            uci.cursor().foreach("wireless", "wifi-iface", function(s)
-            {
-                if (s.ifname == iface.name && s.mode === "adhoc") {
-                }
-            });
-        }
         netmodes[iface.name] = mode;
     }
     return mode;
