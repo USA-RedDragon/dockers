@@ -453,7 +453,7 @@ function processMessage(cmd, hop, srcipv4, payload)
                     statistics.outgoing.version++;
                     this.outgoing += buildMessage(this, CMD_VERSION, myipv4address, 1, this.version);
                     statistics.outgoing.sync++;
-                    this.outgoing += buildTargettedSyncMessage(this);
+                    this.outgoing += buildTargetedSyncMessage(this);
                 }
             }
             // v0.0.2: The initiator send the version number first together with a feature vector of 16 bits.
@@ -467,7 +467,7 @@ function processMessage(cmd, hop, srcipv4, payload)
                     this.outgoing += buildMessage(this, CMD_VERSION, myipv4address, 1, this.version);
                 }
                 statistics.outgoing.sync++;
-                this.outgoing += buildTargettedSyncMessage(this);
+                this.outgoing += buildTargetedSyncMessage(this);
             }
             // v?.?.?: For unknown versions, v0.0.1 instances just disconnected forcing the other end
             // to recover the connection by downgrading and reconnecting. From v0.0.2 onward the remote
