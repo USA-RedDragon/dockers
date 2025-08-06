@@ -167,7 +167,7 @@ ARG ZLIB_VERSION=1.3.1-r2
 # renovate: datasource=repology depName=alpine_3_21/lzo
 ARG LZO_VERSION=2.10-r5
 # renovate: datasource=repology depName=alpine_3_21/openssl
-ARG OPENSSL_VERSION=3.3.3-r0
+ARG OPENSSL_VERSION=3.3.4-r0
 # renovate: datasource=repology depName=alpine_3_21/iptables
 ARG IPTABLES_VERSION=1.8.11-r1
 # renovate: datasource=repology depName=alpine_3_21/iproute2
@@ -189,7 +189,7 @@ ARG CRONIE_VERSION=1.7.2-r0
 # renovate: datasource=repology depName=alpine_3_21/json-c
 ARG JSONC_VERSION=0.18-r0
 # renovate: datasource=repology depName=alpine_3_21/ca-certificates
-ARG CA_CERTIFICATES_VERSION=20241121-r1
+ARG CA_CERTIFICATES_VERSION=20250619-r0
 
 RUN apk add --no-cache \
     bash="${BASH_VERSION}" \
