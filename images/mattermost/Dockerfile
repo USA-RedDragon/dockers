@@ -2,11 +2,11 @@
 ARG MATTERMOST_VERSION=10.11.1
 FROM docker.io/mattermost/mattermost-enterprise-edition:$MATTERMOST_VERSION AS mattermost
 
-FROM alpine:3.21.3@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c AS patcher
+FROM alpine:3.22.1@sha256:4bcff63911fcb4448bd4fdacec207030997caf25e9bea4045fa6c8c44de311d1 AS patcher
 
-# renovate: datasource=repology depName=alpine_3_21/sd
+# renovate: datasource=repology depName=alpine_3_22/sd
 ARG SD_VERSION=1.0.0-r0
-# renovate: datasource=repology depName=alpine_3_21/ripgrep
+# renovate: datasource=repology depName=alpine_3_22/ripgrep
 ARG RIPGREP_VERSION=14.1.1-r0
 ARG MATTERMOST_VERSION
 
