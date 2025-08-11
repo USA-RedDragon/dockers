@@ -40,7 +40,7 @@ jobs:
     if: ${{ fromJson(needs.generate-matrix.outputs.matrix).include[0] }}
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Check for .version.sh under images/${{ matrix.image }}
         run: |
           if [ -f images/${{ matrix.image }}/.version.sh ]; then
