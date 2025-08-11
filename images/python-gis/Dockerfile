@@ -16,7 +16,7 @@ ARG DEV_PACKAGES=" \
 "
 
 # renovate: datasource=repology versioning=deb depName=debian_12/ca-certificates
-ARG CA_CERTIFICATES_VERSION=20230311
+ARG CA_CERTIFICATES_VERSION=20230311+deb12u1
 # renovate: datasource=repology versioning=deb depName=debian_12/python-pyproj
 ARG PYPROJ_VERSION=3.4.1-1+b1
 
