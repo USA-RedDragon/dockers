@@ -3,9 +3,9 @@ FROM ubuntu:24.04@sha256:1e622c5f073b4f6bfad6632f2616c7f59ef256e96fe78bf6a595d1d
 ARG DEBIAN_FRONTEND=noninteractive
 
 # renovate: datasource=github-releases depName=indilib/indi
-ARG INDI_VERSION=v2.1.3
+ARG INDI_VERSION=v2.1.5.1
 # renovate: datasource=github-releases depName=indilib/indi-3rdparty
-ARG INDI_3RD_PARTY_VERSION=v2.1.3
+ARG INDI_3RD_PARTY_VERSION=v2.1.5.1
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends --no-install-suggests \
