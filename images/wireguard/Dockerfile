@@ -4,11 +4,14 @@ FROM alpine:3.21.3@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff45
 ARG WIREGUARD_TOOLS_VERSION=1.0.20210914-r4
 # renovate: datasource=repology depName=alpine_3_21/iptables
 ARG IPTABLES_VERSION=1.8.11-r1
+# renovate: datasource=repology depName=alpine_3_21/tcpdump
+ARG TCPDUMP_VERSION=4.99.5-r0
 
 RUN apk add --no-cache \
     wireguard-tools="${WIREGUARD_TOOLS_VERSION}" \
     iptables="${IPTABLES_VERSION}" \
-    ip6tables="${IPTABLES_VERSION}"
+    ip6tables="${IPTABLES_VERSION}" \
+    tcpdump="${TCPDUMP_VERSION}"
 
 VOLUME ["/etc/wireguard"]
 EXPOSE 51820/udp
