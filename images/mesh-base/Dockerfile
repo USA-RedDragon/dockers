@@ -190,6 +190,8 @@ ARG CRONIE_VERSION=1.7.2-r0
 ARG JSONC_VERSION=0.18-r0
 # renovate: datasource=repology depName=alpine_3_21/ca-certificates
 ARG CA_CERTIFICATES_VERSION=20250619-r0
+# renovate: datasource=repology depName=alpine_3_21/tcpdump
+ARG TCPDUMP_VERSION=4.99.5-r0
 
 RUN apk add --no-cache \
     bash="${BASH_VERSION}" \
@@ -207,7 +209,8 @@ RUN apk add --no-cache \
     s6="${S6_VERSION}" \
     cronie="${CRONIE_VERSION}" \
     json-c="${JSONC_VERSION}" \
-    ca-certificates="${CA_CERTIFICATES_VERSION}"
+    ca-certificates="${CA_CERTIFICATES_VERSION}" \
+    tcpdump="${TCPDUMP_VERSION}"
 
 RUN sed -i 's/module(load="imklog")//g' /etc/rsyslog.conf
 
