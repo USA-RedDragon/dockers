@@ -3,7 +3,7 @@ FROM amazoncorretto:21.0.8-alpine@sha256:3b5deeb603e6d68144a736fe130c0394449d3f9
 # renovate: datasource=github-releases depName=Anuken/Mindustry
 ARG MINDUSTRY_VERSION=v146
 
-# renovate: datasource=repology depName=alpine_3_21/curl
+# renovate: datasource=repology depName=alpine_3_22/curl
 ARG CURL_VERSION=8.12.1-r1
 
 RUN apk add --no-cache --virtual .build-deps \
