@@ -162,7 +162,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Lint - detect-secrets
-        uses: reviewdog/action-detect-secrets@v0.29.0
+        uses: reviewdog/action-detect-secrets@v0.29.4
         with:
           github_token: ${{ secrets.github_token }}
           fail_on_error: true
