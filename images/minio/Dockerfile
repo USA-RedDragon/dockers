@@ -12,9 +12,9 @@ FROM quay.io/minio/aistor/minio:RELEASE.2025-06-25T02-55-12Z AS minio
 FROM alpine:3.21.3@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c AS patcher
 
 # renovate: datasource=repology depName=alpine_3_21/ca-certificates
-ARG CA_CERTIFICATES_VERSION=20241121-r1
+ARG CA_CERTIFICATES_VERSION=20250619-r0
 # renovate: datasource=repology depName=alpine_3_21/openssl
-ARG OPENSSL_VERSION=3.3.3-r0
+ARG OPENSSL_VERSION=3.3.4-r0
 # renovate: datasource=repology depName=alpine_3_21/curl
 ARG CURL_VERSION=8.12.1-r1
 # renovate: datasource=repology depName=alpine_3_21/ripgrep
