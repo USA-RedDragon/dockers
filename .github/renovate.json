@@ -82,7 +82,8 @@
       "matchPackageNames": [
         "ghcr.io/mend/renovate-ee-worker",
         "ghcr.io/mend/renovate-ee-server"
-      ]
+      ],
+      "automerge": false
     },
     {
       "groupName": "Mattermost",
