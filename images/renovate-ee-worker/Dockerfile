@@ -1,4 +1,4 @@
-FROM ghcr.io/mend/renovate-ee-worker:10.1.0-full
+FROM ghcr.io/mend/renovate-ee-worker:10.3.0-full
 
 USER root
 
