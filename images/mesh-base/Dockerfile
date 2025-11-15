@@ -1,21 +1,21 @@
-FROM alpine:3.21.3@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c AS olsrd-builder
+FROM alpine:3.22.2@sha256:4b7ce07002c69e8f3d704a9c5d6fd3053be500b7f1c69fc0d80990c2ad8dd412 AS olsrd-builder
 
 WORKDIR /tmp
 RUN mkdir -p /out
 
-# renovate: datasource=repology depName=alpine_3_21/git
+# renovate: datasource=repology depName=alpine_3_22/git
 ARG GIT_VERSION=2.47.3-r0
-# renovate: datasource=repology depName=alpine_3_21/gcc
+# renovate: datasource=repology depName=alpine_3_22/gcc
 ARG GCC_VERSION=14.2.0-r4
-# renovate: datasource=repology depName=alpine_3_21/linux-headers
+# renovate: datasource=repology depName=alpine_3_22/linux-headers
 ARG LINUX_HEADERS_VERSION=6.6-r1
-# renovate: datasource=repology depName=alpine_3_21/bison
+# renovate: datasource=repology depName=alpine_3_22/bison
 ARG BISON_VERSION=3.8.2-r1
-# renovate: datasource=repology depName=alpine_3_21/flex
+# renovate: datasource=repology depName=alpine_3_22/flex
 ARG FLEX_VERSION=2.6.4-r6
-# renovate: datasource=repology depName=alpine_3_21/make
+# renovate: datasource=repology depName=alpine_3_22/make
 ARG MAKE_VERSION=4.4.1-r2
-# renovate: datasource=repology depName=alpine_3_21/musl
+# renovate: datasource=repology depName=alpine_3_22/musl
 ARG MUSL_VERSION=1.2.5-r9
 
 ARG OLSRD_VERSION=6a77e736fb95392e2088f5e6a70f2cb1ce6e1603
@@ -38,20 +38,20 @@ RUN git clone https://github.com/USA-RedDragon/olsrd.git \
     && cd .. \
     && rm -rf olsrd
 
-FROM alpine:3.21.3@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c AS babeld-builder
+FROM alpine:3.22.2@sha256:4b7ce07002c69e8f3d704a9c5d6fd3053be500b7f1c69fc0d80990c2ad8dd412 AS babeld-builder
 
 WORKDIR /tmp
 RUN mkdir -p /out
 
-# renovate: datasource=repology depName=alpine_3_21/git
+# renovate: datasource=repology depName=alpine_3_22/git
 ARG GIT_VERSION=2.47.3-r0
-# renovate: datasource=repology depName=alpine_3_21/gcc
+# renovate: datasource=repology depName=alpine_3_22/gcc
 ARG GCC_VERSION=14.2.0-r4
-# renovate: datasource=repology depName=alpine_3_21/linux-headers
+# renovate: datasource=repology depName=alpine_3_22/linux-headers
 ARG LINUX_HEADERS_VERSION=6.6-r1
-# renovate: datasource=repology depName=alpine_3_21/make
+# renovate: datasource=repology depName=alpine_3_22/make
 ARG MAKE_VERSION=4.4.1-r2
-# renovate: datasource=repology depName=alpine_3_21/musl
+# renovate: datasource=repology depName=alpine_3_22/musl
 ARG MUSL_VERSION=1.2.5-r9
 
 ARG BABELD_VERSION=0234156cccbc8835b386402dfba1c657a6184fe6
@@ -72,26 +72,26 @@ RUN git clone https://github.com/USA-RedDragon/babeld.git \
     && cd .. \
     && rm -rf babeld
 
-FROM alpine:3.21.3@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c AS ucode-builder
+FROM alpine:3.22.2@sha256:4b7ce07002c69e8f3d704a9c5d6fd3053be500b7f1c69fc0d80990c2ad8dd412 AS ucode-builder
 
 WORKDIR /tmp
 RUN mkdir -p /out
 
-# renovate: datasource=repology depName=alpine_3_21/git
+# renovate: datasource=repology depName=alpine_3_22/git
 ARG GIT_VERSION=2.47.3-r0
-# renovate: datasource=repology depName=alpine_3_21/gcc
+# renovate: datasource=repology depName=alpine_3_22/gcc
 ARG GCC_VERSION=14.2.0-r4
-# renovate: datasource=repology depName=alpine_3_21/linux-headers
+# renovate: datasource=repology depName=alpine_3_22/linux-headers
 ARG LINUX_HEADERS_VERSION=6.6-r1
-# renovate: datasource=repology depName=alpine_3_21/zlib
+# renovate: datasource=repology depName=alpine_3_22/zlib
 ARG ZLIB_VERSION=1.3.1-r2
-# renovate: datasource=repology depName=alpine_3_21/make
+# renovate: datasource=repology depName=alpine_3_22/make
 ARG MAKE_VERSION=4.4.1-r2
-# renovate: datasource=repology depName=alpine_3_21/musl
+# renovate: datasource=repology depName=alpine_3_22/musl
 ARG MUSL_VERSION=1.2.5-r9
-# renovate: datasource=repology depName=alpine_3_21/cmake
+# renovate: datasource=repology depName=alpine_3_22/cmake
 ARG CMAKE_VERSION=3.31.1-r0
-# renovate: datasource=repology depName=alpine_3_21/json-c
+# renovate: datasource=repology depName=alpine_3_22/json-c
 ARG JSONC_VERSION=0.18-r0
 
 ARG UCODE_VERSION=5416dcfec9ea6326ee79a82da3e103a39ecf59aa
@@ -114,20 +114,20 @@ RUN git clone https://github.com/jow-/ucode.git \
     && cd .. \
     && rm -rf ucode
 
-FROM alpine:3.21.3@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c AS dnsmasq-builder
+FROM alpine:3.22.2@sha256:4b7ce07002c69e8f3d704a9c5d6fd3053be500b7f1c69fc0d80990c2ad8dd412 AS dnsmasq-builder
 
 WORKDIR /tmp
 RUN mkdir -p /out
 
-# renovate: datasource=repology depName=alpine_3_21/git
+# renovate: datasource=repology depName=alpine_3_22/git
 ARG GIT_VERSION=2.47.3-r0
-# renovate: datasource=repology depName=alpine_3_21/gcc
+# renovate: datasource=repology depName=alpine_3_22/gcc
 ARG GCC_VERSION=14.2.0-r4
-# renovate: datasource=repology depName=alpine_3_21/linux-headers
+# renovate: datasource=repology depName=alpine_3_22/linux-headers
 ARG LINUX_HEADERS_VERSION=6.6-r1
-# renovate: datasource=repology depName=alpine_3_21/make
+# renovate: datasource=repology depName=alpine_3_22/make
 ARG MAKE_VERSION=4.4.1-r2
-# renovate: datasource=repology depName=alpine_3_21/musl
+# renovate: datasource=repology depName=alpine_3_22/musl
 ARG MUSL_VERSION=1.2.5-r9
 
 # We need to build dnsmasq from source due to this bug: https://thekelleys.org.uk/gitweb/?p=dnsmasq.git;a=commit;h=5846f749e5d878b6b5f7c20f6975bc96b95e4aae
@@ -151,46 +151,46 @@ RUN git clone https://thekelleys.org.uk/git/dnsmasq.git \
     && cd .. \
     && rm -rf dnsmasq
 
-FROM alpine:3.21.3@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c
+FROM alpine:3.22.2@sha256:4b7ce07002c69e8f3d704a9c5d6fd3053be500b7f1c69fc0d80990c2ad8dd412
 
 COPY --from=olsrd-builder /out /
 COPY --from=babeld-builder /out /
 COPY --from=ucode-builder /out /
 COPY --from=dnsmasq-builder /out /
 
-# renovate: datasource=repology depName=alpine_3_21/bash
+# renovate: datasource=repology depName=alpine_3_22/bash
 ARG BASH_VERSION=5.2.37-r0
-# renovate: datasource=repology depName=alpine_3_21/curl
+# renovate: datasource=repology depName=alpine_3_22/curl
 ARG CURL_VERSION=8.12.1-r1
-# renovate: datasource=repology depName=alpine_3_21/zlib
+# renovate: datasource=repology depName=alpine_3_22/zlib
 ARG ZLIB_VERSION=1.3.1-r2
-# renovate: datasource=repology depName=alpine_3_21/lzo
+# renovate: datasource=repology depName=alpine_3_22/lzo
 ARG LZO_VERSION=2.10-r5
-# renovate: datasource=repology depName=alpine_3_21/openssl
+# renovate: datasource=repology depName=alpine_3_22/openssl
 ARG OPENSSL_VERSION=3.3.4-r0
-# renovate: datasource=repology depName=alpine_3_21/iptables
+# renovate: datasource=repology depName=alpine_3_22/iptables
 ARG IPTABLES_VERSION=1.8.11-r1
-# renovate: datasource=repology depName=alpine_3_21/iproute2
+# renovate: datasource=repology depName=alpine_3_22/iproute2
 ARG IPRROUTE2_VERSION=6.11.0-r0
-# renovate: datasource=repology depName=alpine_3_21/rsyslog
+# renovate: datasource=repology depName=alpine_3_22/rsyslog
 ARG RSYSLOG_VERSION=8.2410.0-r0
-# renovate: datasource=repology depName=alpine_3_21/logrotate
+# renovate: datasource=repology depName=alpine_3_22/logrotate
 ARG LOGROTATE_VERSION=3.21.0-r1
-# renovate: datasource=repology depName=alpine_3_21/jq
+# renovate: datasource=repology depName=alpine_3_22/jq
 ARG JQ_VERSION=1.7.1-r0
-# renovate: datasource=repology depName=alpine_3_21/gettext
+# renovate: datasource=repology depName=alpine_3_22/gettext
 ARG GETTEXT_VERSION=0.22.5-r0
-# renovate: datasource=repology depName=alpine_3_21/wireguard-tools
+# renovate: datasource=repology depName=alpine_3_22/wireguard-tools
 ARG WIREGUARD_TOOLS_VERSION=1.0.20210914-r4
-# renovate: datasource=repology depName=alpine_3_21/s6
+# renovate: datasource=repology depName=alpine_3_22/s6
 ARG S6_VERSION=2.13.1.0-r0
-# renovate: datasource=repology depName=alpine_3_21/cronie
+# renovate: datasource=repology depName=alpine_3_22/cronie
 ARG CRONIE_VERSION=1.7.2-r0
-# renovate: datasource=repology depName=alpine_3_21/json-c
+# renovate: datasource=repology depName=alpine_3_22/json-c
 ARG JSONC_VERSION=0.18-r0
-# renovate: datasource=repology depName=alpine_3_21/ca-certificates
+# renovate: datasource=repology depName=alpine_3_22/ca-certificates
 ARG CA_CERTIFICATES_VERSION=20250619-r0
-# renovate: datasource=repology depName=alpine_3_21/tcpdump
+# renovate: datasource=repology depName=alpine_3_22/tcpdump
 ARG TCPDUMP_VERSION=4.99.5-r0
 
 RUN apk add --no-cache \
