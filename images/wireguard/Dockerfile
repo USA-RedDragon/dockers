@@ -1,10 +1,10 @@
-FROM alpine:3.21.3@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c
+FROM alpine:3.22.2@sha256:4b7ce07002c69e8f3d704a9c5d6fd3053be500b7f1c69fc0d80990c2ad8dd412
 
-# renovate: datasource=repology depName=alpine_3_21/wireguard-tools
+# renovate: datasource=repology depName=alpine_3_22/wireguard-tools
 ARG WIREGUARD_TOOLS_VERSION=1.0.20210914-r4
-# renovate: datasource=repology depName=alpine_3_21/iptables
+# renovate: datasource=repology depName=alpine_3_22/iptables
 ARG IPTABLES_VERSION=1.8.11-r1
-# renovate: datasource=repology depName=alpine_3_21/tcpdump
+# renovate: datasource=repology depName=alpine_3_22/tcpdump
 ARG TCPDUMP_VERSION=4.99.5-r0
 
 RUN apk add --no-cache \
