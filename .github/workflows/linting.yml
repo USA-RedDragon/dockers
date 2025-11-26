@@ -147,7 +147,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
       - name: Lint - Misspell
-        uses: reviewdog/action-misspell@v1.26.3
+        uses: reviewdog/action-misspell@v1.27.0
         with:
           github_token: ${{ secrets.github_token }}
           fail_level: error
