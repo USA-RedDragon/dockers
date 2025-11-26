@@ -9,17 +9,17 @@ RUN cargo install "jwt-cli@${JWT_CLI_VERSION}"
 
 FROM quay.io/minio/aistor/minio:RELEASE.2025-10-17T06-17-41Z AS minio
 
-FROM alpine:3.21.3@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c AS patcher
+FROM alpine:3.22.2@sha256:4b7ce07002c69e8f3d704a9c5d6fd3053be500b7f1c69fc0d80990c2ad8dd412 AS patcher
 
-# renovate: datasource=repology depName=alpine_3_21/ca-certificates
+# renovate: datasource=repology depName=alpine_3_22/ca-certificates
 ARG CA_CERTIFICATES_VERSION=20250619-r0
-# renovate: datasource=repology depName=alpine_3_21/openssl
+# renovate: datasource=repology depName=alpine_3_22/openssl
 ARG OPENSSL_VERSION=3.3.4-r0
-# renovate: datasource=repology depName=alpine_3_21/curl
+# renovate: datasource=repology depName=alpine_3_22/curl
 ARG CURL_VERSION=8.12.1-r1
-# renovate: datasource=repology depName=alpine_3_21/ripgrep
+# renovate: datasource=repology depName=alpine_3_22/ripgrep
 ARG RIPGREP_VERSION=14.1.1-r0
-# renovate: datasource=repology depName=alpine_3_21/sd
+# renovate: datasource=repology depName=alpine_3_22/sd
 ARG SD_VERSION=1.0.0-r0
 
 COPY --from=jwt-cli /usr/local/cargo/bin/jwt /usr/bin/jwt
