@@ -1,4 +1,4 @@
 #!/bin/bash
 # renovate: datasource=docker depName=docker.io/alpine
-export ALPINE_VERSION=3.21.3
+export ALPINE_VERSION=20240606
 export VERSION=${ALPINE_VERSION%%-*}
