@@ -1,4 +1,4 @@
-FROM amazoncorretto:21.0.8-alpine@sha256:3b5deeb603e6d68144a736fe130c0394449d3f904230b92969559513b6b38a5b
+FROM amazoncorretto:21.0.9-alpine@sha256:801b86a5da334ca9dfa60008e6e1171cf364ca6e81061fa161c681721c1c7018
 
 # renovate: datasource=github-releases depName=Anuken/Mindustry
 ARG MINDUSTRY_VERSION=v146
