@@ -50,6 +50,10 @@
   ],
   "packageRules": [
     {
+      "matchPackageNames": ["docker.io/alpine"],
+      "allowedVersions": "<2018.0.0"
+    },
+    {
       "matchPackageNames": ["docker.io/mattermost/mattermost-enterprise-edition"],
       "allowedVersions": "<1000.0.0"
     },
