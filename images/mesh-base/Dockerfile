@@ -54,7 +54,7 @@ ARG MAKE_VERSION=4.4.1-r3
 # renovate: datasource=repology depName=alpine_3_22/musl
 ARG MUSL_VERSION=1.2.5-r21
 
-ARG BABELD_VERSION=0234156cccbc8835b386402dfba1c657a6184fe6
+ARG BABELD_VERSION=30ef463bf59ec15d54abab46a3da7583e9e0264c
 
 RUN apk add --no-cache \
     git="${GIT_VERSION}" \
