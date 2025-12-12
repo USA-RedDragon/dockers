@@ -51,7 +51,7 @@ jobs:
             echo "No .version.sh found"
             touch /tmp/version
           fi
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.image }}-version
           path: /tmp/version
