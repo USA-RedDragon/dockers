@@ -10,7 +10,9 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": [".*Dockerfile$"],
+      "managerFilePatterns": [
+        "/.*Dockerfile$/"
+      ],
       "matchStrings": [
         "# renovate: datasource=repology depName=alpine_(?<currentValue>\\d+[._]\\d+)"
       ],
@@ -22,8 +24,12 @@
     },
     {
       "customType": "regex",
-      "fileMatch": [".*Dockerfile$"],
-      "matchStrings": ["ARG UCODE_VERSION=(?<currentDigest>.*?)\\n"],
+      "managerFilePatterns": [
+        "/.*Dockerfile$/"
+      ],
+      "matchStrings": [
+        "ARG UCODE_VERSION=(?<currentDigest>.*?)\\n"
+      ],
       "currentValueTemplate": "master",
       "depNameTemplate": "ucode",
       "packageNameTemplate": "https://github.com/jow-/ucode",
@@ -31,8 +37,12 @@
     },
     {
       "customType": "regex",
-      "fileMatch": [".*Dockerfile$"],
-      "matchStrings": ["ARG OLSRD_VERSION=(?<currentDigest>.*?)\\n"],
+      "managerFilePatterns": [
+        "/.*Dockerfile$/"
+      ],
+      "matchStrings": [
+        "ARG OLSRD_VERSION=(?<currentDigest>.*?)\\n"
+      ],
       "currentValueTemplate": "aredn",
       "depNameTemplate": "olsrd",
       "packageNameTemplate": "https://github.com/USA-RedDragon/olsrd",
@@ -40,8 +50,12 @@
     },
     {
       "customType": "regex",
-      "fileMatch": [".*Dockerfile$"],
-      "matchStrings": ["ARG BABELD_VERSION=(?<currentDigest>.*?)\\n"],
+      "managerFilePatterns": [
+        "/.*Dockerfile$/"
+      ],
+      "matchStrings": [
+        "ARG BABELD_VERSION=(?<currentDigest>.*?)\\n"
+      ],
       "currentValueTemplate": "main",
       "depNameTemplate": "babeld",
       "packageNameTemplate": "https://github.com/USA-RedDragon/babeld",
@@ -50,22 +64,31 @@
   ],
   "packageRules": [
     {
-      "matchPackageNames": ["docker.io/alpine", "alpine"],
+      "matchPackageNames": [
+        "docker.io/alpine",
+        "alpine"
+      ],
       "allowedVersions": "<2018.0.0"
     },
     {
-      "matchPackageNames": ["docker.io/mattermost/mattermost-enterprise-edition"],
+      "matchPackageNames": [
+        "docker.io/mattermost/mattermost-enterprise-edition"
+      ],
       "allowedVersions": "<1000.0.0"
     },
     {
-      "matchDatasources": ["docker"],
+      "matchDatasources": [
+        "docker"
+      ],
       "matchPackageNames": [
         "/minio/"
       ],
       "versioning": "regex:^RELEASE\\.(?<major>\\d+)-(?<minor>\\d+)-(?<patch>\\d+)T.*Z$"
     },
     {
-      "matchDatasources": ["git-tags"],
+      "matchDatasources": [
+        "git-tags"
+      ],
       "matchPackageNames": [
         "https://thekelleys.org.uk/git/dnsmasq.git"
       ],
@@ -73,7 +96,9 @@
     },
     {
       "groupName": "INDI",
-      "matchDatasources": ["github-releases"],
+      "matchDatasources": [
+        "github-releases"
+      ],
       "matchPackageNames": [
         "indilib/indi-3rdparty",
         "indilib/indi"
@@ -82,7 +107,9 @@
     },
     {
       "groupName": "Renovate",
-      "matchDatasources": ["docker"],
+      "matchDatasources": [
+        "docker"
+      ],
       "matchPackageNames": [
         "ghcr.io/mend/renovate-ee-worker",
         "ghcr.io/mend/renovate-ee-server"
@@ -90,7 +117,9 @@
     },
     {
       "groupName": "Mattermost",
-      "matchDatasources": ["docker"],
+      "matchDatasources": [
+        "docker"
+      ],
       "matchPackageNames": [
         "docker.io/mattermost/mattermost-enterprise-edition",
         "mattermost/mattermost-enterprise-edition"
