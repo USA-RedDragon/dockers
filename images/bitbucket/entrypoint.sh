@@ -122,5 +122,6 @@ if [ -z "$SERVER_ID" ]; then
 	exit 1
 fi
 
-export SETUP_LICENSE="$(python3 /license.py "/license_keys/outer_private_key.pem" "/license_keys/inner_private_key.pem" "$SERVER_ID")"
+SETUP_LICENSE="$(python3 /license.py "/license_keys/outer_private_key.pem" "/license_keys/inner_private_key.pem" "$SERVER_ID")"
+export SETUP_LICENSE
 exec $ENTRYPOINT "$@"
