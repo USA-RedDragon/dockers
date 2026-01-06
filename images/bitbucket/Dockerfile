@@ -44,9 +44,7 @@ RUN <<__DOCKER_EOF__
     find jar_tmp -name "*.class" -type f -exec sed -i "s/$OLD_KEY_HEX/$NEW_KEY_HEX/g" {} +
     find jar_tmp -name "*.class" -type f -exec sed -i "s/$OLD_HASH_HEX/$NEW_HASH_HEX/g" {} +
     
-    cd jar_tmp
-    zip -q -r ../atlassian-extras-key-manager-patched.jar .
-    cd ..
+    (cd jar_tmp && zip -q -r ../atlassian-extras-key-manager-patched.jar .)
     
     mv atlassian-extras-key-manager-patched.jar "$JAR_FILE"
     rm -rf jar_tmp
