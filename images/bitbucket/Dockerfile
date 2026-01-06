@@ -52,7 +52,7 @@ __DOCKER_EOF__
 
 FROM bitbucket
 
-RUN apt-get update && apt-get install -y python3-cryptography python3-javaproperties && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests python3-cryptography python3-javaproperties && rm -rf /var/lib/apt/lists/*
 
 COPY --from=patcher /patcher/atlassian-extras-key-manager-*.jar /opt/atlassian/bitbucket/app/WEB-INF/lib/
 COPY --from=patcher /patcher/outer_private_key.pem /license_keys/outer_private_key.pem
