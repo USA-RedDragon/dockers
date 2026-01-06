@@ -4,11 +4,24 @@ FROM alpine:3.22.2@sha256:4b7ce07002c69e8f3d704a9c5d6fd3053be500b7f1c69fc0d80990
 
 WORKDIR /patcher
 
-COPY --from=bitbucket /opt/atlassian/bitbucket/app/WEB-INF/lib/atlassian-extras-key-manager-*.jar .
+# renovate: datasource=repology depName=alpine_3_22/bash
+ARG BASH_VERSION=5.2.37-r0
+# renovate: datasource=repology depName=alpine_3_22/openssl
+ARG OPENSSL_VERSION=3.5.4-r0
+# renovate: datasource=repology depName=alpine_3_22/sed
+ARG SED_VERSION=4.9-r2
+# renovate: datasource=repology depName=alpine_3_22/zip
+ARG ZIP_VERSION=3.0-r13
 
-RUN apk add --no-cache bash openssl sed zip
+RUN apk add --no-cache \
+    bash="${BASH_VERSION}" \
+    openssl="${OPENSSL_VERSION}" \
+    sed="${SED_VERSION}" \
+    zip="${ZIP_VERSION}"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+COPY --from=bitbucket /opt/atlassian/bitbucket/app/WEB-INF/lib/atlassian-extras-key-manager-*.jar .
 
 RUN <<__DOCKER_EOF__
     openssl dsaparam -out dsaparam.pem 1024
@@ -52,7 +65,18 @@ __DOCKER_EOF__
 
 FROM bitbucket
 
-RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests python3-cryptography python3-javaproperties && rm -rf /var/lib/apt/lists/*
+# renovate: datasource=repology depName=ubuntu_24_04/python-cryptography
+ARG CRYPTOGRAPHY_VERSION=41.0.7-4ubuntu0.1
+# renovate: datasource=repology depName=ubuntu_24_04/javaproperties
+ARG JAVAPROPERTIES_VERSION=0.8.1-1.1
+
+RUN apt-get update && \
+    apt-get install -y \
+        --no-install-recommends \
+        --no-install-suggests \
+            python3-cryptography=${CRYPTOGRAPHY_VERSION} \
+            python3-javaproperties=${JAVAPROPERTIES_VERSION} && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY --from=patcher /patcher/atlassian-extras-key-manager-*.jar /opt/atlassian/bitbucket/app/WEB-INF/lib/
 COPY --from=patcher /patcher/outer_private_key.pem /license_keys/outer_private_key.pem
