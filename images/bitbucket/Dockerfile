@@ -8,6 +8,8 @@ COPY --from=bitbucket /opt/atlassian/bitbucket/app/WEB-INF/lib/atlassian-extras-
 
 RUN apk add --no-cache bash openssl sed zip
 
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 RUN <<__DOCKER_EOF__
     openssl dsaparam -out dsaparam.pem 1024
     openssl gendsa -out outer_private_key.pem dsaparam.pem
