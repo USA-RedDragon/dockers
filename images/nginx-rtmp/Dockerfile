@@ -2,21 +2,21 @@
 # common dependencies
 ################################
 # renovate: datasource=repology depName=alpine_3_22/musl
-ARG MUSL_VERSION=1.2.5-r9
+ARG MUSL_VERSION=1.2.5-r10
 # renovate: datasource=repology depName=alpine_3_22/curl
-ARG CURL_VERSION=8.12.1-r1
+ARG CURL_VERSION=8.14.1-r2
 # renovate: datasource=repology depName=alpine_3_22/gcc
-ARG GCC_VERSION=14.2.0-r4
+ARG GCC_VERSION=14.2.0-r6
 # renovate: datasource=repology depName=alpine_3_22/make
-ARG MAKE_VERSION=4.4.1-r2
+ARG MAKE_VERSION=4.4.1-r3
 # renovate: datasource=repology depName=alpine_3_22/openssl
-ARG OPENSSL_VERSION=3.3.3-r0
+ARG OPENSSL_VERSION=3.5.4-r0
 # renovate: datasource=repology depName=alpine_3_22/pcre
-ARG PCRE_VERSION=8.45-r3
+ARG PCRE_VERSION=8.45-r4
 # renovate: datasource=repology depName=alpine_3_22/zlib
 ARG ZLIB_VERSION=1.3.1-r2
 # renovate: datasource=repology depName=alpine_3_22/ca-certificates
-ARG CA_CERTIFICATES_VERSION=20241121-r1
+ARG CA_CERTIFICATES_VERSION=20250911-r0
 
 ################################
 # ffmpeg runtime dependencies
@@ -36,7 +36,7 @@ ARG LIBVPX_VERSION=1.15.0-r0
 # renovate: datasource=repology depName=alpine_3_22/libvorbis
 ARG LIBVORBIS_VERSION=1.3.7-r2
 # renovate: datasource=repology depName=alpine_3_22/libwebp
-ARG LIBWEBP_VERSION=1.4.0-r0
+ARG LIBWEBP_VERSION=1.5.0-r0
 # renovate: datasource=repology depName=alpine_3_22/libtheora
 ARG LIBTHEORA_VERSION=1.1.1-r18
 # renovate: datasource=repology depName=alpine_3_22/opus
@@ -64,7 +64,7 @@ ARG NGINX_VERSION=1.29.0
 # renovate: datasource=git-tags extractVersion=^v(?<version>.*)$ depName=https://github.com/arut/nginx-rtmp-module.git
 ARG NGINX_RTMP_VERSION=1.2.2
 # renovate: datasource=repology depName=alpine_3_22/linux-headers
-ARG LINUX_HEADERS_VERSION=6.6-r1
+ARG LINUX_HEADERS_VERSION=6.14.2-r0
 
 # Build dependencies.
 RUN apk add --no-cache \
@@ -133,7 +133,7 @@ ARG X265_VERSION
 # renovate: datasource=git-tags extractVersion=^n(?<version>.*)$ depName=git://git.ffmpeg.org/ffmpeg.git
 ARG FFMPEG_VERSION=7.1.1
 # renovate: datasource=repology depName=alpine_3_22/pkgconf
-ARG PKGCONF_VERSION=2.3.0-r0
+ARG PKGCONF_VERSION=2.4.3-r0
 # renovate: datasource=repology depName=alpine_3_22/yasm
 ARG YASM_VERSION=1.3.0-r4
 
@@ -205,9 +205,9 @@ RUN rm -rf /var/cache/* /tmp/*
 FROM alpine:3.22.2@sha256:4b7ce07002c69e8f3d704a9c5d6fd3053be500b7f1c69fc0d80990c2ad8dd412
 
 # Set default ports.
-ENV HTTP_PORT 80
-ENV HTTPS_PORT 443
-ENV RTMP_LISTEN_PORT 1935
+ENV HTTP_PORT=80
+ENV HTTPS_PORT=443
+ENV RTMP_LISTEN_PORT=1935
 
 ARG OPENSSL_VERSION
 ARG PCRE_VERSION
@@ -230,7 +230,7 @@ ARG X264_VERSION
 ARG X265_VERSION
 
 # renovate: datasource=repology depName=alpine_3_22/gettext
-ARG GETTEXT_VERSION=0.22.5-r0
+ARG GETTEXT_VERSION=0.24.1-r0
 
 RUN apk add --no-cache \
   ca-certificates="${CA_CERTIFICATES_VERSION}" \
@@ -257,7 +257,7 @@ COPY --from=build-nginx /out /
 COPY --from=build-ffmpeg /out /
 
 # Add NGINX path, config and static files.
-ENV PATH "${PATH}:/usr/local/nginx/sbin"
+ENV PATH="${PATH}:/usr/local/nginx/sbin"
 COPY nginx.conf /etc/nginx/nginx.conf.template
 RUN mkdir -p /opt/data && mkdir /www
 COPY static /www/static
