@@ -1,4 +1,4 @@
-FROM atlassian/bitbucket:10.1.3@sha256:1da48d3cdda2c71747f4af1f1523588d97a967740c757f52e09127504d5a35a9 AS bitbucket
+FROM atlassian/bitbucket:10.1.4@sha256:6e065b35676da69794955c34959e752b633c9b0f397bf5559387c659641225d1 AS bitbucket
 
 FROM alpine:3.22.2@sha256:4b7ce07002c69e8f3d704a9c5d6fd3053be500b7f1c69fc0d80990c2ad8dd412 AS patcher
 
