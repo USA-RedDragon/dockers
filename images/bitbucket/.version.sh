@@ -1,3 +1,3 @@
 #!/bin/sh
 # renovate: datasource=docker depName=docker.io/atlassian/bitbucket
-export VERSION=10.1.3
+export VERSION=10.1.4
