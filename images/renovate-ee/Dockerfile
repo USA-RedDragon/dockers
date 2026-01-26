@@ -1,4 +1,4 @@
-FROM ghcr.io/mend/renovate-ee-server:11.5.0
+FROM ghcr.io/mend/renovate-ee-server:13.4.0@sha256:93002f6da8f8450b513e40fa1e7a040f5f7c37e71546487013678ae818f51edc
 
 USER root
 
