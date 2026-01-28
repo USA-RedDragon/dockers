@@ -1,4 +1,4 @@
-FROM rust:1.91.1-alpine AS jwt-cli
+FROM rust:1.92.0-alpine@sha256:f6c22e0a256c05d44fca23bf530120b5d4a6249a393734884281ca80782329bc AS jwt-cli
 
 # renovate: datasource=github-releases depName=mike-engel/jwt-cli
 ARG JWT_CLI_VERSION=6.2.0
