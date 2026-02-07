@@ -1,3 +1,3 @@
 #!/bin/sh
 # renovate: datasource=docker depName=quay.io/minio/aistor/minio
-export VERSION=RELEASE.2025-10-17T06-17-41Z
+export VERSION=RELEASE.2026-02-07T07-43-34Z
