@@ -1,4 +1,4 @@
-FROM archlinux:base-devel@sha256:c26263d698029443e20a4dcfa26d4c7180216f28fa5dbe6a6c12f8f031dc757b
+FROM archlinux:base-devel@sha256:7c81df532d6307c5bccb3d2561c90bfc981e6c4384d2a61c9e49b7f2d8aa27c0
 
 RUN pacman-key --init && \
   pacman-key --populate archlinux
