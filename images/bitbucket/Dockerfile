@@ -1,16 +1,16 @@
 FROM atlassian/bitbucket:10.1.4@sha256:07337770f8bf21063699cf4cf4c362ed8247bd893b12542cbdebd8b37e61058c AS bitbucket
 
-FROM alpine:3.22.2@sha256:4b7ce07002c69e8f3d704a9c5d6fd3053be500b7f1c69fc0d80990c2ad8dd412 AS patcher
+FROM alpine:3.23.3@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659 AS patcher
 
 WORKDIR /patcher
 
-# renovate: datasource=repology depName=alpine_3_22/bash
+# renovate: datasource=repology depName=alpine_3_23/bash
 ARG BASH_VERSION=5.2.37-r0
-# renovate: datasource=repology depName=alpine_3_22/openssl
+# renovate: datasource=repology depName=alpine_3_23/openssl
 ARG OPENSSL_VERSION=3.5.4-r0
-# renovate: datasource=repology depName=alpine_3_22/sed
+# renovate: datasource=repology depName=alpine_3_23/sed
 ARG SED_VERSION=4.9-r2
-# renovate: datasource=repology depName=alpine_3_22/zip
+# renovate: datasource=repology depName=alpine_3_23/zip
 ARG ZIP_VERSION=3.0-r13
 
 RUN apk add --no-cache \
