@@ -7,7 +7,7 @@ WORKDIR /usr/src/jwt-cli
 RUN apk add --no-cache musl-dev
 RUN cargo install "jwt-cli@${JWT_CLI_VERSION}"
 
-FROM quay.io/minio/aistor/minio:RELEASE.2025-10-17T06-17-41Z AS minio
+FROM quay.io/minio/aistor/minio:RELEASE.2025-12-20T04-58-37Z@sha256:1149a21d9669990e6340a76426bec8193b19f58391d06a854724c1d49cd617e6 AS minio
 
 FROM alpine:3.22.2@sha256:4b7ce07002c69e8f3d704a9c5d6fd3053be500b7f1c69fc0d80990c2ad8dd412 AS patcher
 
