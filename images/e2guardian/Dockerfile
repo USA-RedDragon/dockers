@@ -14,7 +14,7 @@ ARG LIBPCRE3_VERSION=2:8.39-15
 # renovate: datasource=repology versioning=deb depName=debian_12/openssl
 ARG OPENSSL_VERSION=3.0.17-1~deb12u2
 # renovate: datasource=repology versioning=deb depName=debian_12/clamav
-ARG CLAMAV_VERSION=1.0.7+dfsg-1~deb12u1
+ARG CLAMAV_VERSION=1.4.3+dfsg-1~deb12u2
 
 # Build dependencies
 
