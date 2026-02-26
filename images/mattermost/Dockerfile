@@ -1,5 +1,5 @@
 # renovate: datasource=docker depName=docker.io/mattermost/mattermost-enterprise-edition
-ARG MATTERMOST_VERSION=10.12.4
+ARG MATTERMOST_VERSION=11.4.2
 FROM docker.io/mattermost/mattermost-enterprise-edition:$MATTERMOST_VERSION AS mattermost
 
 FROM alpine:3.22.2@sha256:4b7ce07002c69e8f3d704a9c5d6fd3053be500b7f1c69fc0d80990c2ad8dd412 AS patcher
