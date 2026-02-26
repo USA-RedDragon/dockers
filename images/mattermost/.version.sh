@@ -1,3 +1,3 @@
 #!/bin/sh
 # renovate: datasource=docker depName=docker.io/mattermost/mattermost-enterprise-edition
-export VERSION=10.12.4
+export VERSION=11.4.2
