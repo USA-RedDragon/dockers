@@ -1,4 +1,4 @@
-FROM ghcr.io/mend/renovate-ee-worker:11.5.0-full
+FROM ghcr.io/mend/renovate-ee-worker:14.0.0-full@sha256:4b55511ec9ae1b5a5732f851be6a6703bbd71560ce721dab5447ae7e253267ac
 
 USER root
 
