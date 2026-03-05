@@ -1,4 +1,4 @@
-FROM jumpmind/symmetricds:3.16.10@sha256:eb88b150533b70f3d702e0ec893247156fc1b3d93cb0c543037d2b1497c0e60d
+FROM jumpmind/symmetricds:3.16.11@sha256:26a4b9f62e71fd6d43cc8b1d79b1335ce08eda62104e84519afa7ce0ed0d4c96
 
 RUN apk add --no-cache tini
 
