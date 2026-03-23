@@ -28,15 +28,15 @@ ARG DEV_PACKAGES=" \
 # renovate: datasource=repology versioning=deb depName=debian_12/ca-certificates
 ARG CA_CERTIFICATES_VERSION=20230311+deb12u1
 # renovate: datasource=repology versioning=deb depName=debian_12/curl
-ARG CURL_VERSION=7.88.1-10+deb12u12
+ARG CURL_VERSION=7.88.1-10+deb12u14
 # renovate: datasource=repology versioning=deb depName=debian_12/tzdata
-ARG TZDATA_VERSION=2025b-0+deb12u1
+ARG TZDATA_VERSION=2025b-0+deb12u2
 # renovate: datasource=repology versioning=deb depName=debian_12/fonts-freefont
 ARG FONTS_FREEFONT_VERSION=20120503-10
 # renovate: datasource=repology versioning=deb depName=debian_12/s6
 ARG S6_VERSION=2.11.3.2-1
 # renovate: datasource=repology versioning=deb depName=debian_12/nginx
-ARG NGINX_VERSION=1.22.1-9+deb12u2
+ARG NGINX_VERSION=1.22.1-9+deb12u4
 # renovate: datasource=repology versioning=deb depName=debian_12/requests
 ARG REQUESTS_VERSION=2.28.1+dfsg-1
 # renovate: datasource=repology versioning=deb depName=debian_12/python-paho-mqtt
@@ -46,7 +46,7 @@ ARG DATEUTIL_VERSION=2.8.2-2
 # renovate: datasource=repology versioning=deb depName=debian_12/pyephem
 ARG PYEPHEM_VERSION=4.1.4-2+b1
 # renovate: datasource=repology versioning=deb depName=debian_12/git
-ARG GIT_VERSION=1:2.39.5-0+deb12u2
+ARG GIT_VERSION=1:2.39.5-0+deb12u3
 
 ARG RUNTIME_DEPS=" \
     ca-certificates="${CA_CERTIFICATES_VERSION}" \
