@@ -48,7 +48,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # renovate: datasource=github-releases depName=protocolbuffers/protobuf
-ARG PROTOBUF_VERSION=v29.3
+ARG PROTOBUF_VERSION=v29.5
 ARG TARGETARCH
 
 RUN apt-get update && \
