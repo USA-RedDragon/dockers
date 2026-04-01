@@ -9,7 +9,7 @@ RUN cargo install "jwt-cli@${JWT_CLI_VERSION}"
 
 FROM quay.io/minio/aistor/minio:RELEASE.2025-10-17T06-17-41Z AS minio
 
-FROM alpine:3.22.2@sha256:4b7ce07002c69e8f3d704a9c5d6fd3053be500b7f1c69fc0d80990c2ad8dd412 AS patcher
+FROM alpine:3.22.3@sha256:55ae5d250caebc548793f321534bc6a8ef1d116f334f18f4ada1b2daad3251b2 AS patcher
 
 # renovate: datasource=repology depName=alpine_3_22/ca-certificates
 ARG CA_CERTIFICATES_VERSION=20250619-r0
