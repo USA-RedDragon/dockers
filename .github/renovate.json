@@ -58,7 +58,7 @@
           "bash .github/scripts/update-alpine-packages.sh {{{packageFile}}} {{{newMajor}}} {{{newMinor}}}"
         ],
         "fileFilters": ["**/*.Dockerfile", "**/Dockerfile"],
-        "executionMode": "branch"
+        "executionMode": "update"
       }
     },
     {
