@@ -53,9 +53,13 @@
       "groupName": "Alpine and packages",
       "matchDatasources": ["docker", "repology"],
       "matchPackageNames": ["alpine", "docker.io/alpine", "/^alpine_/"],
-      "postUpgradeCommands": [
-        "bash .github/scripts/update-alpine-packages.sh {{{packageFile}}} {{{newMajor}}} {{{newMinor}}}"
-      ]
+      "postUpgradeTasks": {
+        "commands": [
+          "bash .github/scripts/update-alpine-packages.sh {{{packageFile}}} {{{newMajor}}} {{{newMinor}}}"
+        ],
+        "fileFilters": ["**/*.Dockerfile", "**/Dockerfile"],
+        "executionMode": "branch"
+      }
     },
     {
       "matchPackageNames": ["docker.io/alpine", "alpine"],
