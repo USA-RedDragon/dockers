@@ -50,6 +50,11 @@
   ],
   "packageRules": [
     {
+      "groupName": "Alpine and packages",
+      "matchDatasources": ["docker", "repology"],
+      "matchPackageNames": ["alpine", "docker.io/alpine", "/^alpine_/"]
+    },
+    {
       "matchPackageNames": ["docker.io/alpine", "alpine"],
       "allowedVersions": "<2018.0.0"
     },
