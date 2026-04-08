@@ -76,7 +76,7 @@
       ],
       "postUpgradeTasks": {
         "commands": [
-          "bash .github/scripts/update-alpine-packages.sh {{{packageFile}}} {{{newMajor}}} {{{newMinor}}}"
+          "bash .github/scripts/update-alpine-packages.sh {{{packageFile}}}"
         ],
         "fileFilters": [
           "**/*.Dockerfile",

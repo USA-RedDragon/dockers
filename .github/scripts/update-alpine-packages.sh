@@ -1,22 +1,27 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Called by Renovate postUpgradeCommands after an Alpine Docker image bump.
+# Called by Renovate postUpgradeTasks after an Alpine Docker image bump.
 # Downloads the Alpine APK index for the new release and updates all
 # repology-tracked package version ARGs in the given Dockerfile.
 #
-# Usage: update-alpine-packages.sh <packageFile> <newMajor> <newMinor>
+# Usage: update-alpine-packages.sh <packageFile>
 
-PACKAGE_FILE="${1:?Usage: $0 <packageFile> <newMajor> <newMinor>}"
-NEW_MAJOR="${2:?Usage: $0 <packageFile> <newMajor> <newMinor>}"
-NEW_MINOR="${3:?Usage: $0 <packageFile> <newMajor> <newMinor>}"
-
-ALPINE_VERSION="v${NEW_MAJOR}.${NEW_MINOR}"
+PACKAGE_FILE="${1:?Usage: $0 <packageFile>}"
 
 # Skip if the file has no repology-tracked Alpine packages
 if ! grep -q 'datasource=repology depName=alpine_' "$PACKAGE_FILE" 2>/dev/null; then
     exit 0
 fi
+
+# Extract the Alpine version from the renovate comment lines in the file.
+# After Renovate updates, these will already reflect the new version (e.g., alpine_3_23).
+ALPINE_MAJOR_MINOR=$(grep -oP 'depName=alpine_\K\d+_\d+' "$PACKAGE_FILE" | head -1)
+if [ -z "$ALPINE_MAJOR_MINOR" ]; then
+    exit 0
+fi
+
+ALPINE_VERSION="v${ALPINE_MAJOR_MINOR//_/.}"
 
 TMPDIR=$(mktemp -d)
 trap 'rm -rf "$TMPDIR"' EXIT
@@ -60,7 +65,7 @@ grep -n 'datasource=repology depName=alpine_' "$PACKAGE_FILE" | while IFS=: read
     current=$(sed -n "${arg_line}p" "$PACKAGE_FILE")
 
     # Verify it's an ARG line before modifying
-    if [[ "$current" =~ ^ARG\ [A-Za-z_]+=.+ ]]; then
+    if [[ "$current" =~ ^ARG\ [A-Za-z0-9_]+=.+ ]]; then
         old_ver="${current#*=}"
         if [ "$old_ver" != "$new_ver" ]; then
             sed -i "${arg_line}s|=.*|=${new_ver}|" "$PACKAGE_FILE"
