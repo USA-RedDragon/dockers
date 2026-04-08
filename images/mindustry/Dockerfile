@@ -3,8 +3,8 @@ FROM alpine:3.22.2@sha256:4b7ce07002c69e8f3d704a9c5d6fd3053be500b7f1c69fc0d80990
 # renovate: datasource=github-releases depName=Anuken/Mindustry
 ARG MINDUSTRY_VERSION=v146
 
-# renovate: datasource=repology depName=alpine_3_22/curl
-ARG CURL_VERSION=8.12.1-r1
+# renovate: datasource=repology depName=alpine_3_23/curl
+ARG CURL_VERSION=8.17.0-r1
 
 RUN apk add --no-cache --virtual .build-deps \
     curl="${CURL_VERSION}" \
