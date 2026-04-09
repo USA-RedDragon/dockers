@@ -24,7 +24,7 @@ RUN printf 'TARGET = %s\nGCC_CONFIG = %s\nCOMMON_CONFIG += --disable-nls\nGCC_CO
 RUN printf 'TARGET = %s\nGCC_CONFIG = %s\nCOMMON_CONFIG += --disable-nls\nGCC_CONFIG += --disable-libquadmath --disable-decimal-float\nCOMMON_CONFIG += CFLAGS="-g0 -O2" CXXFLAGS="-g0 -O2"\nMUSL_CONFIG += CFLAGS="-g0 -O2" CXXFLAGS="-g0 -O2"\nMUSL_CONFIG += CFLAGS="-fPIC -O2"\nGNU_SITE = https://ftpmirror.gnu.org/gnu\nDL_CMD = curl -fSL --retry 5 --retry-delay 3 --retry-all-errors -o\nOUTPUT = /opt/cross\n' \
     "x86_64-linux-musl" "" > config.mak && make -j$(nproc) install
 
-FROM rust:1.94.1-slim-bookworm@sha256:5ae2d2ef9875c9c2407bf9b5678e6375304f7ecf8ea46b23e403a5690ec357ec
+FROM rust:1.94.1-slim-bookworm@sha256:cf9dd0ec73e75f827fe59123fff9dc65af1a1c8363c3c31ee8d7f8ad0b6a5fb2
 
 COPY --from=toolchain-builder /opt/cross /opt/cross
 ENV PATH="/opt/cross/bin:${PATH}"
