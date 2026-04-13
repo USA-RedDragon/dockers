@@ -16,6 +16,7 @@ RUN apt-get update \
         libtiff-dev \
         sqlite3 \
         libclang-dev \
+        python3-requests \
     && rm -rf /var/lib/apt/lists/*
 
 USER runner
