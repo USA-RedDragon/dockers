@@ -7,6 +7,8 @@ RUN apt-get update \
         curl \
         build-essential \
         rustup \
+        openssl \
+        pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 USER runner
