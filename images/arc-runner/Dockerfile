@@ -11,6 +11,7 @@ RUN apt-get update \
         pkg-config \
         cmake \
         libasound2-dev \
+        libsqlite3-dev \
     && rm -rf /var/lib/apt/lists/*
 
 USER runner
