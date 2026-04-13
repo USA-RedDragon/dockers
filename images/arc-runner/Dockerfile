@@ -7,7 +7,7 @@ RUN apt-get update \
         curl \
         build-essential \
         rustup \
-        openssl-dev \
+        libssl-dev \
         pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
