@@ -15,6 +15,7 @@ RUN apt-get update \
         libproj-dev \
         libtiff-dev \
         sqlite3 \
+        libclang-dev \
     && rm -rf /var/lib/apt/lists/*
 
 USER runner
