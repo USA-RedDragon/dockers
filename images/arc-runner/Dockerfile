@@ -12,6 +12,8 @@ RUN apt-get update \
         cmake \
         libasound2-dev \
         libsqlite3-dev \
+        libproj-dev \
+        libtiff-dev \
     && rm -rf /var/lib/apt/lists/*
 
 USER runner
