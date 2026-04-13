@@ -10,6 +10,7 @@ RUN apt-get update \
         libssl-dev \
         pkg-config \
         cmake \
+        libasound2-dev \
     && rm -rf /var/lib/apt/lists/*
 
 USER runner
