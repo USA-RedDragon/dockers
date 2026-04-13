@@ -9,6 +9,7 @@ RUN apt-get update \
         rustup \
         libssl-dev \
         pkg-config \
+        cmake \
     && rm -rf /var/lib/apt/lists/*
 
 USER runner
