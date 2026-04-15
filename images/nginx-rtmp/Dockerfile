@@ -2,7 +2,7 @@
 # common dependencies
 ################################
 # renovate: datasource=repology depName=alpine_3_23/musl
-ARG MUSL_VERSION=1.2.5-r21
+ARG MUSL_VERSION=1.2.5-r23
 # renovate: datasource=repology depName=alpine_3_23/curl
 ARG CURL_VERSION=8.17.0-r1
 # renovate: datasource=repology depName=alpine_3_23/gcc
@@ -10,13 +10,13 @@ ARG GCC_VERSION=15.2.0-r2
 # renovate: datasource=repology depName=alpine_3_23/make
 ARG MAKE_VERSION=4.4.1-r3
 # renovate: datasource=repology depName=alpine_3_23/openssl
-ARG OPENSSL_VERSION=3.5.5-r0
+ARG OPENSSL_VERSION=3.5.6-r0
 # renovate: datasource=repology depName=alpine_3_23/pcre
 ARG PCRE_VERSION=8.45-r4
 # renovate: datasource=repology depName=alpine_3_23/zlib
 ARG ZLIB_VERSION=1.3.2-r0
 # renovate: datasource=repology depName=alpine_3_23/ca-certificates
-ARG CA_CERTIFICATES_VERSION=20251003-r0
+ARG CA_CERTIFICATES_VERSION=20260413-r0
 
 ################################
 # ffmpeg runtime dependencies
@@ -48,7 +48,7 @@ ARG X264_VERSION=0.164.3108-r1
 # renovate: datasource=repology depName=alpine_3_23/x265
 ARG X265_VERSION=4.1-r0
 
-FROM alpine:3.23.3@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659 AS build-nginx
+FROM alpine:3.23.4@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11 AS build-nginx
 
 ARG MUSL_VERSION
 ARG CURL_VERSION
@@ -108,7 +108,7 @@ RUN \
 
 ###############################
 # Build the FFmpeg-build image.
-FROM alpine:3.23.3@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659 AS build-ffmpeg
+FROM alpine:3.23.4@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11 AS build-ffmpeg
 
 ARG MUSL_VERSION
 ARG CURL_VERSION
@@ -202,7 +202,7 @@ RUN rm -rf /var/cache/* /tmp/*
 
 ##########################
 # Build the release image.
-FROM alpine:3.23.3@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659
+FROM alpine:3.23.4@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11
 
 # Set default ports.
 ENV HTTP_PORT=80
