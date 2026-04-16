@@ -1,4 +1,4 @@
-FROM alpine:3.23.3@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659 AS olsrd-builder
+FROM alpine:3.23.4@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11 AS olsrd-builder
 
 WORKDIR /tmp
 RUN mkdir -p /out
@@ -16,7 +16,7 @@ ARG FLEX_VERSION=2.6.4-r7
 # renovate: datasource=repology depName=alpine_3_23/make
 ARG MAKE_VERSION=4.4.1-r3
 # renovate: datasource=repology depName=alpine_3_23/musl
-ARG MUSL_VERSION=1.2.5-r21
+ARG MUSL_VERSION=1.2.5-r23
 
 ARG OLSRD_VERSION=73dc4a6cbf618c961b5723ecd6055102e6855985
 
@@ -38,7 +38,7 @@ RUN git clone https://github.com/USA-RedDragon/olsrd.git \
     && cd .. \
     && rm -rf olsrd
 
-FROM alpine:3.23.3@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659 AS babeld-builder
+FROM alpine:3.23.4@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11 AS babeld-builder
 
 WORKDIR /tmp
 RUN mkdir -p /out
@@ -52,7 +52,7 @@ ARG LINUX_HEADERS_VERSION=6.16.12-r0
 # renovate: datasource=repology depName=alpine_3_23/make
 ARG MAKE_VERSION=4.4.1-r3
 # renovate: datasource=repology depName=alpine_3_23/musl
-ARG MUSL_VERSION=1.2.5-r21
+ARG MUSL_VERSION=1.2.5-r23
 
 ARG BABELD_VERSION=30ef463bf59ec15d54abab46a3da7583e9e0264c
 
@@ -72,7 +72,7 @@ RUN git clone https://github.com/USA-RedDragon/babeld.git \
     && cd .. \
     && rm -rf babeld
 
-FROM alpine:3.23.3@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659 AS ucode-builder
+FROM alpine:3.23.4@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11 AS ucode-builder
 
 WORKDIR /tmp
 RUN mkdir -p /out
@@ -88,7 +88,7 @@ ARG ZLIB_VERSION=1.3.2-r0
 # renovate: datasource=repology depName=alpine_3_23/make
 ARG MAKE_VERSION=4.4.1-r3
 # renovate: datasource=repology depName=alpine_3_23/musl
-ARG MUSL_VERSION=1.2.5-r21
+ARG MUSL_VERSION=1.2.5-r23
 # renovate: datasource=repology depName=alpine_3_23/cmake
 ARG CMAKE_VERSION=4.1.3-r0
 # renovate: datasource=repology depName=alpine_3_23/json-c
@@ -114,7 +114,7 @@ RUN git clone https://github.com/jow-/ucode.git \
     && cd .. \
     && rm -rf ucode
 
-FROM alpine:3.23.3@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659 AS dnsmasq-builder
+FROM alpine:3.23.4@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11 AS dnsmasq-builder
 
 WORKDIR /tmp
 RUN mkdir -p /out
@@ -128,7 +128,7 @@ ARG LINUX_HEADERS_VERSION=6.16.12-r0
 # renovate: datasource=repology depName=alpine_3_23/make
 ARG MAKE_VERSION=4.4.1-r3
 # renovate: datasource=repology depName=alpine_3_23/musl
-ARG MUSL_VERSION=1.2.5-r21
+ARG MUSL_VERSION=1.2.5-r23
 
 # We need to build dnsmasq from source due to this bug: https://thekelleys.org.uk/gitweb/?p=dnsmasq.git;a=commit;h=5846f749e5d878b6b5f7c20f6975bc96b95e4aae
 # The bug is fixed in dnsmasq 2.92test11, but the latest release in Alpine v3.23 is 2.91.
@@ -151,7 +151,7 @@ RUN git clone https://thekelleys.org.uk/git/dnsmasq.git \
     && cd .. \
     && rm -rf dnsmasq
 
-FROM alpine:3.23.3@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659
+FROM alpine:3.23.4@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11
 
 COPY --from=olsrd-builder /out /
 COPY --from=babeld-builder /out /
@@ -167,13 +167,13 @@ ARG ZLIB_VERSION=1.3.2-r0
 # renovate: datasource=repology depName=alpine_3_23/lzo
 ARG LZO_VERSION=2.10-r5
 # renovate: datasource=repology depName=alpine_3_23/openssl
-ARG OPENSSL_VERSION=3.5.5-r0
+ARG OPENSSL_VERSION=3.5.6-r0
 # renovate: datasource=repology depName=alpine_3_23/iptables
 ARG IPTABLES_VERSION=1.8.11-r1
 # renovate: datasource=repology depName=alpine_3_23/iproute2
 ARG IPRROUTE2_VERSION=6.17.0-r0
 # renovate: datasource=repology depName=alpine_3_23/rsyslog
-ARG RSYSLOG_VERSION=8.2512.0-r0
+ARG RSYSLOG_VERSION=8.2512.0-r1
 # renovate: datasource=repology depName=alpine_3_23/logrotate
 ARG LOGROTATE_VERSION=3.22.0-r0
 # renovate: datasource=repology depName=alpine_3_23/jq
@@ -189,7 +189,7 @@ ARG CRONIE_VERSION=1.7.2-r0
 # renovate: datasource=repology depName=alpine_3_23/json-c
 ARG JSONC_VERSION=0.18-r1
 # renovate: datasource=repology depName=alpine_3_23/ca-certificates
-ARG CA_CERTIFICATES_VERSION=20251003-r0
+ARG CA_CERTIFICATES_VERSION=20260413-r0
 # renovate: datasource=repology depName=alpine_3_23/tcpdump
 ARG TCPDUMP_VERSION=4.99.5-r1
 
