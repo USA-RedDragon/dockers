@@ -16,7 +16,7 @@ RUN printf '%s\n' \
     'MUSL_CONFIG += CFLAGS="-g0 -O2" CXXFLAGS="-g0 -O2"' \
     'MUSL_CONFIG += CFLAGS="-fPIC -O2"' \
     'GNU_SITE = https://ftpmirror.gnu.org/gnu' \
-    'DL_CMD = curl -fSL --retry 5 --retry-delay 3 --retry-all-errors -o' \
+    'DL_CMD = curl -fSL --retry 50 --retry-delay 5 --retry-all-errors -o' \
     'OUTPUT = /opt/cross' \
     > config.mak.base
 
