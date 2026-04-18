@@ -72,14 +72,16 @@ COPY --from=build-arm /opt/cross/ /opt/cross/
 COPY --from=build-aarch64 /opt/cross/ /opt/cross/
 COPY --from=build-x86_64 /opt/cross/ /opt/cross/
 COPY --from=build-riscv64 /opt/cross/ /opt/cross/
-ENV PATH="/opt/cross/bin:${PATH}"
+ENV PATH="/opt/cross/bin:${PATH}" \
+    CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER=x86_64-w64-mingw32-gcc
 
 # Tier 2 targets — pre-built std available on stable
 RUN rustup target add \
     armv7-unknown-linux-musleabihf \
     aarch64-unknown-linux-musl \
     x86_64-unknown-linux-musl \
-    riscv64gc-unknown-linux-musl
+    riscv64gc-unknown-linux-musl \
+    x86_64-pc-windows-gnu
 
 # Tier 3 targets (MIPS) — no pre-built std, requires nightly + build-std
 RUN rustup toolchain install nightly && \
@@ -89,6 +91,7 @@ RUN apt-get update && \
     apt-get install -y \
         --no-install-recommends \
         --no-install-suggests \
+            mingw-w64 \
             qemu-user-static \
     && \
     rm -rf /var/lib/apt/lists/*
