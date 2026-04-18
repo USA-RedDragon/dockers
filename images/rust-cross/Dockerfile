@@ -62,6 +62,37 @@ RUN cp config.mak.base config.mak && \
     printf '%s\n' 'TARGET = riscv64-linux-musl' >> config.mak && \
     make -j$(nproc) install
 
+FROM debian:12.13-slim@sha256:4724b8cc51e33e398f0e2e15e18d5ec2851ff0c2280647e1310bc1642182655d AS build-osxcross
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential cmake curl git patch \
+    liblzma-dev libxml2-dev libssl-dev zlib1g-dev \
+    python3 git bzip2 ca-certificates \
+    gnupg lsb-release software-properties-common wget \
+    && wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc \
+    && echo "deb http://apt.llvm.org/bookworm/ llvm-toolchain-bookworm-19 main" > /etc/apt/sources.list.d/llvm.list \
+    && apt-get update && apt-get install -y --no-install-recommends clang-19 \
+    && ln -sf /usr/bin/clang-19 /usr/bin/clang && ln -sf /usr/bin/clang++-19 /usr/bin/clang++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# renovate: sha: datasource=git-refs depName=osxcross packageName=https://github.com/tpoechtrager/osxcross branch=master
+ARG OSXCROSS_SHA=e6ab3fa7423f9235ce9ed6381d6d3af191b46b59
+
+ARG DARWIN_SDK_VERSION=26.4
+ARG DARWIN_OSX_VERSION_MIN=10.13
+
+RUN --mount=type=secret,id=DARWIN_SDK_URL \
+    mkdir -p /tmp/osxcross && cd /tmp/osxcross \
+    && git init . \
+    && git remote add origin https://github.com/tpoechtrager/osxcross.git \
+    && git fetch --depth 1 origin ${OSXCROSS_SHA} \
+    && git checkout FETCH_HEAD \
+    && curl -sLo tarballs/MacOSX${DARWIN_SDK_VERSION}.sdk.tar.bz2 "$(cat /run/secrets/DARWIN_SDK_URL)" \
+    && sed -i '/\*) echo "Unsupported SDK"/i\  26.4*) TARGET=darwin25.4;   SUPPORTED_ARCHS="arm64 arm64e x86_64 x86_64h"; NEED_TAPI_SUPPORT=1; OSX_VERSION_MIN_INT=10.13 ;;' build.sh \
+    && UNATTENDED=1 SDK_VERSION="${DARWIN_SDK_VERSION}" OSX_VERSION_MIN="${DARWIN_OSX_VERSION_MIN}" ./build.sh \
+    && mv target /opt/osxcross && mv tools /opt/osxcross/ \
+    && rm -rf /tmp/osxcross
+
 FROM rust:1.94.1-slim-bookworm@sha256:cf9dd0ec73e75f827fe59123fff9dc65af1a1c8363c3c31ee8d7f8ad0b6a5fb2
 
 COPY --from=build-mips /opt/cross/ /opt/cross/
@@ -72,16 +103,24 @@ COPY --from=build-arm /opt/cross/ /opt/cross/
 COPY --from=build-aarch64 /opt/cross/ /opt/cross/
 COPY --from=build-x86_64 /opt/cross/ /opt/cross/
 COPY --from=build-riscv64 /opt/cross/ /opt/cross/
-ENV PATH="/opt/cross/bin:${PATH}" \
-    CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER=x86_64-w64-mingw32-gcc
+COPY --from=build-osxcross /opt/osxcross/ /opt/osxcross/
 
-# Tier 2 targets — pre-built std available on stable
+ARG DARWIN_SDK_VERSION=25.4
+ENV PATH="/opt/cross/bin:/opt/osxcross/bin:${PATH}" \
+    LD_LIBRARY_PATH="/opt/osxcross/lib" \
+    CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER=x86_64-w64-mingw32-gcc \
+    CARGO_TARGET_X86_64_APPLE_DARWIN_LINKER=x86_64-apple-darwin${DARWIN_SDK_VERSION}-clang \
+    CARGO_TARGET_AARCH64_APPLE_DARWIN_LINKER=arm64-apple-darwin${DARWIN_SDK_VERSION}-clang
+
+# Tier 1 / Tier 2 targets — pre-built std available on stable
 RUN rustup target add \
     armv7-unknown-linux-musleabihf \
     aarch64-unknown-linux-musl \
     x86_64-unknown-linux-musl \
     riscv64gc-unknown-linux-musl \
-    x86_64-pc-windows-gnu
+    x86_64-pc-windows-gnu \
+    x86_64-apple-darwin \
+    aarch64-apple-darwin
 
 # Tier 3 targets (MIPS) — no pre-built std, requires nightly + build-std
 RUN rustup toolchain install nightly && \
