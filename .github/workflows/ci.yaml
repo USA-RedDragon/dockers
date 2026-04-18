@@ -66,7 +66,7 @@ jobs:
       contents: read
       packages: write
       security-events: write
-    uses: USA-RedDragon/reusable-actions/.github/workflows/docker-ci.yaml@fef709392f847baa6257606623b4893420433207 # v2.0.17
+    uses: USA-RedDragon/reusable-actions/.github/workflows/docker-ci.yaml@ba338faac060b1f62598fb2aea122db3926aad6e # v2.0.18
     with:
       push: ${{ github.event_name != 'pull_request' }}
       context: images/${{ matrix.image }}
@@ -75,6 +75,9 @@ jobs:
       image-name: ${{ needs.lowercase-user.outputs.user }}/${{ matrix.image }}
       version-from-artifact: ${{ matrix.image }}-version
       platforms: ${{ ( matrix.image != 'archlinux-pkgbuild' && matrix.image != 'symmetricds' ) && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
+    secrets:
+      secrets: |
+        DARWIN_SDK_URL: ${{ if ( matrix.image == 'rust-cross' ) && secrets.DARWIN_SDK_URL || '' }}
 
   docker-results:
     if: always()
