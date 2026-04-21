@@ -94,7 +94,7 @@ ARG CMAKE_VERSION=4.1.3-r0
 # renovate: datasource=repology depName=alpine_3_23/json-c
 ARG JSONC_VERSION=0.18-r1
 
-ARG UCODE_VERSION=14ef4139cef38fb5cc7b2c9848e8550f95d597fd
+ARG UCODE_VERSION=388ef3f35e0a2bb62a626ed86ed727af12bfff02
 
 RUN apk add --no-cache \
     git="${GIT_VERSION}" \
