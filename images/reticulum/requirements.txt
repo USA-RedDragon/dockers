@@ -1,0 +1,4 @@
+cryptography==47.0.0
+pyserial==3.5
+cffi==2.0.0
+pycparser==3.0
