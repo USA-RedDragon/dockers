@@ -1,4 +1,4 @@
-FROM debian:12.11-slim@sha256:90522eeb7e5923ee2b871c639059537b30521272f10ca86fdbbbb2b75a8c40cd
+FROM debian:13.4-slim@sha256:109e2c65005bf160609e4ba6acf7783752f8502ad218e298253428690b9eaa4b
 
 # renovate: datasource=github-releases depName=e2guardian/e2guardian
 ARG E2GUARDIAN_VERSION=v5.5.4r
