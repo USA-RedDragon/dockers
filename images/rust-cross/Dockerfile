@@ -93,7 +93,7 @@ RUN --mount=type=secret,id=DARWIN_SDK_URL \
     && mv target /opt/osxcross && mv tools /opt/osxcross/ \
     && rm -rf /tmp/osxcross
 
-FROM rust:1.94.1-slim-bookworm@sha256:cf9dd0ec73e75f827fe59123fff9dc65af1a1c8363c3c31ee8d7f8ad0b6a5fb2
+FROM rust:1.95.0-slim-bookworm@sha256:b8ecdb97c5b9c1ae058249f72710dbe33d4da19f7b8d911bd3c72e5f048af251
 
 COPY --from=build-mips /opt/cross/ /opt/cross/
 COPY --from=build-mips-sf /opt/cross/ /opt/cross/
