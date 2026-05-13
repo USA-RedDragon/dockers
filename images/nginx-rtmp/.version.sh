@@ -1,3 +1,3 @@
 #!/bin/sh
 # renovate: datasource=git-tags extractVersion=^release-(?<version>.*)$ depName=https://github.com/nginx/nginx.git
-export VERSION=1.30.1
+export VERSION=1.31.0
