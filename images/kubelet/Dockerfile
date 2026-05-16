@@ -12,7 +12,7 @@ FROM registry.k8s.io/build-image/debian-base:bookworm-v1.0.7
 # renovate: datasource=repology versioning=deb depName=debian_12/ca-certificates
 ARG CA_CERTIFICATES_VERSION=20230311+deb12u1
 # renovate: datasource=repology versioning=deb depName=debian_12/libcap2
-ARG LIBCAP_VERSION=1:2.66-4+deb12u2+b2
+ARG LIBCAP_VERSION=1:2.66-4+deb12u3
 # renovate: datasource=repology versioning=deb depName=debian_12/ethtool
 ARG ETHTOOL_VERSION=1:6.1-1
 # renovate: datasource=repology versioning=deb depName=debian_12/iproute2
