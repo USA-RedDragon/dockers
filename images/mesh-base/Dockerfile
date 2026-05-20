@@ -192,6 +192,8 @@ ARG JSONC_VERSION=0.18-r1
 ARG CA_CERTIFICATES_VERSION=20260413-r0
 # renovate: datasource=repology depName=alpine_3_23/tcpdump
 ARG TCPDUMP_VERSION=4.99.5-r1
+# renovate: datasource=repology depName=alpine_3_23/inotify-tools
+ARG INOTIFY_TOOLS_VERSION=4.23.9.0-r0
 
 RUN apk add --no-cache \
     bash="${BASH_VERSION}" \
@@ -210,7 +212,8 @@ RUN apk add --no-cache \
     cronie="${CRONIE_VERSION}" \
     json-c="${JSONC_VERSION}" \
     ca-certificates="${CA_CERTIFICATES_VERSION}" \
-    tcpdump="${TCPDUMP_VERSION}"
+    tcpdump="${TCPDUMP_VERSION}" \
+    inotify-tools="${INOTIFY_TOOLS_VERSION}"
 
 RUN sed -i 's/module(load="imklog")//g' /etc/rsyslog.conf
 
