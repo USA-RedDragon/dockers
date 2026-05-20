@@ -161,7 +161,7 @@ COPY --from=dnsmasq-builder /out /
 # renovate: datasource=repology depName=alpine_3_23/bash
 ARG BASH_VERSION=5.3.3-r1
 # renovate: datasource=repology depName=alpine_3_23/curl
-ARG CURL_VERSION=8.17.0-r1
+ARG CURL_VERSION=8.19.0-r0
 # renovate: datasource=repology depName=alpine_3_23/zlib
 ARG ZLIB_VERSION=1.3.2-r0
 # renovate: datasource=repology depName=alpine_3_23/lzo
