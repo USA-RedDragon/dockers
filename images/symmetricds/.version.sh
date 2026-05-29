@@ -1,3 +1,3 @@
 #!/bin/sh
 # renovate: datasource=docker depName=docker.io/jumpmind/symmetricds
-export VERSION=3.17.4
+export VERSION=3.17.5
