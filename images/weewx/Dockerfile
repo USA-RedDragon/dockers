@@ -30,7 +30,7 @@ ARG CA_CERTIFICATES_VERSION=20230311+deb12u1
 # renovate: datasource=repology versioning=deb depName=debian_12/curl
 ARG CURL_VERSION=7.88.1-10+deb12u14
 # renovate: datasource=repology versioning=deb depName=debian_12/tzdata
-ARG TZDATA_VERSION=2025b-0+deb12u2
+ARG TZDATA_VERSION=2026b-0+deb12u1
 # renovate: datasource=repology versioning=deb depName=debian_12/fonts-freefont
 ARG FONTS_FREEFONT_VERSION=20120503-10
 # renovate: datasource=repology versioning=deb depName=debian_12/s6
