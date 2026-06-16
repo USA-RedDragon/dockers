@@ -1,4 +1,4 @@
-FROM alpine:3.24.0@sha256:660e0827bd401543d81323d4886abbd08fda0fe3ba84337837d0b11a67251283 AS olsrd-builder
+FROM alpine:3.24.1@sha256:bec4ccd3817e7c824eb0388971a0b83fab111d586285511ba0266b77e8dc65a9 AS olsrd-builder
 
 WORKDIR /tmp
 RUN mkdir -p /out
@@ -38,7 +38,7 @@ RUN git clone https://github.com/USA-RedDragon/olsrd.git \
     && cd .. \
     && rm -rf olsrd
 
-FROM alpine:3.24.0@sha256:660e0827bd401543d81323d4886abbd08fda0fe3ba84337837d0b11a67251283 AS babeld-builder
+FROM alpine:3.24.1@sha256:bec4ccd3817e7c824eb0388971a0b83fab111d586285511ba0266b77e8dc65a9 AS babeld-builder
 
 WORKDIR /tmp
 RUN mkdir -p /out
@@ -72,7 +72,7 @@ RUN git clone https://github.com/USA-RedDragon/babeld.git \
     && cd .. \
     && rm -rf babeld
 
-FROM alpine:3.24.0@sha256:660e0827bd401543d81323d4886abbd08fda0fe3ba84337837d0b11a67251283 AS ucode-builder
+FROM alpine:3.24.1@sha256:bec4ccd3817e7c824eb0388971a0b83fab111d586285511ba0266b77e8dc65a9 AS ucode-builder
 
 WORKDIR /tmp
 RUN mkdir -p /out
@@ -114,7 +114,7 @@ RUN git clone https://github.com/jow-/ucode.git \
     && cd .. \
     && rm -rf ucode
 
-FROM alpine:3.24.0@sha256:660e0827bd401543d81323d4886abbd08fda0fe3ba84337837d0b11a67251283 AS dnsmasq-builder
+FROM alpine:3.24.1@sha256:bec4ccd3817e7c824eb0388971a0b83fab111d586285511ba0266b77e8dc65a9 AS dnsmasq-builder
 
 WORKDIR /tmp
 RUN mkdir -p /out
@@ -151,7 +151,7 @@ RUN git clone https://thekelleys.org.uk/git/dnsmasq.git \
     && cd .. \
     && rm -rf dnsmasq
 
-FROM alpine:3.24.0@sha256:660e0827bd401543d81323d4886abbd08fda0fe3ba84337837d0b11a67251283
+FROM alpine:3.24.1@sha256:bec4ccd3817e7c824eb0388971a0b83fab111d586285511ba0266b77e8dc65a9
 
 COPY --from=olsrd-builder /out /
 COPY --from=babeld-builder /out /
@@ -167,7 +167,7 @@ ARG ZLIB_VERSION=1.3.2-r0
 # renovate: datasource=repology depName=alpine_3_24/lzo
 ARG LZO_VERSION=2.10-r5
 # renovate: datasource=repology depName=alpine_3_24/openssl
-ARG OPENSSL_VERSION=3.5.6-r0
+ARG OPENSSL_VERSION=3.5.7-r0
 # renovate: datasource=repology depName=alpine_3_24/iptables
 ARG IPTABLES_VERSION=1.8.13-r0
 # renovate: datasource=repology depName=alpine_3_24/iproute2
@@ -189,7 +189,7 @@ ARG CRONIE_VERSION=1.7.2-r1
 # renovate: datasource=repology depName=alpine_3_24/json-c
 ARG JSONC_VERSION=0.18-r1
 # renovate: datasource=repology depName=alpine_3_24/ca-certificates
-ARG CA_CERTIFICATES_VERSION=20260413-r0
+ARG CA_CERTIFICATES_VERSION=20260611-r0
 # renovate: datasource=repology depName=alpine_3_24/tcpdump
 ARG TCPDUMP_VERSION=4.99.6-r1
 # renovate: datasource=repology depName=alpine_3_24/inotify-tools

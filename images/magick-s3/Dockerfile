@@ -1,4 +1,4 @@
-FROM alpine:3.24.0@sha256:660e0827bd401543d81323d4886abbd08fda0fe3ba84337837d0b11a67251283
+FROM alpine:3.24.1@sha256:bec4ccd3817e7c824eb0388971a0b83fab111d586285511ba0266b77e8dc65a9
 
 # renovate: datasource=repology depName=alpine_3_24/aws-cli
 ARG AWS_CLI_VERSION=2.34.63-r0
