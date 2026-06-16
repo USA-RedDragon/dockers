@@ -10,13 +10,13 @@ ARG GCC_VERSION=15.2.0-r5
 # renovate: datasource=repology depName=alpine_3_24/make
 ARG MAKE_VERSION=4.4.1-r4
 # renovate: datasource=repology depName=alpine_3_24/openssl
-ARG OPENSSL_VERSION=3.5.6-r0
+ARG OPENSSL_VERSION=3.5.7-r0
 # renovate: datasource=repology depName=alpine_3_24/pcre
 ARG PCRE_VERSION=8.45-r4
 # renovate: datasource=repology depName=alpine_3_24/zlib
 ARG ZLIB_VERSION=1.3.2-r0
 # renovate: datasource=repology depName=alpine_3_24/ca-certificates
-ARG CA_CERTIFICATES_VERSION=20260413-r0
+ARG CA_CERTIFICATES_VERSION=20260611-r0
 
 ################################
 # ffmpeg runtime dependencies
@@ -32,7 +32,7 @@ ARG LIBOGG_VERSION=1.3.6-r0
 # renovate: datasource=repology depName=alpine_3_24/libass
 ARG LIBASS_VERSION=0.17.4-r1
 # renovate: datasource=repology depName=alpine_3_24/libvpx
-ARG LIBVPX_VERSION=1.15.2-r0
+ARG LIBVPX_VERSION=1.15.2-r1
 # renovate: datasource=repology depName=alpine_3_24/libvorbis
 ARG LIBVORBIS_VERSION=1.3.7-r2
 # renovate: datasource=repology depName=alpine_3_24/libwebp
@@ -48,7 +48,7 @@ ARG X264_VERSION=0.164.3108-r1
 # renovate: datasource=repology depName=alpine_3_24/x265
 ARG X265_VERSION=4.1-r0
 
-FROM alpine:3.24.0@sha256:660e0827bd401543d81323d4886abbd08fda0fe3ba84337837d0b11a67251283 AS build-nginx
+FROM alpine:3.24.1@sha256:bec4ccd3817e7c824eb0388971a0b83fab111d586285511ba0266b77e8dc65a9 AS build-nginx
 
 ARG MUSL_VERSION
 ARG CURL_VERSION
@@ -108,7 +108,7 @@ RUN \
 
 ###############################
 # Build the FFmpeg-build image.
-FROM alpine:3.24.0@sha256:660e0827bd401543d81323d4886abbd08fda0fe3ba84337837d0b11a67251283 AS build-ffmpeg
+FROM alpine:3.24.1@sha256:bec4ccd3817e7c824eb0388971a0b83fab111d586285511ba0266b77e8dc65a9 AS build-ffmpeg
 
 ARG MUSL_VERSION
 ARG CURL_VERSION
@@ -202,7 +202,7 @@ RUN rm -rf /var/cache/* /tmp/*
 
 ##########################
 # Build the release image.
-FROM alpine:3.24.0@sha256:660e0827bd401543d81323d4886abbd08fda0fe3ba84337837d0b11a67251283
+FROM alpine:3.24.1@sha256:bec4ccd3817e7c824eb0388971a0b83fab111d586285511ba0266b77e8dc65a9
 
 # Set default ports.
 ENV HTTP_PORT=80
