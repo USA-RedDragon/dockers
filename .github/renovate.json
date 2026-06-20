@@ -7,6 +7,15 @@
   "separateMultipleMinor": true,
   "separateMultipleMajor": true,
   "separateMajorMinor": true,
+  "customDatasources": {
+    "aredn-snapshot": {
+      "defaultRegistryUrlTemplate": "https://downloads.arednmesh.org/snapshots/targets/x86/64/profiles.json",
+      "format": "json",
+      "transformTemplates": [
+        "{ \"releases\": [ { \"version\": version_number } ] }"
+      ]
+    }
+  },
   "customManagers": [
     {
       "customType": "regex",
@@ -63,6 +72,12 @@
     }
   ],
   "packageRules": [
+    {
+      "matchDatasources": [
+        "custom.aredn-snapshot"
+      ],
+      "versioning": "regex:^(?<major>\\d{4})(?<minor>\\d{2})(?<patch>\\d{2})-[0-9a-f]+$"
+    },
     {
       "groupName": "Alpine and packages",
       "matchDatasources": [
