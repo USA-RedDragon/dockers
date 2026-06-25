@@ -1,4 +1,4 @@
-FROM debian:12.13-slim@sha256:4724b8cc51e33e398f0e2e15e18d5ec2851ff0c2280647e1310bc1642182655d AS toolchain-base
+FROM debian:12.13-slim@sha256:67b30a61dc87758f0caf819646104f29ecbda97d920aaf5edc834128ac8493d3 AS toolchain-base
 
 RUN apt-get update && apt-get install -y \
     build-essential file git curl wget patch
@@ -62,7 +62,7 @@ RUN cp config.mak.base config.mak && \
     printf '%s\n' 'TARGET = riscv64-linux-musl' >> config.mak && \
     make -j$(nproc) install
 
-FROM debian:12.13-slim@sha256:4724b8cc51e33e398f0e2e15e18d5ec2851ff0c2280647e1310bc1642182655d AS build-osxcross
+FROM debian:12.13-slim@sha256:67b30a61dc87758f0caf819646104f29ecbda97d920aaf5edc834128ac8493d3 AS build-osxcross
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential cmake curl git patch \
