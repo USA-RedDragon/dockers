@@ -1,3 +1,3 @@
 #!/bin/sh
 # renovate: datasource=docker depName=docker.io/rust
-export VERSION=1.94.1
+export VERSION=1.95.0
