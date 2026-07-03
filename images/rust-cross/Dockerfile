@@ -157,3 +157,97 @@ RUN apt-get update && \
         curl \
         unzip \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates gnupg wget \
+    && wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc >/dev/null \
+    && echo "deb http://apt.llvm.org/bookworm/ llvm-toolchain-bookworm-19 main" > /etc/apt/sources.list.d/llvm.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends libclang-19-dev \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+ENV LIBCLANG_PATH=/usr/lib/llvm-19/lib
+
+RUN dpkg --add-architecture arm64 && \
+    dpkg --add-architecture armhf && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+        openjdk-17-jdk-headless \
+        pkg-config \
+        gcc-aarch64-linux-gnu g++-aarch64-linux-gnu \
+        gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf \
+        libasound2-dev libx11-dev libxcursor-dev libxrandr-dev libxi-dev \
+        libwayland-dev libxkbcommon-dev libudev-dev \
+        libasound2-dev:arm64 libx11-dev:arm64 libxcursor-dev:arm64 \
+        libxrandr-dev:arm64 libxi-dev:arm64 libwayland-dev:arm64 \
+        libxkbcommon-dev:arm64 libudev-dev:arm64 \
+        libasound2-dev:armhf libx11-dev:armhf libxcursor-dev:armhf \
+        libxrandr-dev:armhf libxi-dev:armhf libwayland-dev:armhf \
+        libxkbcommon-dev:armhf libudev-dev:armhf \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-${TARGETARCH}
+
+RUN rustup target add \
+    x86_64-unknown-linux-gnu \
+    aarch64-unknown-linux-gnu \
+    armv7-unknown-linux-gnueabihf \
+    wasm32-unknown-unknown \
+    aarch64-linux-android \
+    armv7-linux-androideabi \
+    x86_64-linux-android \
+    i686-linux-android
+
+ENV CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc \
+    CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER=arm-linux-gnueabihf-gcc \
+    PKG_CONFIG_ALLOW_CROSS=1 \
+    PKG_CONFIG_SYSROOT_DIR=/ \
+    PKG_CONFIG_PATH_x86_64_unknown_linux_gnu=/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig \
+    PKG_CONFIG_PATH_aarch64_unknown_linux_gnu=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig \
+    PKG_CONFIG_PATH_armv7_unknown_linux_gnueabihf=/usr/lib/arm-linux-gnueabihf/pkgconfig:/usr/share/pkgconfig
+
+ARG ANDROID_CMDLINE_TOOLS_VERSION=13114758
+ARG ANDROID_PLATFORM_VERSION=android-34
+ARG ANDROID_BUILD_TOOLS_VERSION=36.0.0
+ARG ANDROID_NDK_VERSION=26.1.10909125
+ENV ANDROID_HOME=/opt/android-sdk \
+    ANDROID_SDK_ROOT=/opt/android-sdk
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl unzip && \
+    mkdir -p "${ANDROID_HOME}/cmdline-tools" && \
+    curl -fSL -o /tmp/cmdline-tools.zip \
+        "https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_CMDLINE_TOOLS_VERSION}_latest.zip" && \
+    unzip -q /tmp/cmdline-tools.zip -d "${ANDROID_HOME}/cmdline-tools" && \
+    mv "${ANDROID_HOME}/cmdline-tools/cmdline-tools" "${ANDROID_HOME}/cmdline-tools/latest" && \
+    yes | "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null && \
+    "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" \
+        "platform-tools" \
+        "platforms;${ANDROID_PLATFORM_VERSION}" \
+        "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" \
+        "ndk;${ANDROID_NDK_VERSION}" >/dev/null && \
+    apt-get -y remove --purge curl unzip && apt-get -y autoremove && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* "${ANDROID_HOME}/.android"
+ENV ANDROID_NDK_ROOT=/opt/android-sdk/ndk/${ANDROID_NDK_VERSION} \
+    ANDROID_NDK_HOME=/opt/android-sdk/ndk/${ANDROID_NDK_VERSION} \
+    PATH="/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools:${PATH}"
+
+    # renovate: datasource=crate depName=cargo-ndk
+ARG CARGO_NDK_VERSION=4.1.2
+ARG WASM_BINDGEN_VERSION=0.2.104
+RUN cargo install cargo-ndk --version "${CARGO_NDK_VERSION}" --locked && \
+    cargo install wasm-bindgen-cli --version "${WASM_BINDGEN_VERSION}" --locked && \
+    rm -rf "${CARGO_HOME}/registry/cache" "${CARGO_HOME}/registry/src" "${CARGO_HOME}/git"
+
+# renovate: datasource=github-releases depName=WebAssembly/binaryen
+ARG BINARYEN_VERSION=version_130
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl && \
+    ARCH="${TARGETARCH}" && \
+    if [ "${TARGETARCH}" = "arm64" ]; then ARCH="aarch64"; fi && \
+    if [ "${TARGETARCH}" = "amd64" ]; then ARCH="x86_64"; fi && \
+    curl -fSL -o /tmp/binaryen.tar.gz \
+        "https://github.com/WebAssembly/binaryen/releases/download/${BINARYEN_VERSION}/binaryen-${BINARYEN_VERSION}-${ARCH}-linux.tar.gz" && \
+    tar -xzf /tmp/binaryen.tar.gz -C /opt && \
+    mv "/opt/binaryen-${BINARYEN_VERSION}" /opt/binaryen && \
+    ln -s /opt/binaryen/bin/wasm-opt /usr/local/bin/wasm-opt && \
+    apt-get -y remove --purge curl && apt-get -y autoremove && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
