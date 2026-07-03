@@ -166,7 +166,9 @@ RUN apt-get update && \
     && apt-get update \
     && apt-get install -y --no-install-recommends libclang-19-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
-ENV LIBCLANG_PATH=/usr/lib/llvm-19/lib
+
+ENV LIBCLANG_PATH=/usr/lib/llvm-19/lib \
+    BINDGEN_EXTRA_CLANG_ARGS="-isystem /usr/lib/llvm-19/lib/clang/19/include"
 
 RUN dpkg --add-architecture arm64 && \
     dpkg --add-architecture armhf && \
@@ -196,6 +198,11 @@ RUN rustup target add \
     armv7-linux-androideabi \
     x86_64-linux-android \
     i686-linux-android
+
+ENV CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER=x86_64-linux-musl-gcc \
+    CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aarch64-linux-musl-gcc \
+    CARGO_TARGET_ARMV7_UNKNOWN_LINUX_MUSLEABIHF_LINKER=arm-linux-musleabihf-gcc \
+    CARGO_TARGET_RISCV64GC_UNKNOWN_LINUX_MUSL_LINKER=riscv64-linux-musl-gcc
 
 ENV CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc \
     CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER=arm-linux-gnueabihf-gcc \
@@ -229,13 +236,6 @@ RUN apt-get update && \
 ENV ANDROID_NDK_ROOT=/opt/android-sdk/ndk/${ANDROID_NDK_VERSION} \
     ANDROID_NDK_HOME=/opt/android-sdk/ndk/${ANDROID_NDK_VERSION} \
     PATH="/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools:${PATH}"
-
-    # renovate: datasource=crate depName=cargo-ndk
-ARG CARGO_NDK_VERSION=4.1.2
-ARG WASM_BINDGEN_VERSION=0.2.104
-RUN cargo install cargo-ndk --version "${CARGO_NDK_VERSION}" --locked && \
-    cargo install wasm-bindgen-cli --version "${WASM_BINDGEN_VERSION}" --locked && \
-    rm -rf "${CARGO_HOME}/registry/cache" "${CARGO_HOME}/registry/src" "${CARGO_HOME}/git"
 
 # renovate: datasource=github-releases depName=WebAssembly/binaryen
 ARG BINARYEN_VERSION=version_130
