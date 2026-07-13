@@ -117,9 +117,10 @@ COPY --from=build-riscv64 /opt/cross/ /opt/cross/
 COPY --from=build-osxcross /opt/osxcross/ /opt/osxcross/
 
 ARG DARWIN_SDK_VERSION=25.4
-ENV PATH="/opt/cross/bin:/opt/osxcross/bin:${PATH}" \
+ENV PATH="/opt/cross/bin:/opt/osxcross/bin:/opt/llvm-mingw/bin:${PATH}" \
     LD_LIBRARY_PATH="/opt/osxcross/lib" \
-    CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER=x86_64-w64-mingw32-gcc \
+    CARGO_TARGET_X86_64_PC_WINDOWS_GNULLVM_LINKER=x86_64-w64-mingw32-clang \
+    CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_LINKER=aarch64-w64-mingw32-clang \
     CARGO_TARGET_X86_64_APPLE_DARWIN_LINKER=x86_64-apple-darwin${DARWIN_SDK_VERSION}-clang \
     CARGO_TARGET_AARCH64_APPLE_DARWIN_LINKER=arm64-apple-darwin${DARWIN_SDK_VERSION}-clang
 
@@ -129,7 +130,8 @@ RUN rustup target add \
     aarch64-unknown-linux-musl \
     x86_64-unknown-linux-musl \
     riscv64gc-unknown-linux-musl \
-    x86_64-pc-windows-gnu \
+    x86_64-pc-windows-gnullvm \
+    aarch64-pc-windows-gnullvm \
     x86_64-apple-darwin \
     aarch64-apple-darwin
 
@@ -141,10 +143,27 @@ RUN apt-get update && \
     apt-get install -y \
         --no-install-recommends \
         --no-install-suggests \
-            mingw-w64 \
             qemu-user-static \
     && \
     rm -rf /var/lib/apt/lists/*
+
+# LLVM/Clang-based MinGW toolchain, providing the *-w64-mingw32-clang linkers
+# used by the x86_64/aarch64-pc-windows-gnullvm targets. One toolchain targets
+# both Windows arches; extracted to a stable /opt/llvm-mingw on PATH.
+# renovate: datasource=github-releases depName=mstorsjo/llvm-mingw
+ARG LLVM_MINGW_VERSION=20260616
+ARG TARGETARCH
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl xz-utils && \
+    ARCH="${TARGETARCH}" && \
+    if [ "${TARGETARCH}" = "arm64" ]; then ARCH="aarch64"; fi && \
+    if [ "${TARGETARCH}" = "amd64" ]; then ARCH="x86_64"; fi && \
+    curl -fSL -o /tmp/llvm-mingw.tar.xz \
+        "https://github.com/mstorsjo/llvm-mingw/releases/download/${LLVM_MINGW_VERSION}/llvm-mingw-${LLVM_MINGW_VERSION}-ucrt-ubuntu-22.04-${ARCH}.tar.xz" && \
+    mkdir -p /opt/llvm-mingw && \
+    tar -xJf /tmp/llvm-mingw.tar.xz -C /opt/llvm-mingw --strip-components=1 && \
+    apt-get -y remove --purge curl xz-utils && apt-get -y autoremove && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # renovate: datasource=github-releases depName=protocolbuffers/protobuf
 ARG PROTOBUF_VERSION=v34.1
