@@ -1,4 +1,6 @@
-FROM debian:12.13-slim@sha256:4724b8cc51e33e398f0e2e15e18d5ec2851ff0c2280647e1310bc1642182655d AS toolchain-base
+FROM debian:13.5-slim@sha256:28de0877c2189802884ccd20f15ee41c203573bd87bb6b883f5f46362d24c5c2 AS toolchain-base
+
+ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y \
     build-essential file git curl wget patch
@@ -78,17 +80,15 @@ RUN cp config.mak.base config.mak && \
     printf '%s\n' 'TARGET = riscv64-linux-musl' >> config.mak && \
     make -j$(nproc) install
 
-FROM debian:12.13-slim@sha256:4724b8cc51e33e398f0e2e15e18d5ec2851ff0c2280647e1310bc1642182655d AS build-osxcross
+FROM debian:13.5-slim@sha256:28de0877c2189802884ccd20f15ee41c203573bd87bb6b883f5f46362d24c5c2 AS build-osxcross
+
+ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential cmake curl git patch \
     liblzma-dev libxml2-dev libssl-dev zlib1g-dev \
     python3 git bzip2 ca-certificates \
-    gnupg lsb-release software-properties-common wget \
-    && wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc \
-    && echo "deb http://apt.llvm.org/bookworm/ llvm-toolchain-bookworm-19 main" > /etc/apt/sources.list.d/llvm.list \
-    && apt-get update && apt-get install -y --no-install-recommends clang-19 \
-    && ln -sf /usr/bin/clang-19 /usr/bin/clang && ln -sf /usr/bin/clang++-19 /usr/bin/clang++ \
+    gnupg lsb-release wget clang libclang-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # renovate: sha: datasource=git-refs depName=osxcross packageName=https://github.com/tpoechtrager/osxcross branch=master
@@ -113,7 +113,9 @@ RUN --mount=type=secret,id=IOS_SDK_URL \
     mkdir -p /opt/ios-sdk && \
     curl -fsSL "$(cat /run/secrets/IOS_SDK_URL)" | tar -xj -C /opt/ios-sdk
 
-FROM rust:1.94.1-slim-bookworm@sha256:cf9dd0ec73e75f827fe59123fff9dc65af1a1c8363c3c31ee8d7f8ad0b6a5fb2
+FROM rust:1.94.1-slim-trixie@sha256:cf09adf8c3ebaba10779e5c23ff7fe4df4cccdab8a91f199b0c142c53fef3e1a
+
+ARG DEBIAN_FRONTEND=noninteractive
 
 COPY --from=build-mips /opt/cross/ /opt/cross/
 COPY --from=build-mips-sf /opt/cross/ /opt/cross/
@@ -216,9 +218,10 @@ RUN apt-get update && \
 RUN dpkg --add-architecture arm64 && \
     dpkg --add-architecture armhf && \
     dpkg --add-architecture i386 && \
+    dpkg --add-architecture riscv64 && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
-        openjdk-17-jdk-headless \
+        openjdk-21-jdk-headless \
         pkg-config \
         gcc-aarch64-linux-gnu g++-aarch64-linux-gnu \
         gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf \
@@ -234,9 +237,12 @@ RUN dpkg --add-architecture arm64 && \
         libasound2-dev:i386 libx11-dev:i386 libxcursor-dev:i386 \
         libxrandr-dev:i386 libxi-dev:i386 libwayland-dev:i386 \
         libxkbcommon-dev:i386 libudev-dev:i386 \
-        clang libclang-dev libc6-dev-i386 lib32gcc-12-dev \
+        libasound2-dev:riscv64 libx11-dev:riscv64 libxcursor-dev:riscv64 \
+        libxrandr-dev:riscv64 libxi-dev:riscv64 libwayland-dev:riscv64 \
+        libxkbcommon-dev:riscv64 libudev-dev:riscv64 \
+        clang libclang-dev libc6-dev-i386 lib32gcc-14-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-${TARGETARCH}
+ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk-${TARGETARCH}
 
 ENV CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER=x86_64-linux-musl-gcc \
     CARGO_TARGET_I686_UNKNOWN_LINUX_MUSL_LINKER=i686-linux-musl-gcc \
