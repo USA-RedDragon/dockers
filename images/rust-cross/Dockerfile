@@ -223,8 +223,8 @@ ENV CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc \
     PKG_CONFIG_PATH_aarch64_unknown_linux_gnu=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig \
     PKG_CONFIG_PATH_armv7_unknown_linux_gnueabihf=/usr/lib/arm-linux-gnueabihf/pkgconfig:/usr/share/pkgconfig
 
-ARG ANDROID_CMDLINE_TOOLS_VERSION=13114758
-ARG ANDROID_PLATFORM_VERSION=android-37
+ARG ANDROID_CMDLINE_TOOLS_VERSION=15641748
+ARG ANDROID_PLATFORM_VERSION=android-37.0
 ARG ANDROID_BUILD_TOOLS_VERSION=37.0.0
 ARG ANDROID_NDK_VERSION=27.3.13750724
 ENV ANDROID_HOME=/opt/android-sdk \
