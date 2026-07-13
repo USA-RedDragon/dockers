@@ -129,6 +129,7 @@ RUN rustup target add \
     armv7-unknown-linux-musleabihf \
     aarch64-unknown-linux-musl \
     x86_64-unknown-linux-musl \
+    riscv64gc-unknown-linux-gnu \
     riscv64gc-unknown-linux-musl \
     x86_64-pc-windows-gnullvm \
     aarch64-pc-windows-gnullvm \
@@ -210,6 +211,7 @@ RUN dpkg --add-architecture arm64 && \
         pkg-config \
         gcc-aarch64-linux-gnu g++-aarch64-linux-gnu \
         gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf \
+        gcc-riscv64-linux-gnu g++-riscv64-linux-gnu \
         libasound2-dev libx11-dev libxcursor-dev libxrandr-dev libxi-dev \
         libwayland-dev libxkbcommon-dev libudev-dev \
         libasound2-dev:arm64 libx11-dev:arm64 libxcursor-dev:arm64 \
@@ -238,6 +240,7 @@ ENV CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER=x86_64-linux-musl-gcc \
 
 ENV CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc \
     CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER=arm-linux-gnueabihf-gcc \
+    CARGO_TARGET_RISCV64GC_UNKNOWN_LINUX_GNU_LINKER=riscv64-linux-gnu-gcc \
     PKG_CONFIG_ALLOW_CROSS=1 \
     PKG_CONFIG_SYSROOT_DIR=/ \
     PKG_CONFIG_PATH_x86_64_unknown_linux_gnu=/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig \
