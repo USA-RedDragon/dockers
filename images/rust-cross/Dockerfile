@@ -9,6 +9,17 @@ ARG MUSL_CROSS_MAKE_VERSION=v0.9.11
 RUN git clone --single-branch --branch ${MUSL_CROSS_MAKE_VERSION} --depth 1 https://github.com/richfelker/musl-cross-make.git /build/musl-cross-make
 WORKDIR /build/musl-cross-make
 
+# git.savannah.gnu.org (musl-cross-make's config.sub source) is frequently down.
+# Pre-seed the EXACT pinned revision (3d5db9ebe860) from Software Heritage, which
+# is content-addressed by the same sha1 musl-cross-make verifies. Because the file
+# then already exists, make's download rule (an order-only prereq) never runs, so
+# savannah is never contacted — but it's byte-identical to the pin, not a rolling
+# gcc config.sub. The sha1 check keeps it honest if SWH ever changes.
+RUN mkdir -p sources && \
+    curl -fSL --retry 5 -o sources/config.sub \
+      "https://archive.softwareheritage.org/api/1/content/sha1:7d66e32bb3cce017e1cc9bef59fb6f8271fb7fec/raw/" && \
+    echo "7d66e32bb3cce017e1cc9bef59fb6f8271fb7fec  sources/config.sub" | sha1sum -c -
+
 RUN printf '%s\n' \
     'COMMON_CONFIG += --disable-nls' \
     'GCC_CONFIG += --disable-libquadmath --disable-decimal-float' \
@@ -16,7 +27,7 @@ RUN printf '%s\n' \
     'MUSL_CONFIG += CFLAGS="-g0 -O2" CXXFLAGS="-g0 -O2"' \
     'MUSL_CONFIG += CFLAGS="-fPIC -O2"' \
     'GNU_SITE = https://mirrors.kernel.org/gnu' \
-    'DL_CMD = curl -fSL --retry 5 --retry-delay 5 --retry-all-errors -o' \
+    'DL_CMD = curl -fSL --connect-timeout 30 --retry 5 --retry-delay 5 --retry-all-errors -o' \
     'OUTPUT = /opt/cross' \
     > config.mak.base
 
