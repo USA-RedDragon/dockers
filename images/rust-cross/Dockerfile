@@ -128,8 +128,7 @@ COPY --from=build-osxcross /opt/osxcross/ /opt/osxcross/
 COPY --from=build-osxcross /opt/ios-sdk/ /opt/ios-sdk/
 
 ARG DARWIN_SDK_VERSION=25.4
-ARG IOS_SDK_VERSION=26.4
-ENV IOS_SDKROOT=/opt/ios-sdk/iPhoneOS${IOS_SDK_VERSION}.sdk
+ENV IOS_SDKROOT=/opt/ios-sdk/iPhoneOS.sdk
 ENV PATH="/opt/cross/bin:/opt/osxcross/bin:/opt/llvm-mingw/bin:${PATH}" \
     LD_LIBRARY_PATH="/opt/osxcross/lib" \
     CARGO_TARGET_X86_64_PC_WINDOWS_GNULLVM_LINKER=x86_64-w64-mingw32-clang \
