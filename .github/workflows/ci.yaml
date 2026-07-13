@@ -78,6 +78,7 @@ jobs:
     secrets:
       secrets: |
         DARWIN_SDK_URL: ${{ ( matrix.image == 'rust-cross' ) && secrets.DARWIN_SDK_URL || '' }}
+        IOS_SDK_URL: ${{ ( matrix.image == 'rust-cross' ) && secrets.IOS_SDK_URL || '' }}
 
   docker-results:
     if: always()
