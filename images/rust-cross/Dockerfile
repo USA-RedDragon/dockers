@@ -215,6 +215,7 @@ RUN apt-get update && \
 
 RUN dpkg --add-architecture arm64 && \
     dpkg --add-architecture armhf && \
+    dpkg --add-architecture i386 && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
         openjdk-17-jdk-headless \
@@ -230,6 +231,9 @@ RUN dpkg --add-architecture arm64 && \
         libasound2-dev:armhf libx11-dev:armhf libxcursor-dev:armhf \
         libxrandr-dev:armhf libxi-dev:armhf libwayland-dev:armhf \
         libxkbcommon-dev:armhf libudev-dev:armhf \
+        libasound2-dev:i386 libx11-dev:i386 libxcursor-dev:i386 \
+        libxrandr-dev:i386 libxi-dev:i386 libwayland-dev:i386 \
+        libxkbcommon-dev:i386 libudev-dev:i386 \
         clang libclang-dev libc6-dev-i386 lib32gcc-12-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-${TARGETARCH}
@@ -248,6 +252,13 @@ ENV CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc \
     PKG_CONFIG_PATH_x86_64_unknown_linux_gnu=/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig \
     PKG_CONFIG_PATH_aarch64_unknown_linux_gnu=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig \
     PKG_CONFIG_PATH_armv7_unknown_linux_gnueabihf=/usr/lib/arm-linux-gnueabihf/pkgconfig:/usr/share/pkgconfig
+
+ENV CC_x86_64_apple_darwin=x86_64-apple-darwin25.4-clang \
+    CXX_x86_64_apple_darwin=x86_64-apple-darwin25.4-clang++ \
+    AR_x86_64_apple_darwin=x86_64-apple-darwin25.4-ar \
+    CC_aarch64_apple_darwin=arm64-apple-darwin25.4-clang \
+    CXX_aarch64_apple_darwin=arm64-apple-darwin25.4-clang++ \
+    AR_aarch64_apple_darwin=arm64-apple-darwin25.4-ar
 
 RUN printf '#!/bin/sh\nexec clang -target arm64-apple-ios13.0 -isysroot "$IOS_SDKROOT" -mios-version-min=13.0 -fuse-ld=/opt/osxcross/bin/arm64-apple-darwin25.4-ld "$@"\n' \
       > /usr/local/bin/arm64-apple-ios-clang && chmod +x /usr/local/bin/arm64-apple-ios-clang
