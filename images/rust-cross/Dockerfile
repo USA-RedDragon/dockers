@@ -175,7 +175,7 @@ RUN apt-get update && \
     && wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc >/dev/null \
     && echo "deb http://apt.llvm.org/bookworm/ llvm-toolchain-bookworm-19 main" > /etc/apt/sources.list.d/llvm.list \
     && apt-get update \
-    && apt-get install -y --no-install-recommends libclang-19-dev \
+    && apt-get install -y --no-install-recommends libclang-19-dev clang-19 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ENV LIBCLANG_PATH=/usr/lib/llvm-19/lib \
