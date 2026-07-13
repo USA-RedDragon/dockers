@@ -63,6 +63,11 @@ RUN cp config.mak.base config.mak && \
     printf '%s\n' 'TARGET = aarch64-linux-musl' >> config.mak && \
     make -j$(nproc) install
 
+FROM toolchain-base AS build-i686
+RUN cp config.mak.base config.mak && \
+    printf '%s\n' 'TARGET = i686-linux-musl' >> config.mak && \
+    make -j$(nproc) install
+
 FROM toolchain-base AS build-x86_64
 RUN cp config.mak.base config.mak && \
     printf '%s\n' 'TARGET = x86_64-linux-musl' >> config.mak && \
@@ -104,6 +109,10 @@ RUN --mount=type=secret,id=DARWIN_SDK_URL \
     && mv target /opt/osxcross && mv tools /opt/osxcross/ \
     && rm -rf /tmp/osxcross
 
+RUN --mount=type=secret,id=IOS_SDK_URL \
+    mkdir -p /opt/ios-sdk && \
+    curl -fsSL "$(cat /run/secrets/IOS_SDK_URL)" | tar -xj -C /opt/ios-sdk
+
 FROM rust:1.94.1-slim-bookworm@sha256:cf9dd0ec73e75f827fe59123fff9dc65af1a1c8363c3c31ee8d7f8ad0b6a5fb2
 
 COPY --from=build-mips /opt/cross/ /opt/cross/
@@ -112,11 +121,15 @@ COPY --from=build-mipsel /opt/cross/ /opt/cross/
 COPY --from=build-mipsel-sf /opt/cross/ /opt/cross/
 COPY --from=build-arm /opt/cross/ /opt/cross/
 COPY --from=build-aarch64 /opt/cross/ /opt/cross/
+COPY --from=build-i686 /opt/cross/ /opt/cross/
 COPY --from=build-x86_64 /opt/cross/ /opt/cross/
 COPY --from=build-riscv64 /opt/cross/ /opt/cross/
 COPY --from=build-osxcross /opt/osxcross/ /opt/osxcross/
+COPY --from=build-osxcross /opt/ios-sdk/ /opt/ios-sdk/
 
 ARG DARWIN_SDK_VERSION=25.4
+ARG IOS_SDK_VERSION=26.4
+ENV IOS_SDKROOT=/opt/ios-sdk/iPhoneOS${IOS_SDK_VERSION}.sdk
 ENV PATH="/opt/cross/bin:/opt/osxcross/bin:/opt/llvm-mingw/bin:${PATH}" \
     LD_LIBRARY_PATH="/opt/osxcross/lib" \
     CARGO_TARGET_X86_64_PC_WINDOWS_GNULLVM_LINKER=x86_64-w64-mingw32-clang \
@@ -126,15 +139,27 @@ ENV PATH="/opt/cross/bin:/opt/osxcross/bin:/opt/llvm-mingw/bin:${PATH}" \
 
 # Tier 1 / Tier 2 targets — pre-built std available on stable
 RUN rustup target add \
-    armv7-unknown-linux-musleabihf \
-    aarch64-unknown-linux-musl \
+    x86_64-unknown-linux-gnu \
     x86_64-unknown-linux-musl \
+    x86_64-linux-android \
+    x86_64-pc-windows-gnullvm \
+    x86_64-apple-darwin \
+    aarch64-unknown-linux-gnu \
+    aarch64-unknown-linux-musl \
+    aarch64-linux-android \
+    aarch64-pc-windows-gnullvm \
+    aarch64-apple-darwin \
+    aarch64-apple-ios \
+    i686-linux-android \
+    i686-pc-windows-gnullvm \
+    i686-unknown-linux-gnu \
+    i686-unknown-linux-musl \
+    armv7-unknown-linux-gnueabihf \
+    armv7-unknown-linux-musleabihf \
+    armv7-linux-androideabi \
     riscv64gc-unknown-linux-gnu \
     riscv64gc-unknown-linux-musl \
-    x86_64-pc-windows-gnullvm \
-    aarch64-pc-windows-gnullvm \
-    x86_64-apple-darwin \
-    aarch64-apple-darwin
+    wasm32-unknown-unknown
 
 # Tier 3 targets (MIPS) — no pre-built std, requires nightly + build-std
 RUN rustup toolchain install nightly && \
@@ -189,20 +214,6 @@ RUN apt-get update && \
         unzip \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        ca-certificates gnupg wget \
-    && wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc >/dev/null \
-    && echo "deb http://apt.llvm.org/bookworm/ llvm-toolchain-bookworm-19 main" > /etc/apt/sources.list.d/llvm.list \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends libclang-19-dev clang-19 \
-    && ln -sf /usr/bin/clang-19 /usr/bin/clang \
-    && ln -sf /usr/bin/clang++-19 /usr/bin/clang++ \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-ENV LIBCLANG_PATH=/usr/lib/llvm-19/lib \
-    BINDGEN_EXTRA_CLANG_ARGS="-isystem /usr/lib/llvm-19/lib/clang/19/include"
-
 RUN dpkg --add-architecture arm64 && \
     dpkg --add-architecture armhf && \
     apt-get update && \
@@ -220,20 +231,12 @@ RUN dpkg --add-architecture arm64 && \
         libasound2-dev:armhf libx11-dev:armhf libxcursor-dev:armhf \
         libxrandr-dev:armhf libxi-dev:armhf libwayland-dev:armhf \
         libxkbcommon-dev:armhf libudev-dev:armhf \
+        clang libclang-dev libc6-dev-i386 lib32gcc-12-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-${TARGETARCH}
 
-RUN rustup target add \
-    x86_64-unknown-linux-gnu \
-    aarch64-unknown-linux-gnu \
-    armv7-unknown-linux-gnueabihf \
-    wasm32-unknown-unknown \
-    aarch64-linux-android \
-    armv7-linux-androideabi \
-    x86_64-linux-android \
-    i686-linux-android
-
 ENV CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER=x86_64-linux-musl-gcc \
+    CARGO_TARGET_I686_UNKNOWN_LINUX_MUSL_LINKER=i686-linux-musl-gcc \
     CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aarch64-linux-musl-gcc \
     CARGO_TARGET_ARMV7_UNKNOWN_LINUX_MUSLEABIHF_LINKER=arm-linux-musleabihf-gcc \
     CARGO_TARGET_RISCV64GC_UNKNOWN_LINUX_MUSL_LINKER=riscv64-linux-musl-gcc
@@ -246,6 +249,10 @@ ENV CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc \
     PKG_CONFIG_PATH_x86_64_unknown_linux_gnu=/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig \
     PKG_CONFIG_PATH_aarch64_unknown_linux_gnu=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig \
     PKG_CONFIG_PATH_armv7_unknown_linux_gnueabihf=/usr/lib/arm-linux-gnueabihf/pkgconfig:/usr/share/pkgconfig
+
+RUN printf '#!/bin/sh\nexec clang -target arm64-apple-ios13.0 -isysroot "$IOS_SDKROOT" -mios-version-min=13.0 -fuse-ld=/opt/osxcross/bin/arm64-apple-darwin25.4-ld "$@"\n' \
+      > /usr/local/bin/arm64-apple-ios-clang && chmod +x /usr/local/bin/arm64-apple-ios-clang
+ENV CARGO_TARGET_AARCH64_APPLE_IOS_LINKER=arm64-apple-ios-clang
 
 ARG ANDROID_CMDLINE_TOOLS_VERSION=15641748
 ARG ANDROID_PLATFORM_VERSION=android-37.0
