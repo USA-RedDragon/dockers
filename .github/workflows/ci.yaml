@@ -77,9 +77,9 @@ jobs:
       platforms: ${{ ( matrix.image != 'archlinux-pkgbuild' && matrix.image != 'symmetricds' && matrix.image != 'mesh-node' && matrix.image != 'mesh-node-nightly' ) && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
     secrets:
       secrets: |
-        DARWIN_SDK_URL: ${{ ( matrix.image == 'rust-cross' ) && secrets.DARWIN_SDK_URL || '' }}
-        IOS_SDK_URL: ${{ ( matrix.image == 'rust-cross' ) && secrets.IOS_SDK_URL || '' }}
-        IOS_SIMULATOR_SDK_URL: ${{ ( matrix.image == 'rust-cross' ) && secrets.IOS_SIMULATOR_SDK_URL || '' }}
+        DARWIN_SDK_URL="${{ ( matrix.image == 'rust-cross' ) && secrets.DARWIN_SDK_URL || '' }}"
+        IOS_SDK_URL="${{ ( matrix.image == 'rust-cross' ) && secrets.IOS_SDK_URL || '' }}"
+        IOS_SIMULATOR_SDK_URL="${{ ( matrix.image == 'rust-cross' ) && secrets.IOS_SIMULATOR_SDK_URL || '' }}"
 
   docker-results:
     if: always()
