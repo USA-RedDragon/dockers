@@ -113,6 +113,9 @@ RUN --mount=type=secret,id=IOS_SDK_URL \
     mkdir -p /opt/ios-sdk && \
     curl -fsSL "$(cat /run/secrets/IOS_SDK_URL)" | tar -xj -C /opt/ios-sdk
 
+RUN --mount=type=secret,id=IOS_SIMULATOR_SDK_URL \
+    curl -fsSL "$(cat /run/secrets/IOS_SIMULATOR_SDK_URL)" | tar -xj -C /opt/ios-sdk
+
 FROM rust:1.94.1-slim-trixie@sha256:cf09adf8c3ebaba10779e5c23ff7fe4df4cccdab8a91f199b0c142c53fef3e1a
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -131,6 +134,8 @@ COPY --from=build-osxcross /opt/ios-sdk/ /opt/ios-sdk/
 
 ARG DARWIN_SDK_VERSION=25.4
 ENV IOS_SDKROOT=/opt/ios-sdk/iPhoneOS.sdk
+ENV IOS_SIMULATOR_SDKROOT=/opt/ios-sdk/iPhoneSimulator.sdk
+
 ENV PATH="/opt/cross/bin:/opt/osxcross/bin:/opt/llvm-mingw/bin:${PATH}" \
     LD_LIBRARY_PATH="/opt/osxcross/lib" \
     CARGO_TARGET_X86_64_PC_WINDOWS_GNULLVM_LINKER=x86_64-w64-mingw32-clang \
@@ -151,6 +156,7 @@ RUN rustup target add \
     aarch64-pc-windows-gnullvm \
     aarch64-apple-darwin \
     aarch64-apple-ios \
+    aarch64-apple-ios-sim \
     i686-linux-android \
     i686-pc-windows-gnullvm \
     i686-unknown-linux-gnu \
@@ -266,8 +272,32 @@ ENV CC_x86_64_apple_darwin=x86_64-apple-darwin25.4-clang \
     CXX_aarch64_apple_darwin=arm64-apple-darwin25.4-clang++ \
     AR_aarch64_apple_darwin=arm64-apple-darwin25.4-ar
 
-RUN printf '#!/bin/sh\nexec clang -target arm64-apple-ios13.0 -isysroot "$IOS_SDKROOT" -mios-version-min=13.0 -fuse-ld=/opt/osxcross/bin/arm64-apple-darwin25.4-ld "$@"\n' \
-      > /usr/local/bin/arm64-apple-ios-clang && chmod +x /usr/local/bin/arm64-apple-ios-clang
+RUN <<__DOCKER_EOF__
+cat <<'__EOF__' > /usr/local/bin/arm64-apple-ios-sim-clang
+#!/bin/sh
+V="${IPHONEOS_DEPLOYMENT_TARGET:-13.0}"
+exec clang -target "arm64-apple-ios${V}-simulator" -isysroot "$IOS_SIMULATOR_SDKROOT" -mios-version-min="$V" -fuse-ld=/opt/osxcross/bin/arm64-apple-darwin25.4-ld "$@"
+__EOF__
+chmod +x /usr/local/bin/arm64-apple-ios-sim-clang
+
+cat <<'__EOF__' > /usr/local/bin/arm64-apple-ios-clang
+#!/bin/sh
+V="${IPHONEOS_DEPLOYMENT_TARGET:-13.0}"
+exec clang -target "arm64-apple-ios${V}" -isysroot "$IOS_SDKROOT" -mios-version-min="$V" -fuse-ld=/opt/osxcross/bin/arm64-apple-darwin25.4-ld "$@"
+__EOF__
+chmod +x /usr/local/bin/arm64-apple-ios-clang
+
+cat <<'__EOF__' > /usr/local/bin/xcrun
+#!/bin/sh
+for a in "$@"; do case "$a" in iphoneos) sdk="$IOS_SDKROOT";;
+  iphonesimulator) sdk="$IOS_SIMULATOR_SDKROOT";; esac; done
+case " $* " in *" --show-sdk-path "*|*" -sdk_path "*) [ -n "$sdk" ] && { echo "$sdk"; exit 0; };; esac
+exec /opt/osxcross/bin/xcrun "$@"
+__EOF__
+chmod +x /usr/local/bin/xcrun
+__DOCKER_EOF__
+
+ENV CARGO_TARGET_AARCH64_APPLE_IOS_SIM_LINKER=arm64-apple-ios-sim-clang
 ENV CARGO_TARGET_AARCH64_APPLE_IOS_LINKER=arm64-apple-ios-clang
 
 ARG ANDROID_CMDLINE_TOOLS_VERSION=15641748
@@ -309,3 +339,5 @@ RUN apt-get update && \
     ln -s /opt/binaryen/bin/wasm-opt /usr/local/bin/wasm-opt && \
     apt-get -y remove --purge curl && apt-get -y autoremove && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+ENV PATH=/usr/local/bin:$PATH
