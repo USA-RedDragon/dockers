@@ -341,4 +341,31 @@ RUN apt-get update && \
     apt-get -y remove --purge curl && apt-get -y autoremove && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+# renovate: datasource=crate depName=wasm-pack
+ARG WASM_PACK_VERSION=0.15.0
+RUN cargo install wasm-pack --version "${WASM_PACK_VERSION}" --locked
+
+# renovate: datasource=crate depName=cargo-ndk
+ARG CARGO_NDK_VERSION=4.1.2
+RUN cargo install cargo-ndk --version "${CARGO_NDK_VERSION}" --locked
+
+# renovate: datasource=github-releases depName=ziglang/zig
+ARG ZIG_VERSION=0.13.0
+# renovate: datasource=crate depName=cargo-zigbuild
+ARG CARGO_ZIGBUILD_VERSION=0.23.0
+ARG TARGETARCH
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl xz-utils && \
+    ARCH="${TARGETARCH}" && \
+    if [ "${TARGETARCH}" = "arm64" ]; then ARCH="aarch64"; fi && \
+    if [ "${TARGETARCH}" = "amd64" ]; then ARCH="x86_64"; fi && \
+    curl -fSL -o /tmp/zig.tar.xz \
+        "https://ziglang.org/download/${ZIG_VERSION}/zig-linux-${ARCH}-${ZIG_VERSION}.tar.xz" && \
+    mkdir -p /opt/zig && \
+    tar -xJf /tmp/zig.tar.xz -C /opt/zig --strip-components=1 && \
+    ln -s /opt/zig/zig /usr/local/bin/zig && \
+    cargo install cargo-zigbuild --version "${CARGO_ZIGBUILD_VERSION}" --locked && \
+    apt-get -y remove --purge curl xz-utils && apt-get -y autoremove && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
 ENV PATH=/usr/local/bin:$PATH
