@@ -80,6 +80,30 @@ RUN cp config.mak.base config.mak && \
     printf '%s\n' 'TARGET = riscv64-linux-musl' >> config.mak && \
     make -j$(nproc) install
 
+FROM toolchain-base AS build-musl-libs
+COPY --from=build-arm /opt/cross/ /opt/cross/
+COPY --from=build-aarch64 /opt/cross/ /opt/cross/
+COPY --from=build-i686 /opt/cross/ /opt/cross/
+COPY --from=build-x86_64 /opt/cross/ /opt/cross/
+COPY --from=build-riscv64 /opt/cross/ /opt/cross/
+ENV PATH="/opt/cross/bin:${PATH}"
+RUN apt-get update && apt-get install -y --no-install-recommends bzip2 \
+    && rm -rf /var/lib/apt/lists/*
+
+# renovate: datasource=github-tags depName=alsa-project/alsa-lib
+ARG ALSA_LIB_VERSION=1.2.13
+
+RUN set -eux; \
+    for triple in \
+        arm-linux-musleabihf aarch64-linux-musl i686-linux-musl \
+        x86_64-linux-musl riscv64-linux-musl; do \
+      cd /tmp; \
+      curl -fSL "https://www.alsa-project.org/files/pub/lib/alsa-lib-${ALSA_LIB_VERSION}.tar.bz2" | tar xj; \
+      cd "alsa-lib-${ALSA_LIB_VERSION}"; \
+      ./configure --host="$triple" --prefix="/opt/cross/$triple" \
+          --disable-python --disable-topology --without-versioned CC="$triple-gcc"; \
+      make -j"$(nproc)"; make install; \
+      cd /tmp; rm -rf "alsa-lib-${ALSA_LIB_VERSION}"; \
 FROM debian:13.5-slim@sha256:28de0877c2189802884ccd20f15ee41c203573bd87bb6b883f5f46362d24c5c2 AS build-osxcross
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -124,11 +148,7 @@ COPY --from=build-mips /opt/cross/ /opt/cross/
 COPY --from=build-mips-sf /opt/cross/ /opt/cross/
 COPY --from=build-mipsel /opt/cross/ /opt/cross/
 COPY --from=build-mipsel-sf /opt/cross/ /opt/cross/
-COPY --from=build-arm /opt/cross/ /opt/cross/
-COPY --from=build-aarch64 /opt/cross/ /opt/cross/
-COPY --from=build-i686 /opt/cross/ /opt/cross/
-COPY --from=build-x86_64 /opt/cross/ /opt/cross/
-COPY --from=build-riscv64 /opt/cross/ /opt/cross/
+COPY --from=build-musl-libs /opt/cross/ /opt/cross/
 COPY --from=build-osxcross /opt/osxcross/ /opt/osxcross/
 COPY --from=build-osxcross /opt/ios-sdk/ /opt/ios-sdk/
 
@@ -264,7 +284,12 @@ ENV CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc \
     PKG_CONFIG_SYSROOT_DIR=/ \
     PKG_CONFIG_PATH_x86_64_unknown_linux_gnu=/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig \
     PKG_CONFIG_PATH_aarch64_unknown_linux_gnu=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig \
-    PKG_CONFIG_PATH_armv7_unknown_linux_gnueabihf=/usr/lib/arm-linux-gnueabihf/pkgconfig:/usr/share/pkgconfig
+    PKG_CONFIG_PATH_armv7_unknown_linux_gnueabihf=/usr/lib/arm-linux-gnueabihf/pkgconfig:/usr/share/pkgconfig \
+    PKG_CONFIG_PATH_x86_64_unknown_linux_musl=/opt/cross/x86_64-linux-musl/lib/pkgconfig \
+    PKG_CONFIG_PATH_i686_unknown_linux_musl=/opt/cross/i686-linux-musl/lib/pkgconfig \
+    PKG_CONFIG_PATH_aarch64_unknown_linux_musl=/opt/cross/aarch64-linux-musl/lib/pkgconfig \
+    PKG_CONFIG_PATH_armv7_unknown_linux_musleabihf=/opt/cross/arm-linux-musleabihf/lib/pkgconfig \
+    PKG_CONFIG_PATH_riscv64gc_unknown_linux_musl=/opt/cross/riscv64-linux-musl/lib/pkgconfig
 
 ENV CC_x86_64_apple_darwin=x86_64-apple-darwin25.4-clang \
     CXX_x86_64_apple_darwin=x86_64-apple-darwin25.4-clang++ \
