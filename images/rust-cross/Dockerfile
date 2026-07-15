@@ -177,6 +177,7 @@ RUN apt-get update && \
         --no-install-recommends \
         --no-install-suggests \
             qemu-user-static \
+            make \
     && \
     rm -rf /var/lib/apt/lists/*
 
