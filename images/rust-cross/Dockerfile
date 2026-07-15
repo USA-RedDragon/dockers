@@ -87,11 +87,13 @@ COPY --from=build-i686 /opt/cross/ /opt/cross/
 COPY --from=build-x86_64 /opt/cross/ /opt/cross/
 COPY --from=build-riscv64 /opt/cross/ /opt/cross/
 ENV PATH="/opt/cross/bin:${PATH}"
-RUN apt-get update && apt-get install -y --no-install-recommends bzip2 \
+RUN apt-get update && apt-get install -y --no-install-recommends bzip2 gperf pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 # renovate: datasource=github-tags depName=alsa-project/alsa-lib
 ARG ALSA_LIB_VERSION=1.2.13
+# renovate: datasource=github-releases depName=eudev-project/eudev
+ARG EUDEV_VERSION=3.2.14
 
 RUN set -eux; \
     for triple in \
@@ -104,6 +106,16 @@ RUN set -eux; \
           --disable-python --disable-topology --without-versioned CC="$triple-gcc"; \
       make -j"$(nproc)"; make install; \
       cd /tmp; rm -rf "alsa-lib-${ALSA_LIB_VERSION}"; \
+      curl -fSL "https://github.com/eudev-project/eudev/releases/download/v${EUDEV_VERSION}/eudev-${EUDEV_VERSION}.tar.gz" | tar xz; \
+      cd "eudev-${EUDEV_VERSION}"; \
+      ./configure --host="$triple" --prefix="/opt/cross/$triple" \
+          --disable-programs --disable-blkid --disable-kmod --disable-selinux \
+          --disable-manpages --disable-hwdb --disable-introspection \
+          --disable-mtd_probe --disable-rule-generator CC="$triple-gcc"; \
+      make -j"$(nproc)"; make install; \
+      cd /tmp; rm -rf "eudev-${EUDEV_VERSION}"; \
+    done
+
 FROM debian:13.5-slim@sha256:28de0877c2189802884ccd20f15ee41c203573bd87bb6b883f5f46362d24c5c2 AS build-osxcross
 
 ARG DEBIAN_FRONTEND=noninteractive
