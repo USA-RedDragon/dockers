@@ -87,18 +87,30 @@ COPY --from=build-i686 /opt/cross/ /opt/cross/
 COPY --from=build-x86_64 /opt/cross/ /opt/cross/
 COPY --from=build-riscv64 /opt/cross/ /opt/cross/
 ENV PATH="/opt/cross/bin:${PATH}"
-RUN apt-get update && apt-get install -y --no-install-recommends bzip2 gperf pkg-config \
+RUN apt-get update && apt-get install -y --no-install-recommends bzip2 rsync xz-utils gperf pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 # renovate: datasource=github-tags depName=alsa-project/alsa-lib
 ARG ALSA_LIB_VERSION=1.2.13
 # renovate: datasource=github-releases depName=eudev-project/eudev
 ARG EUDEV_VERSION=3.2.14
+ARG LINUX_VERSION=4.19.325
 
 RUN set -eux; \
+    curl -fSL "https://cdn.kernel.org/pub/linux/kernel/v${LINUX_VERSION%%.*}.x/linux-${LINUX_VERSION}.tar.xz" | tar xJ -C /tmp; \
+    ksrc="/tmp/linux-${LINUX_VERSION}"; \
     for triple in \
         arm-linux-musleabihf aarch64-linux-musl i686-linux-musl \
         x86_64-linux-musl riscv64-linux-musl; do \
+      case "$triple" in \
+        arm-*)           karch=arm ;; \
+        aarch64-*)       karch=arm64 ;; \
+        i686-*|x86_64-*) karch=x86 ;; \
+        riscv64-*)       karch=riscv ;; \
+        *) echo "no kernel ARCH mapping for $triple" >&2; exit 1 ;; \
+      esac; \
+      sysroot="$("$triple-gcc" -print-sysroot)"; [ -n "$sysroot" ] || sysroot="/opt/cross/$triple"; \
+      make -C "$ksrc" ARCH="$karch" INSTALL_HDR_PATH="$sysroot" headers_install >/dev/null; \
       cd /tmp; \
       curl -fSL "https://www.alsa-project.org/files/pub/lib/alsa-lib-${ALSA_LIB_VERSION}.tar.bz2" | tar xj; \
       cd "alsa-lib-${ALSA_LIB_VERSION}"; \
@@ -114,7 +126,8 @@ RUN set -eux; \
           --disable-mtd_probe --disable-rule-generator CC="$triple-gcc"; \
       make -j"$(nproc)"; make install; \
       cd /tmp; rm -rf "eudev-${EUDEV_VERSION}"; \
-    done
+    done; \
+    rm -rf "$ksrc"
 
 FROM debian:13.5-slim@sha256:28de0877c2189802884ccd20f15ee41c203573bd87bb6b883f5f46362d24c5c2 AS build-osxcross
 
