@@ -421,4 +421,10 @@ RUN apt-get update && \
     apt-get -y remove --purge curl xz-utils && apt-get -y autoremove && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+# zig 0.13.0's bundled riscv64 glibc headers omit the LP64D-ABI stub.
+# Fill it from the real gnu riscv64 sysroot that
+# gcc-riscv64-linux-gnu already installed in the image.
+RUN cp /usr/riscv64-linux-gnu/include/gnu/stubs-lp64d.h \
+       /opt/zig/lib/libc/include/riscv64-linux-gnu/gnu/stubs-lp64d.h
+
 ENV PATH=/usr/local/bin:$PATH
