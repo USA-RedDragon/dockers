@@ -211,7 +211,8 @@ RUN rustup target add \
     armv7-linux-androideabi \
     riscv64gc-unknown-linux-gnu \
     riscv64gc-unknown-linux-musl \
-    wasm32-unknown-unknown
+    wasm32-unknown-unknown \
+    wasm32-wasip1
 
 # Tier 3 targets (MIPS) — no pre-built std, requires nightly + build-std
 RUN rustup toolchain install nightly && \
