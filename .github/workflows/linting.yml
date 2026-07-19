@@ -116,7 +116,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Lint - Yamllint
-        uses: reviewdog/action-yamllint@v1.21.0
+        uses: reviewdog/action-yamllint@e02a49fdf53f51ddd8dfa89b09aa975043aeba38 # v1.23.0
         with:
           github_token: ${{ secrets.github_token }}
           fail_level: error
