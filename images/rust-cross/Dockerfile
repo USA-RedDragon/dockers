@@ -165,7 +165,7 @@ RUN --mount=type=secret,id=IOS_SDK_URL \
 RUN --mount=type=secret,id=IOS_SIMULATOR_SDK_URL \
     curl -fsSL "$(cat /run/secrets/IOS_SIMULATOR_SDK_URL)" | tar -xj -C /opt/ios-sdk
 
-FROM rust:1.94.1-slim-trixie@sha256:cf09adf8c3ebaba10779e5c23ff7fe4df4cccdab8a91f199b0c142c53fef3e1a
+FROM rust:1.97.1-slim-trixie@sha256:3b2879047d42784ca9403ad20c51ed3df361a50f1df96f5777d39b4e33aa65cd
 
 ARG DEBIAN_FRONTEND=noninteractive
 
