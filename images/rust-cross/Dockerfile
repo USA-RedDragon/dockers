@@ -403,7 +403,7 @@ ARG CARGO_NDK_VERSION=4.1.2
 RUN cargo install cargo-ndk --version "${CARGO_NDK_VERSION}" --locked
 
 # renovate: datasource=github-releases depName=ziglang/zig
-ARG ZIG_VERSION=0.13.0
+ARG ZIG_VERSION=0.15.1
 # renovate: datasource=crate depName=cargo-zigbuild
 ARG CARGO_ZIGBUILD_VERSION=0.23.0
 ARG TARGETARCH
