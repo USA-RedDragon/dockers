@@ -91,7 +91,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends bzip2 rsync xz-
     && rm -rf /var/lib/apt/lists/*
 
 # renovate: datasource=github-tags depName=alsa-project/alsa-lib
-ARG ALSA_LIB_VERSION=1.2.13
+ARG ALSA_LIB_VERSION=1.2.16
 # renovate: datasource=github-releases depName=eudev-project/eudev
 ARG EUDEV_VERSION=3.2.14
 ARG LINUX_VERSION=4.19.325
