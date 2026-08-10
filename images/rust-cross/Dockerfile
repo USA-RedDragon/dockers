@@ -246,7 +246,7 @@ RUN apt-get update && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # renovate: datasource=github-releases depName=protocolbuffers/protobuf
-ARG PROTOBUF_VERSION=v34.1
+ARG PROTOBUF_VERSION=v34.2
 ARG TARGETARCH
 
 RUN apt-get update && \
