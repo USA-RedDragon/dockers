@@ -10,7 +10,7 @@ RUN wget -q -O /kubelet ${KUBELET_URL} && chmod +x /kubelet
 FROM registry.k8s.io/build-image/debian-base:bookworm-v1.0.7
 
 # renovate: datasource=repology versioning=deb depName=debian_12/ca-certificates
-ARG CA_CERTIFICATES_VERSION=20230311+deb12u1
+ARG CA_CERTIFICATES_VERSION=20250419~deb12u1
 # renovate: datasource=repology versioning=deb depName=debian_12/libcap2
 ARG LIBCAP_VERSION=1:2.66-4+deb12u2+b2
 # renovate: datasource=repology versioning=deb depName=debian_12/ethtool
