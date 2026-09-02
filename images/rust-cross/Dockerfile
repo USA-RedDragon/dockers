@@ -405,7 +405,7 @@ RUN cargo install cargo-ndk --version "${CARGO_NDK_VERSION}" --locked
 # renovate: datasource=github-releases depName=ziglang/zig
 ARG ZIG_VERSION=0.13.0
 # renovate: datasource=crate depName=cargo-zigbuild
-ARG CARGO_ZIGBUILD_VERSION=0.23.0
+ARG CARGO_ZIGBUILD_VERSION=0.23.4
 ARG TARGETARCH
 RUN apt-get update && \
     apt-get install -y --no-install-recommends curl xz-utils && \
