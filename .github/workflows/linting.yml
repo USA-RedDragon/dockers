@@ -98,7 +98,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Lint - Trivy
-        uses: reviewdog/action-trivy@v1.14.0
+        uses: reviewdog/action-trivy@aa68cc9532e944d1b1d91045a37405e46182dd2c # v1.15.1
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
