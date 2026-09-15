@@ -21,6 +21,11 @@ RUN apt-get update \
         python3-requests \
         zip \
         unzip \
+        cpio \
+        rsync \
+        zstd \
+        xxd \
+        libarchive-tools \
         libudev-dev \
         mesa-vulkan-drivers \
         xvfb \
