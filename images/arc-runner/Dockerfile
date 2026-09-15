@@ -17,6 +17,7 @@ RUN apt-get update \
         sqlite3 \
         libclang-dev \
         python3-requests \
+        zip \
     && rm -rf /var/lib/apt/lists/*
 
 USER runner
