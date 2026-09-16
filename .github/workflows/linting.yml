@@ -33,7 +33,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Shellcheck
-        uses: reviewdog/action-shellcheck@4c07458293ac342d477251099501a718ae5ef86e # v1.32.0
+        uses: reviewdog/action-shellcheck@a94d585085f1f5215ae65f4de34e7bbd0523d550 # v1.33.0
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
@@ -54,7 +54,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: reviewdog/action-hadolint@921946a7ebaaf08ac72607bad67209f4e52b5407 # v1.50.5
+      - uses: reviewdog/action-hadolint@9d9a44af664599d7fe5ed5ee3d66d2d236cb7f8f # v1.54.0
         with:
           reporter: github-pr-review
           github_token: ${{ secrets.github_token }}
@@ -105,7 +105,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Lint - Trivy
-        uses: reviewdog/action-trivy@a1e6d7dd5520369c076d7ce639a16442938535d8 # v1.14.0
+        uses: reviewdog/action-trivy@765ed28176fa16dcac6ced7a652f51f6fd871174 # v1.16.0
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
@@ -123,7 +123,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Lint - Yamllint
-        uses: reviewdog/action-yamllint@f01d8a48fd8d89f89895499fca2cff09f9e9e8c0 # v1.21.0
+        uses: reviewdog/action-yamllint@6803b0dc8f295034a6156b924814053acb2e6f5a # v1.24.0
         with:
           github_token: ${{ secrets.github_token }}
           fail_level: error
@@ -139,7 +139,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Lint - Actionlint
-        uses: reviewdog/action-actionlint@6fb7acc99f4a1008869fa8a0f09cfca740837d9d # v1.72.0
+        uses: reviewdog/action-actionlint@8b682e1e7e512151d73a6b9449cbff173846226e # v1.74.0
         with:
           github_token: ${{ secrets.github_token }}
           fail_level: error
@@ -169,7 +169,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Lint - detect-secrets
-        uses: reviewdog/action-detect-secrets@53b50179462bbe04af2f25f088b97e55e1dec3a1 # v0.29.6
+        uses: reviewdog/action-detect-secrets@aa401448f8afc3c826140059b40e614b8ae0081b # v0.30.0
         with:
           github_token: ${{ secrets.github_token }}
           fail_level: error
