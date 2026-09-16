@@ -70,7 +70,7 @@ jobs:
             echo "No .version.sh found"
             touch /tmp/version
           fi
-      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ matrix.image }}-version
           path: /tmp/version
@@ -85,7 +85,7 @@ jobs:
       contents: read
       packages: write
       security-events: write
-    uses: USA-RedDragon/reusable-actions/.github/workflows/docker-ci.yaml@4a4ab216b29662f3424712de85cf3a0a1a0ac7af # v2.0.19
+    uses: USA-RedDragon/reusable-actions/.github/workflows/docker-ci.yaml@d65722ccb9ea7d4e4b770754a67aecc037033f1b # v2.0.21
     with:
       push: ${{ github.event_name != 'pull_request' }}
       context: images/${{ matrix.image }}
