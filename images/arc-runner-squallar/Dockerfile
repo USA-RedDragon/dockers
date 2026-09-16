@@ -37,7 +37,7 @@ RUN install -d -m 0755 /etc/apt/keyrings \
 RUN if [ "${TARGETARCH}" = "amd64" ]; then \
         set -eux; \
         curl -fsSL --retry 5 https://dl.google.com/linux/linux_signing_key.pub \
-            | gpg --dearmor -o /etc/apt/keyrings/google-chrome.gpg; \
+            | gpg --dearmor --batch --yes -o /etc/apt/keyrings/google-chrome.gpg; \
         echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-chrome.gpg] https://dl.google.com/linux/chrome/deb/ stable main" \
             > /etc/apt/sources.list.d/google-chrome.list; \
         apt-get update; \
@@ -46,7 +46,7 @@ RUN if [ "${TARGETARCH}" = "amd64" ]; then \
         ver="$(google-chrome --version | grep -oE '[0-9]+(\.[0-9]+){3}')"; \
         curl -fsSL --retry 5 -o /tmp/chromedriver.zip \
             "https://storage.googleapis.com/chrome-for-testing-public/${ver}/linux64/chromedriver-linux64.zip"; \
-        unzip -q -j /tmp/chromedriver.zip chromedriver-linux64/chromedriver -d /usr/bin; \
+        unzip -q -o -j /tmp/chromedriver.zip chromedriver-linux64/chromedriver -d /usr/bin; \
         rm -f /tmp/chromedriver.zip; \
         chromedriver --version; \
     fi
