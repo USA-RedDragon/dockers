@@ -1,4 +1,4 @@
-FROM alpine:3.24.1@sha256:bec4ccd3817e7c824eb0388971a0b83fab111d586285511ba0266b77e8dc65a9 AS olsrd-builder
+FROM alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b AS olsrd-builder
 
 WORKDIR /tmp
 RUN mkdir -p /out
@@ -23,7 +23,7 @@ RUN git clone https://github.com/USA-RedDragon/olsrd.git \
     && cd .. \
     && rm -rf olsrd
 
-FROM alpine:3.24.1@sha256:bec4ccd3817e7c824eb0388971a0b83fab111d586285511ba0266b77e8dc65a9 AS babeld-builder
+FROM alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b AS babeld-builder
 
 WORKDIR /tmp
 RUN mkdir -p /out
@@ -46,12 +46,12 @@ RUN git clone https://github.com/USA-RedDragon/babeld.git \
     && cd .. \
     && rm -rf babeld
 
-FROM alpine:3.24.1@sha256:bec4ccd3817e7c824eb0388971a0b83fab111d586285511ba0266b77e8dc65a9 AS ucode-builder
+FROM alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b AS ucode-builder
 
 WORKDIR /tmp
 RUN mkdir -p /out
 
-ARG UCODE_VERSION=fecacb8188c6a4f38d97434160b979d73e898b24
+ARG UCODE_VERSION=1a20d752a5a2b91780f22e30c6bbb671a0fb611e
 
 RUN apk add --no-cache \
     git \
@@ -71,7 +71,7 @@ RUN git clone https://github.com/jow-/ucode.git \
     && cd .. \
     && rm -rf ucode
 
-FROM alpine:3.24.1@sha256:bec4ccd3817e7c824eb0388971a0b83fab111d586285511ba0266b77e8dc65a9 AS dnsmasq-builder
+FROM alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b AS dnsmasq-builder
 
 WORKDIR /tmp
 RUN mkdir -p /out
@@ -97,7 +97,7 @@ RUN git clone https://thekelleys.org.uk/git/dnsmasq.git \
     && cd .. \
     && rm -rf dnsmasq
 
-FROM alpine:3.24.1@sha256:bec4ccd3817e7c824eb0388971a0b83fab111d586285511ba0266b77e8dc65a9
+FROM alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
 
 COPY --from=olsrd-builder /out /
 COPY --from=babeld-builder /out /
