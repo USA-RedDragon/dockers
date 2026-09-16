@@ -57,7 +57,7 @@ USER runner
 ARG RUSTUP_VERSION=1.29.1
 
 # renovate: datasource=github-releases depName=rust-lang/rust
-ARG RUST_VERSION=1.97.1
+ARG RUST_VERSION=1.98.1
 ARG RUST_NIGHTLY=nightly-2026-08-15
 
 ENV RUSTUP_HOME=/home/runner/.rustup \
