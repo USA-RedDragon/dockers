@@ -24,7 +24,7 @@ jobs:
       - name: Generate matrix (changed images)
         id: images
         if: github.event_name == 'push' || github.event_name == 'pull_request'
-        uses: hellofresh/action-changed-files@f6db62a551af02bb4bbc88ce6536bf40aa537e8f # v3.0.1
+        uses: hellofresh/action-changed-files@3b2e213935a6ca5fa6669c8cbffb68eb5a6dbd89 # v4.0.0
         with:
           pattern: images/(?P<image>[^/]+)
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
