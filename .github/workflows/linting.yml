@@ -2,6 +2,10 @@ name: Linting
 on:
   pull_request:
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   generate-matrix:
     name: Generate job matrices
@@ -35,7 +39,7 @@ jobs:
           reporter: github-pr-review
           fail_level: error
           level: info
-          filter_mode: nofilter
+          filter_mode: added
           path: images/${{ matrix.image }}
 
   dockerlint:
@@ -56,12 +60,15 @@ jobs:
           github_token: ${{ secrets.github_token }}
           fail_level: error
           level: info
-          filter_mode: nofilter
+          filter_mode: added
           exclude: '*'
           include: 'images/${{ matrix.image }}/Dockerfile'
           # DL3059: Multiple consecutive `RUN` instructions are used for clarity
           # DL3003: WORKDIR to switch directories isn't the pattern I want
-          hadolint_ignore: DL3059 DL3003
+          # DL3008/DL3018: apt/apk versions are deliberately unpinned; the
+          # distros only serve the latest build per release, so exact pins
+          # can only match it or break the build
+          hadolint_ignore: DL3059 DL3003 DL3008 DL3018
 
   markdownlint:
     needs: [ generate-matrix ]
@@ -76,12 +83,12 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Lint - Markdown
-        uses: reviewdog/action-markdownlint@v0.26.2
+        uses: reviewdog/action-markdownlint@d7862f0a8dbbee78e016f527260747a4f2bb2a64 # v0.30.0
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
           level: info
-          filter_mode: nofilter
+          filter_mode: added
           fail_level: error
           markdownlint_flags: --config .markdownlint.jsonc images/${{ matrix.image }}/**.md
 
@@ -103,7 +110,7 @@ jobs:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
           level: info
-          filter_mode: nofilter
+          filter_mode: added
           fail_level: error
           working_directory: images/${{ matrix.image }}
           trivy_command: fs
@@ -121,7 +128,7 @@ jobs:
           github_token: ${{ secrets.github_token }}
           fail_level: error
           level: info
-          filter_mode: nofilter
+          filter_mode: added
           reporter: github-pr-review
           yamllint_flags: '.github/workflows .yamllint.yml'
 
@@ -137,7 +144,7 @@ jobs:
           github_token: ${{ secrets.github_token }}
           fail_level: error
           level: info
-          filter_mode: nofilter
+          filter_mode: added
           reporter: github-pr-review
 
   misspell:
@@ -147,12 +154,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Lint - Misspell
-        uses: reviewdog/action-misspell@d6429416b12b09b4e2768307d53bef58d172e962 # v1.27.0
+        uses: reviewdog/action-misspell@da40ce414be6ce320a9322aa2bae10bd3b9e6ef3 # v1.29.0
         with:
           github_token: ${{ secrets.github_token }}
           fail_level: error
           level: info
-          filter_mode: nofilter
+          filter_mode: added
           reporter: github-pr-review
 
   detect-secrets:
@@ -167,9 +174,9 @@ jobs:
           github_token: ${{ secrets.github_token }}
           fail_level: error
           level: info
-          filter_mode: nofilter
+          filter_mode: added
           reporter: github-pr-review
-          detect_secrets_flags: --exclude-files '\.git/.*'
+          detect_secrets_flags: "--exclude-files '\\.git/.*' --exclude-lines '^\\s*secrets: \\|$'"
 
   lint-results:
     if: always()

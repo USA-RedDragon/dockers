@@ -9,74 +9,35 @@ ENV PYTHONUNBUFFERED=1
 # renovate: datasource=github-releases depName=weewx/weewx
 ARG WEEWX_VERSION=v5.2.0
 
-# renovate: datasource=repology versioning=deb depName=debian_12/freetype
-ARG FREETYPE_VERSION=2.12.1+dfsg-5+deb12u4
-# renovate: datasource=repology versioning=deb depName=debian_12/python3-defaults
-ARG PYTHON3_VERSION=3.11.2-1+b1
-# renovate: datasource=repology versioning=deb depName=debian_12/libjpeg-turbo
-ARG LIBJPEG_TURBO_VERSION=1:2.1.5-2
-# renovate: datasource=repology versioning=deb depName=debian_12/zlib
-ARG ZLIB_VERSION=1:1.2.13.dfsg-1
-
 ARG DEV_PACKAGES=" \
-    libfreetype6-dev="${FREETYPE_VERSION}" \
-    python3-dev="${PYTHON3_VERSION}" \
-    libjpeg62-turbo-dev="${LIBJPEG_TURBO_VERSION}" \
-    zlib1g-dev="${ZLIB_VERSION}" \
+    libfreetype6-dev \
+    python3-dev \
+    libjpeg62-turbo-dev \
+    zlib1g-dev \
 "
-
-# renovate: datasource=repology versioning=deb depName=debian_12/ca-certificates
-ARG CA_CERTIFICATES_VERSION=20230311+deb12u1
-# renovate: datasource=repology versioning=deb depName=debian_12/curl
-ARG CURL_VERSION=7.88.1-10+deb12u14
-# renovate: datasource=repology versioning=deb depName=debian_12/tzdata
-ARG TZDATA_VERSION=2025b-0+deb12u2
-# renovate: datasource=repology versioning=deb depName=debian_12/fonts-freefont
-ARG FONTS_FREEFONT_VERSION=20120503-10
-# renovate: datasource=repology versioning=deb depName=debian_12/s6
-ARG S6_VERSION=2.11.3.2-1
-# renovate: datasource=repology versioning=deb depName=debian_12/nginx
-ARG NGINX_VERSION=1.22.1-9+deb12u4
-# renovate: datasource=repology versioning=deb depName=debian_12/requests
-ARG REQUESTS_VERSION=2.28.1+dfsg-1
-# renovate: datasource=repology versioning=deb depName=debian_12/python-paho-mqtt
-ARG PAHO_MQTT_VERSION=1.6.1-1
-# renovate: datasource=repology versioning=deb depName=debian_12/python-dateutil
-ARG DATEUTIL_VERSION=2.8.2-2
-# renovate: datasource=repology versioning=deb depName=debian_12/pyephem
-ARG PYEPHEM_VERSION=4.1.4-2+b1
-# renovate: datasource=repology versioning=deb depName=debian_12/git
-ARG GIT_VERSION=1:2.39.5-0+deb12u3
 
 ARG RUNTIME_DEPS=" \
-    ca-certificates="${CA_CERTIFICATES_VERSION}" \
-    curl="${CURL_VERSION}" \
-    tzdata="${TZDATA_VERSION}" \
-    libfreetype6="${FREETYPE_VERSION}" \
-    fonts-freefont-ttf="${FONTS_FREEFONT_VERSION}" \
-    python3="${PYTHON3_VERSION}" \
-    libjpeg62-turbo="${LIBJPEG_TURBO_VERSION}" \
-    zlib1g="${ZLIB_VERSION}" \
-    python3-requests="${REQUESTS_VERSION}" \
-    python3-paho-mqtt="${PAHO_MQTT_VERSION}" \
-    python3-dateutil="${DATEUTIL_VERSION}" \
-    python3-ephem="${PYEPHEM_VERSION}" \
-    s6="${S6_VERSION}" \
-    nginx="${NGINX_VERSION}" \
-    git=${GIT_VERSION} \
+    ca-certificates \
+    curl \
+    tzdata \
+    libfreetype6 \
+    fonts-freefont-ttf \
+    python3 \
+    libjpeg62-turbo \
+    zlib1g \
+    python3-requests \
+    python3-paho-mqtt \
+    python3-dateutil \
+    python3-ephem \
+    s6 \
+    nginx \
+    git \
 "
 
-# renovate: datasource=repology versioning=deb depName=debian_12/make-dfsg
-ARG MAKE_VERSION=4.3-4.1
-# renovate: datasource=repology versioning=deb depName=debian_12/python-pip
-ARG PIP_VERSION=23.0.1+dfsg-1
-# renovate: datasource=repology versioning=deb depName=debian_12/poetry
-ARG POETRY_VERSION=1.3.2+dfsg-3
-
 ARG BUILD_DEPS=" \
-    make=${MAKE_VERSION} \
-    python3-pip="${PIP_VERSION}" \
-    python3-poetry="${POETRY_VERSION}" \
+    make \
+    python3-pip \
+    python3-poetry \
 "
 
 RUN mkdir -p /var/www/html/weewx /var/lib/weewx /etc/weewx /usr/share/weewx/user

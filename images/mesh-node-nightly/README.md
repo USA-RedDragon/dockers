@@ -7,9 +7,10 @@ than the tagged releases.
 
 Same approach as [mesh-node](../mesh-node/README.md) - AREDN®'s official x86-64
 rootfs is extracted and run **unmodified**, vendoring no AREDN® code - but it
-pulls a pinned snapshot rather than a tagged release. The image tag is the
-snapshot id (e.g. `20260620-a66a654e`), pinned in the build and bumped by
-renovate so the tag matches the rootfs that was built.
+pulls the current snapshot rather than a tagged release. AREDN® keeps only the
+latest snapshot on its mirror, so the build resolves it at build time and the
+image tag is that snapshot id (e.g. `20260620-a66a654e`). The image is rebuilt
+on a schedule to track new snapshots.
 
 ## Running
 

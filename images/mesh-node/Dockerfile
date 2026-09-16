@@ -23,9 +23,7 @@ ARG AREDN_CHANNEL=releases
 ARG AREDN_VERSION=4.26.1.0
 
 # debugfs (from e2fsprogs-extra) reads the ext4 rootfs image without mounting it.
-# renovate: datasource=repology depName=alpine_3_24/e2fsprogs
-ARG E2FSPROGS_VERSION=1.47.4-r0
-RUN apk add --no-cache e2fsprogs-extra="${E2FSPROGS_VERSION}"
+RUN apk add --no-cache e2fsprogs-extra
 
 RUN set -eux; \
     [ "${TARGETARCH}" = "amd64" ] || { echo "AREDN image supports linux/amd64 only (got ${TARGETARCH})" >&2; exit 1; }; \

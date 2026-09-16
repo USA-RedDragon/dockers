@@ -3,34 +3,7 @@
   "extends": [
     "local>USA-RedDragon/renovate-configs"
   ],
-  "separateMinorPatch": true,
-  "separateMultipleMinor": true,
-  "separateMultipleMajor": true,
-  "separateMajorMinor": true,
-  "customDatasources": {
-    "aredn-snapshot": {
-      "defaultRegistryUrlTemplate": "https://downloads.arednmesh.org/snapshots/targets/x86/64/profiles.json",
-      "format": "json",
-      "transformTemplates": [
-        "{ \"releases\": [ { \"version\": version_number } ] }"
-      ]
-    }
-  },
   "customManagers": [
-    {
-      "customType": "regex",
-      "managerFilePatterns": [
-        "/.*Dockerfile$/"
-      ],
-      "matchStrings": [
-        "# renovate: datasource=repology depName=alpine_(?<currentValue>\\d+[._]\\d+)"
-      ],
-      "currentValueTemplate": "{{{ replace '_' '.' currentValue }}}",
-      "datasourceTemplate": "docker",
-      "depNameTemplate": "alpine",
-      "versioningTemplate": "regex:^(?<major>\\d+)[._](?<minor>\\d+)$",
-      "autoReplaceStringTemplate": "# renovate: datasource=repology depName=alpine_{{{newMajor}}}_{{{newMinor}}}"
-    },
     {
       "customType": "regex",
       "managerFilePatterns": [
@@ -73,32 +46,14 @@
   ],
   "packageRules": [
     {
+      "description": "Deps extracted by regex from .version.sh have nowhere to write a digest; pinning them poisons the shared pin branch",
+      "matchManagers": [
+        "custom.regex"
+      ],
       "matchDatasources": [
-        "custom.aredn-snapshot"
+        "docker"
       ],
-      "versioning": "regex:^(?<major>\\d{4})(?<minor>\\d{2})(?<patch>\\d{2})-[0-9a-f]+$"
-    },
-    {
-      "groupName": "Alpine and packages",
-      "matchDatasources": [
-        "docker",
-        "repology"
-      ],
-      "matchPackageNames": [
-        "alpine",
-        "docker.io/alpine",
-        "/^alpine_/"
-      ],
-      "postUpgradeTasks": {
-        "commands": [
-          "bash .github/scripts/update-alpine-packages.sh {{{packageFile}}}"
-        ],
-        "fileFilters": [
-          "**/*.Dockerfile",
-          "**/Dockerfile"
-        ],
-        "executionMode": "update"
-      }
+      "pinDigests": false
     },
     {
       "matchPackageNames": [
@@ -106,21 +61,6 @@
         "alpine"
       ],
       "allowedVersions": "<2018.0.0"
-    },
-    {
-      "matchPackageNames": [
-        "docker.io/mattermost/mattermost-enterprise-edition"
-      ],
-      "allowedVersions": "<1000.0.0"
-    },
-    {
-      "matchDatasources": [
-        "docker"
-      ],
-      "matchPackageNames": [
-        "/minio/"
-      ],
-      "versioning": "regex:^RELEASE\\.(?<major>\\d+)-(?<minor>\\d+)-(?<patch>\\d+)T.*Z$"
     },
     {
       "matchDatasources": [
@@ -132,7 +72,6 @@
       "versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)(?<compatibility>[a-zA-Z]+)?(?<patch>\\d+)?$"
     },
     {
-      "groupName": "INDI",
       "matchDatasources": [
         "github-releases"
       ],
@@ -143,24 +82,30 @@
       "versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(\\.(?<build>\\d+))?$"
     },
     {
-      "groupName": "Renovate",
-      "matchDatasources": [
-        "docker"
+      "description": "One automerge PR per image: CI builds per changed image directory, so a group per directory is one build per round",
+      "matchFileNames": [
+        "images/**"
       ],
-      "matchPackageNames": [
-        "ghcr.io/mend/renovate-ee-worker",
-        "ghcr.io/mend/renovate-ee-server"
-      ]
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest",
+        "pin"
+      ],
+      "groupName": "{{parentDir}}"
     },
     {
-      "groupName": "Mattermost",
-      "matchDatasources": [
-        "docker"
+      "description": "One automerge PR for all workflow action bumps",
+      "matchManagers": [
+        "github-actions"
       ],
-      "matchPackageNames": [
-        "docker.io/mattermost/mattermost-enterprise-edition",
-        "mattermost/mattermost-enterprise-edition"
-      ]
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest",
+        "pin"
+      ],
+      "groupName": "github-actions"
     }
   ]
 }

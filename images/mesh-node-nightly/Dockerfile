@@ -6,10 +6,10 @@
 # started by procd. No AREDN code is vendored or rebuilt here - this image is a
 # thin wrapper around upstream AREDN firmware.
 #
-# The snapshot is pinned (and bumped by renovate) so the image content matches
-# its published tag. AREDN keeps only the current snapshot on the mirror, so the
-# build works while AREDN_SNAPSHOT is the live snapshot; renovate moves the pin
-# forward as new snapshots are published.
+# AREDN keeps only the current snapshot on the mirror, so the build resolves
+# whichever snapshot is live at build time rather than pinning an id that would
+# go stale within a day. The image tag comes from .version.sh, which resolves
+# the same way; a scheduled rebuild keeps the published image current.
 #
 # AREDN publishes the x86-64 rootfs only as an ext4 image, so the builder uses
 # debugfs to extract it without mounting (mounting needs privileges that are not
@@ -20,18 +20,19 @@
 FROM --platform=$BUILDPLATFORM alpine:3.24.1@sha256:bec4ccd3817e7c824eb0388971a0b83fab111d586285511ba0266b77e8dc65a9 AS rootfs
 
 ARG TARGETARCH
-# renovate: datasource=custom.aredn-snapshot depName=aredn-snapshot
-ARG AREDN_SNAPSHOT=20260620-a66a654e
+# Empty resolves the live snapshot; set it to build a specific one (only works
+# while that snapshot is still on the mirror).
+ARG AREDN_SNAPSHOT_VERSION=
 
 # debugfs (from e2fsprogs-extra) reads the ext4 rootfs image without mounting it.
-# renovate: datasource=repology depName=alpine_3_24/e2fsprogs
-ARG E2FSPROGS_VERSION=1.47.4-r0
-RUN apk add --no-cache e2fsprogs-extra="${E2FSPROGS_VERSION}"
+RUN apk add --no-cache e2fsprogs-extra
 
 RUN set -eux; \
     [ "${TARGETARCH}" = "amd64" ] || { echo "AREDN image supports linux/amd64 only (got ${TARGETARCH})" >&2; exit 1; }; \
     base="https://downloads.arednmesh.org/snapshots/targets/x86/64"; \
-    file="aredn-${AREDN_SNAPSHOT}-x86-64-generic-ext4-rootfs.img.gz"; \
+    snapshot="${AREDN_SNAPSHOT_VERSION:-$(wget -q -O - "${base}/profiles.json" | sed -n 's/.*"version_number": *"\([^"]*\)".*/\1/p')}"; \
+    [ -n "${snapshot}" ] || { echo "could not resolve the current AREDN snapshot" >&2; exit 1; }; \
+    file="aredn-${snapshot}-x86-64-generic-ext4-rootfs.img.gz"; \
     wget -q -O /tmp/sha256sums "${base}/sha256sums"; \
     wget -q -O /tmp/rootfs.img.gz "${base}/${file}"; \
     echo "$(grep " \*${file}\$" /tmp/sha256sums | cut -d' ' -f1)  /tmp/rootfs.img.gz" | sha256sum -c -; \

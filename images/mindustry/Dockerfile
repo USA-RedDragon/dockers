@@ -3,11 +3,8 @@ FROM alpine:3.24.1@sha256:bec4ccd3817e7c824eb0388971a0b83fab111d586285511ba0266b
 # renovate: datasource=github-releases depName=Anuken/Mindustry
 ARG MINDUSTRY_VERSION=v146
 
-# renovate: datasource=repology depName=alpine_3_24/curl
-ARG CURL_VERSION=8.20.0-r1
-
 RUN apk add --no-cache --virtual .build-deps \
-    curl="${CURL_VERSION}" \
+    curl \
     && curl -fSsL \
         https://github.com/Anuken/Mindustry/releases/download/${MINDUSTRY_VERSION}/server-release.jar \
         -o /mindustry-server.jar \

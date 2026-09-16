@@ -1,82 +1,21 @@
-################################
-# common dependencies
-################################
-# renovate: datasource=repology depName=alpine_3_24/musl
-ARG MUSL_VERSION=1.2.6-r2
-# renovate: datasource=repology depName=alpine_3_24/curl
-ARG CURL_VERSION=8.20.0-r1
-# renovate: datasource=repology depName=alpine_3_24/gcc
-ARG GCC_VERSION=15.2.0-r5
-# renovate: datasource=repology depName=alpine_3_24/make
-ARG MAKE_VERSION=4.4.1-r4
-# renovate: datasource=repology depName=alpine_3_24/openssl
-ARG OPENSSL_VERSION=3.5.7-r0
-# renovate: datasource=repology depName=alpine_3_24/pcre
-ARG PCRE_VERSION=8.45-r4
-# renovate: datasource=repology depName=alpine_3_24/zlib
-ARG ZLIB_VERSION=1.3.2-r0
-# renovate: datasource=repology depName=alpine_3_24/ca-certificates
-ARG CA_CERTIFICATES_VERSION=20260611-r0
-
-################################
-# ffmpeg runtime dependencies
-################################
-# renovate: datasource=repology depName=alpine_3_24/fdk-aac
-ARG FDK_AAC_VERSION=2.0.2-r4
-# renovate: datasource=repology depName=alpine_3_24/freetype
-ARG FREETYPE_VERSION=2.14.3-r0
-# renovate: datasource=repology depName=alpine_3_24/lame
-ARG LAME_VERSION=3.100-r5
-# renovate: datasource=repology depName=alpine_3_24/libogg
-ARG LIBOGG_VERSION=1.3.6-r0
-# renovate: datasource=repology depName=alpine_3_24/libass
-ARG LIBASS_VERSION=0.17.4-r1
-# renovate: datasource=repology depName=alpine_3_24/libvpx
-ARG LIBVPX_VERSION=1.15.2-r1
-# renovate: datasource=repology depName=alpine_3_24/libvorbis
-ARG LIBVORBIS_VERSION=1.3.7-r2
-# renovate: datasource=repology depName=alpine_3_24/libwebp
-ARG LIBWEBP_VERSION=1.6.0-r0
-# renovate: datasource=repology depName=alpine_3_24/libtheora
-ARG LIBTHEORA_VERSION=1.2.0-r1
-# renovate: datasource=repology depName=alpine_3_24/opus
-ARG OPUS_VERSION=1.6.1-r0
-# renovate: datasource=repology depName=alpine_3_24/rtmpdump
-ARG RTMPDUMP_VERSION=2.4_git20190330-r5
-# renovate: datasource=repology depName=alpine_3_24/x264
-ARG X264_VERSION=0.164.3108-r1
-# renovate: datasource=repology depName=alpine_3_24/x265
-ARG X265_VERSION=4.1-r0
-
 FROM alpine:3.24.1@sha256:bec4ccd3817e7c824eb0388971a0b83fab111d586285511ba0266b77e8dc65a9 AS build-nginx
-
-ARG MUSL_VERSION
-ARG CURL_VERSION
-ARG GCC_VERSION
-ARG MAKE_VERSION
-ARG OPENSSL_VERSION
-ARG PCRE_VERSION
-ARG ZLIB_VERSION
-ARG CA_CERTIFICATES_VERSION
 
 # renovate: datasource=git-tags extractVersion=^release-(?<version>.*)$ depName=https://github.com/nginx/nginx.git
 ARG NGINX_VERSION=1.31.2
 # renovate: datasource=git-tags extractVersion=^v(?<version>.*)$ depName=https://github.com/arut/nginx-rtmp-module.git
 ARG NGINX_RTMP_VERSION=1.2.2
-# renovate: datasource=repology depName=alpine_3_24/linux-headers
-ARG LINUX_HEADERS_VERSION=7.0.0-r1
 
 # Build dependencies.
 RUN apk add --no-cache \
-  gcc="${GCC_VERSION}" \
-  ca-certificates="${CA_CERTIFICATES_VERSION}" \
-  curl="${CURL_VERSION}" \
-  linux-headers="${LINUX_HEADERS_VERSION}" \
-  make="${MAKE_VERSION}" \
-  musl-dev="${MUSL_VERSION}" \
-  openssl-dev="${OPENSSL_VERSION}" \
-  pcre-dev="${PCRE_VERSION}" \
-  zlib-dev="${ZLIB_VERSION}"
+  gcc \
+  ca-certificates \
+  curl \
+  linux-headers \
+  make \
+  musl-dev \
+  openssl-dev \
+  pcre-dev \
+  zlib-dev
 
 WORKDIR /tmp
 
@@ -110,55 +49,31 @@ RUN \
 # Build the FFmpeg-build image.
 FROM alpine:3.24.1@sha256:bec4ccd3817e7c824eb0388971a0b83fab111d586285511ba0266b77e8dc65a9 AS build-ffmpeg
 
-ARG MUSL_VERSION
-ARG CURL_VERSION
-ARG GCC_VERSION
-ARG MAKE_VERSION
-ARG OPENSSL_VERSION
-
-ARG FDK_AAC_VERSION
-ARG FREETYPE_VERSION
-ARG LAME_VERSION
-ARG LIBOGG_VERSION
-ARG LIBASS_VERSION
-ARG LIBVPX_VERSION
-ARG LIBVORBIS_VERSION
-ARG LIBWEBP_VERSION
-ARG LIBTHEORA_VERSION
-ARG OPUS_VERSION
-ARG RTMPDUMP_VERSION
-ARG X264_VERSION
-ARG X265_VERSION
-
 # renovate: datasource=git-tags extractVersion=^n(?<version>.*)$ depName=git://git.ffmpeg.org/ffmpeg.git
 ARG FFMPEG_VERSION=7.1.5
-# renovate: datasource=repology depName=alpine_3_24/pkgconf
-ARG PKGCONF_VERSION=2.5.1-r0
-# renovate: datasource=repology depName=alpine_3_24/yasm
-ARG YASM_VERSION=1.3.0-r4
 
 # FFmpeg build dependencies.
 RUN apk add --no-cache \
-  gcc="${GCC_VERSION}" \
-  musl-dev="${MUSL_VERSION}" \
-  curl="${CURL_VERSION}" \
-  make="${MAKE_VERSION}" \
-  fdk-aac-dev="${FDK_AAC_VERSION}" \
-  freetype-dev="${FREETYPE_VERSION}" \
-  lame-dev="${LAME_VERSION}" \
-  libogg-dev="${LIBOGG_VERSION}" \
-  libass-dev="${LIBASS_VERSION}" \
-  libvpx-dev="${LIBVPX_VERSION}" \
-  libvorbis-dev="${LIBVORBIS_VERSION}" \
-  libwebp-dev="${LIBWEBP_VERSION}" \
-  libtheora-dev="${LIBTHEORA_VERSION}" \
-  opus-dev="${OPUS_VERSION}" \
-  openssl-dev="${OPENSSL_VERSION}" \
-  rtmpdump-dev="${RTMPDUMP_VERSION}" \
-  x264-dev="${X264_VERSION}" \
-  x265-dev="${X265_VERSION}" \
-  pkgconf="${PKGCONF_VERSION}" \
-  yasm="${YASM_VERSION}"
+  gcc \
+  musl-dev \
+  curl \
+  make \
+  fdk-aac-dev \
+  freetype-dev \
+  lame-dev \
+  libogg-dev \
+  libass-dev \
+  libvpx-dev \
+  libvorbis-dev \
+  libwebp-dev \
+  libtheora-dev \
+  opus-dev \
+  openssl-dev \
+  rtmpdump-dev \
+  x264-dev \
+  x265-dev \
+  pkgconf \
+  yasm
 
 WORKDIR /tmp
 
@@ -209,49 +124,26 @@ ENV HTTP_PORT=80
 ENV HTTPS_PORT=443
 ENV RTMP_LISTEN_PORT=1935
 
-ARG OPENSSL_VERSION
-ARG PCRE_VERSION
-ARG ZLIB_VERSION
-ARG CA_CERTIFICATES_VERSION
-ARG CURL_VERSION
-
-ARG FDK_AAC_VERSION
-ARG FREETYPE_VERSION
-ARG LAME_VERSION
-ARG LIBOGG_VERSION
-ARG LIBASS_VERSION
-ARG LIBVPX_VERSION
-ARG LIBVORBIS_VERSION
-ARG LIBWEBP_VERSION
-ARG LIBTHEORA_VERSION
-ARG OPUS_VERSION
-ARG RTMPDUMP_VERSION
-ARG X264_VERSION
-ARG X265_VERSION
-
-# renovate: datasource=repology depName=alpine_3_24/gettext
-ARG GETTEXT_VERSION=1.0-r0
-
 RUN apk add --no-cache \
-  ca-certificates="${CA_CERTIFICATES_VERSION}" \
-  openssl="${OPENSSL_VERSION}" \
-  pcre="${PCRE_VERSION}" \
-  zlib="${ZLIB_VERSION}" \
-  curl="${CURL_VERSION}" \
-  fdk-aac="${FDK_AAC_VERSION}" \
-  freetype="${FREETYPE_VERSION}" \
-  gettext="${GETTEXT_VERSION}" \
-  lame="${LAME_VERSION}" \
-  libogg="${LIBOGG_VERSION}" \
-  libass="${LIBASS_VERSION}" \
-  libvpx="${LIBVPX_VERSION}" \
-  libvorbis="${LIBVORBIS_VERSION}" \
-  libwebp="${LIBWEBP_VERSION}" \
-  libtheora="${LIBTHEORA_VERSION}" \
-  opus="${OPUS_VERSION}" \
-  rtmpdump="${RTMPDUMP_VERSION}" \
-  x264-dev="${X264_VERSION}" \
-  x265-dev="${X265_VERSION}"
+  ca-certificates \
+  openssl \
+  pcre \
+  zlib \
+  curl \
+  fdk-aac \
+  freetype \
+  gettext \
+  lame \
+  libogg \
+  libass \
+  libvpx \
+  libvorbis \
+  libwebp \
+  libtheora \
+  opus \
+  rtmpdump \
+  x264-dev \
+  x265-dev
 
 COPY --from=build-nginx /out /
 COPY --from=build-ffmpeg /out /

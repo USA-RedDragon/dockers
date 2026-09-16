@@ -3,6 +3,12 @@ on:
   push:
     branches:
       - main
+  # Package versions are not pinned inside the images (Alpine/Debian only
+  # ever serve the latest build per release branch), so a periodic rebuild is
+  # what picks up distro security fixes when nothing in this repo changed.
+  schedule:
+    - cron: '0 12 * * 1'  # Mondays 12:00 UTC
+  workflow_dispatch:
 
 concurrency:
   group: '${{ github.workflow }} @ ${{ github.ref }}'
@@ -13,13 +19,26 @@ jobs:
     name: Generate job matrices
     runs-on: ubuntu-24.04
     outputs:
-      matrix: ${{ steps.images.outputs.matrix }}
+      matrix: ${{ steps.all.outputs.matrix || steps.images.outputs.matrix }}
     steps:
-      - name: Generate matrix
+      - name: Generate matrix (changed images)
         id: images
+        if: github.event_name == 'push' || github.event_name == 'pull_request'
         uses: hellofresh/action-changed-files@f6db62a551af02bb4bbc88ce6536bf40aa537e8f # v3.0.1
         with:
           pattern: images/(?P<image>[^/]+)
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        if: github.event_name != 'push' && github.event_name != 'pull_request'
+      - name: Generate matrix (all images)
+        id: all
+        if: github.event_name != 'push' && github.event_name != 'pull_request'
+        run: |
+          include=""
+          for dir in images/*/; do
+            image="$(basename "${dir}")"
+            include="${include:+${include},}{\"image\":\"${image}\",\"reason\":\"scheduled\"}"
+          done
+          echo "matrix={\"include\":[${include}]}" >> "$GITHUB_OUTPUT"
 
   lowercase-user:
     runs-on: ubuntu-24.04

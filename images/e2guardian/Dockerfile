@@ -3,61 +3,33 @@ FROM debian:12.11-slim@sha256:90522eeb7e5923ee2b871c639059537b30521272f10ca86fdb
 # renovate: datasource=github-releases depName=e2guardian/e2guardian
 ARG E2GUARDIAN_VERSION=v5.5.4r
 
-# Runtime dependencies
-
-# renovate: datasource=repology versioning=deb depName=debian_12/zlib
-ARG ZLIB1G_VERSION=1:1.2.13.dfsg-1
-# renovate: datasource=repology versioning=deb depName=debian_12/ca-certificates
-ARG CA_CERTIFICATES_VERSION=20230311+deb12u1
-# renovate: datasource=repology versioning=deb depName=debian_12/pcre3
-ARG LIBPCRE3_VERSION=2:8.39-15
-# renovate: datasource=repology versioning=deb depName=debian_12/openssl
-ARG OPENSSL_VERSION=3.0.19-1~deb12u2
-# renovate: datasource=repology versioning=deb depName=debian_12/clamav
-ARG CLAMAV_VERSION=1.4.3+dfsg-1~deb12u2
-
 # Build dependencies
 
 ARG DEV_PACKAGES=" \
-    libpcre3-dev=${LIBPCRE3_VERSION} \
-    libssl-dev=${OPENSSL_VERSION} \
-    zlib1g-dev=${ZLIB1G_VERSION} \
-    libclamav-dev=${CLAMAV_VERSION} \
+    libpcre3-dev \
+    libssl-dev \
+    zlib1g-dev \
+    libclamav-dev \
 "
 
-# renovate: datasource=repology versioning=deb depName=debian_12/make-dfsg
-ARG MAKE_VERSION=4.3-4.1
-# renovate: datasource=repology versioning=deb depName=debian_12/gcc
-ARG GCC_VERSION=4:12.2.0-3
-# renovate: datasource=repology versioning=deb depName=debian_12/git
-ARG GIT_VERSION=1:2.39.5-0+deb12u3
-# renovate: datasource=repology versioning=deb depName=debian_12/automake-1.16
-ARG AUTOMAKE_VERSION=1:1.16.5-1.3
-# renovate: datasource=repology versioning=deb depName=debian_12/autoconf
-ARG AUTOCONF_VERSION=2.71-3
-# renovate: datasource=repology versioning=deb depName=debian_12/pkgconf
-ARG PKG_CONFIG_VERSION=1.8.1-1
-# renovate: datasource=repology versioning=deb depName=debian_12/m4
-ARG M4_VERSION=1.4.19-3
-
 ARG BUILD_DEPS=" \
-    make=${MAKE_VERSION} \
-    g++=${GCC_VERSION} \
-    git=${GIT_VERSION} \
-    automake=${AUTOMAKE_VERSION} \
-    autoconf=${AUTOCONF_VERSION} \
-    pkg-config=${PKG_CONFIG_VERSION} \
-    m4=${M4_VERSION} \
+    make \
+    g++ \
+    git \
+    automake \
+    autoconf \
+    pkg-config \
+    m4 \
 "
 
 # Runtime dependencies
 RUN apt-get update \
     && apt-get install -y --no-install-recommends --no-install-suggests \
-        zlib1g="${ZLIB1G_VERSION}" \
-        ca-certificates="${CA_CERTIFICATES_VERSION}" \
-        libpcre3="${LIBPCRE3_VERSION}" \
-        openssl="${OPENSSL_VERSION}" \
-        clamav="${CLAMAV_VERSION}" \
+        zlib1g \
+        ca-certificates \
+        libpcre3 \
+        openssl \
+        clamav \
     && rm -rf /var/lib/apt/lists/*
 
 # False-positive from hadolint

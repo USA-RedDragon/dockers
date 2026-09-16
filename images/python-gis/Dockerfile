@@ -2,45 +2,26 @@ FROM python:3.13.12-slim@sha256:f1927c75e81efd1e091dbd64b6c0ecaa5630b38635a3d1c0
 
 ENV PYTHONUNBUFFERED=1
 
-# renovate: datasource=repology versioning=deb depName=debian_12/geos
-ARG LIBGEOS_VERSION=3.11.1-1
-# renovate: datasource=repology versioning=deb depName=debian_12/proj
-ARG PROJ_VERSION=9.1.1-1+b1
-# renovate: datasource=repology versioning=deb depName=debian_12/openblas
-ARG OPENBLAS_VERSION=0.3.21+ds-4
-
 ARG DEV_PACKAGES=" \
-    libgeos-dev="${LIBGEOS_VERSION}" \
-    libproj-dev="${PROJ_VERSION}" \
-    libopenblas-dev="${OPENBLAS_VERSION}" \
+    libgeos-dev \
+    libproj-dev \
+    libopenblas-dev \
 "
-
-# renovate: datasource=repology versioning=deb depName=debian_12/ca-certificates
-ARG CA_CERTIFICATES_VERSION=20230311+deb12u1
-# renovate: datasource=repology versioning=deb depName=debian_12/python-pyproj
-ARG PYPROJ_VERSION=3.4.1-1+b1
 
 ARG RUNTIME_DEPS=" \
-    ca-certificates="${CA_CERTIFICATES_VERSION}" \
-    libgeos-c1v5="${LIBGEOS_VERSION}" \
-    libproj25="${PROJ_VERSION}" \
-    proj-bin="${PROJ_VERSION}" \
-    python3-pyproj="${PYPROJ_VERSION}" \
-    libopenblas0="${OPENBLAS_VERSION}" \
+    ca-certificates \
+    libgeos-c1v5 \
+    libproj25 \
+    proj-bin \
+    python3-pyproj \
+    libopenblas0 \
 "
 
-# renovate: datasource=repology versioning=deb depName=debian_12/make-dfsg
-ARG MAKE_VERSION=4.3-4.1
-# renovate: datasource=repology versioning=deb depName=debian_12/gcc
-ARG GCC_VERSION=4:12.2.0-3
-# renovate: datasource=repology versioning=deb depName=debian_12/git
-ARG GIT_VERSION=1:2.39.5-0+deb12u3
-
 ARG BUILD_DEPS=" \
-    make=${MAKE_VERSION} \
-    g++=${GCC_VERSION} \
-    git=${GIT_VERSION} \
-    gfortran=${GCC_VERSION} \
+    make \
+    g++ \
+    git \
+    gfortran \
 "
 
 COPY requirements.txt /tmp/requirements.txt
