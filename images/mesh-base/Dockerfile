@@ -51,7 +51,7 @@ FROM alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6ee
 WORKDIR /tmp
 RUN mkdir -p /out
 
-ARG UCODE_VERSION=1a20d752a5a2b91780f22e30c6bbb671a0fb611e
+ARG UCODE_VERSION=377315c78c1509e933b39d1d5646e4bb875187a4
 
 RUN apk add --no-cache \
     git \
