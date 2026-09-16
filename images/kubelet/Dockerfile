@@ -7,7 +7,7 @@ ARG KUBELET_URL=https://dl.k8s.io/release/${KUBELET_VERSION}/bin/linux/${TARGETA
 
 RUN wget -q -O /kubelet ${KUBELET_URL} && chmod +x /kubelet
 
-FROM registry.k8s.io/build-image/debian-base:bookworm-v1.0.7
+FROM registry.k8s.io/build-image/debian-base:bookworm-v1.0.7@sha256:368abceecc1308e0913a6fd5ab89a513ee4268becefc2a82dbe616462b29a46b
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends --no-install-suggests \
