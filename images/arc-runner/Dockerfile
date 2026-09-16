@@ -1,4 +1,4 @@
-FROM ghcr.io/actions/actions-runner:2.335.1@sha256:08c30b0a7105f64bddfc485d2487a22aa03932a791402393352fdf674bda2c29
+FROM ghcr.io/actions/actions-runner:2.337.0@sha256:e5496277be5d09bc968b3d64911b74e219ac4a3f2edce956a3ecf9271bea1ef4
 
 ARG TARGETARCH
 ARG DEBIAN_FRONTEND=noninteractive
@@ -30,7 +30,7 @@ RUN apt-get update \
 # renovate: datasource=node-version depName=node
 ARG NODE_VERSION=24.21.0
 # renovate: datasource=github-tags depName=aws/aws-cli
-ARG AWSCLI_VERSION=2.36.45
+ARG AWSCLI_VERSION=2.36.46
 RUN set -eux; \
     case "${TARGETARCH}" in \
         amd64) node_arch=x64; aws_arch=x86_64 ;; \
