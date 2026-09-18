@@ -15,7 +15,7 @@
 
 # The builder runs on the native build platform; the rootfs is selected explicitly,
 # so cross-building needs no emulation.
-FROM --platform=$BUILDPLATFORM alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b AS rootfs
+FROM --platform=$BUILDPLATFORM alpine:3.24.2@sha256:3cf95fe0816180395592b8373f3ec60663f076127617bbacb4eacf9667afe2e9 AS rootfs
 
 ARG TARGETARCH
 ARG AREDN_CHANNEL=releases
