@@ -1,7 +1,7 @@
 FROM alpine:3.24.2@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6 AS downloader
 
 # renovate: datasource=github-releases depName=Anuken/Mindustry
-ARG MINDUSTRY_VERSION=v146
+ARG MINDUSTRY_VERSION=v159.7
 
 RUN apk add --no-cache --virtual .build-deps \
     curl \
