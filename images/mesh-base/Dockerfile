@@ -1,4 +1,4 @@
-FROM alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b AS olsrd-builder
+FROM alpine:3.24.2@sha256:3cf95fe0816180395592b8373f3ec60663f076127617bbacb4eacf9667afe2e9 AS olsrd-builder
 
 WORKDIR /tmp
 RUN mkdir -p /out
@@ -23,7 +23,7 @@ RUN git clone https://github.com/USA-RedDragon/olsrd.git \
     && cd .. \
     && rm -rf olsrd
 
-FROM alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b AS babeld-builder
+FROM alpine:3.24.2@sha256:3cf95fe0816180395592b8373f3ec60663f076127617bbacb4eacf9667afe2e9 AS babeld-builder
 
 WORKDIR /tmp
 RUN mkdir -p /out
@@ -46,7 +46,7 @@ RUN git clone https://github.com/USA-RedDragon/babeld.git \
     && cd .. \
     && rm -rf babeld
 
-FROM alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b AS ucode-builder
+FROM alpine:3.24.2@sha256:3cf95fe0816180395592b8373f3ec60663f076127617bbacb4eacf9667afe2e9 AS ucode-builder
 
 WORKDIR /tmp
 RUN mkdir -p /out
@@ -71,7 +71,7 @@ RUN git clone https://github.com/jow-/ucode.git \
     && cd .. \
     && rm -rf ucode
 
-FROM alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b AS dnsmasq-builder
+FROM alpine:3.24.2@sha256:3cf95fe0816180395592b8373f3ec60663f076127617bbacb4eacf9667afe2e9 AS dnsmasq-builder
 
 WORKDIR /tmp
 RUN mkdir -p /out
@@ -97,7 +97,7 @@ RUN git clone https://thekelleys.org.uk/git/dnsmasq.git \
     && cd .. \
     && rm -rf dnsmasq
 
-FROM alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
+FROM alpine:3.24.2@sha256:3cf95fe0816180395592b8373f3ec60663f076127617bbacb4eacf9667afe2e9
 
 COPY --from=olsrd-builder /out /
 COPY --from=babeld-builder /out /
