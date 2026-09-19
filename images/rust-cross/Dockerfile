@@ -1,4 +1,4 @@
-FROM debian:13.5-slim@sha256:28de0877c2189802884ccd20f15ee41c203573bd87bb6b883f5f46362d24c5c2 AS toolchain-base
+FROM debian:13.7-slim@sha256:a99cfc517144bc59b1978475ec53b46ecabec7e43635402ee5b77cc54cd1b20a AS toolchain-base
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -91,7 +91,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends bzip2 rsync xz-
     && rm -rf /var/lib/apt/lists/*
 
 # renovate: datasource=github-tags depName=alsa-project/alsa-lib
-ARG ALSA_LIB_VERSION=1.2.13
+ARG ALSA_LIB_VERSION=1.2.16
 # renovate: datasource=github-releases depName=eudev-project/eudev
 ARG EUDEV_VERSION=3.2.14
 ARG LINUX_VERSION=4.19.325
@@ -129,7 +129,7 @@ RUN set -eux; \
     done; \
     rm -rf "$ksrc"
 
-FROM debian:13.5-slim@sha256:28de0877c2189802884ccd20f15ee41c203573bd87bb6b883f5f46362d24c5c2 AS build-osxcross
+FROM debian:13.7-slim@sha256:a99cfc517144bc59b1978475ec53b46ecabec7e43635402ee5b77cc54cd1b20a AS build-osxcross
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -165,7 +165,7 @@ RUN --mount=type=secret,id=IOS_SDK_URL \
 RUN --mount=type=secret,id=IOS_SIMULATOR_SDK_URL \
     curl -fsSL "$(cat /run/secrets/IOS_SIMULATOR_SDK_URL)" | tar -xj -C /opt/ios-sdk
 
-FROM rust:1.97.1-slim-trixie@sha256:cf09adf8c3ebaba10779e5c23ff7fe4df4cccdab8a91f199b0c142c53fef3e1a
+FROM rust:1.98.1-slim-trixie@sha256:f47a8de237dcbb0b0ce1099901e60a89728e3d51f24e664b40e947171538ade7
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -246,7 +246,7 @@ RUN apt-get update && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # renovate: datasource=github-releases depName=protocolbuffers/protobuf
-ARG PROTOBUF_VERSION=v34.1
+ARG PROTOBUF_VERSION=v34.2
 ARG TARGETARCH
 
 RUN apt-get update && \
@@ -403,9 +403,9 @@ ARG CARGO_NDK_VERSION=4.1.2
 RUN cargo install cargo-ndk --version "${CARGO_NDK_VERSION}" --locked
 
 # renovate: datasource=github-releases depName=ziglang/zig
-ARG ZIG_VERSION=0.13.0
+ARG ZIG_VERSION=0.15.1
 # renovate: datasource=crate depName=cargo-zigbuild
-ARG CARGO_ZIGBUILD_VERSION=0.23.0
+ARG CARGO_ZIGBUILD_VERSION=0.23.4
 ARG TARGETARCH
 RUN apt-get update && \
     apt-get install -y --no-install-recommends curl xz-utils && \
