@@ -1,4 +1,4 @@
-FROM debian:12.11-slim@sha256:90522eeb7e5923ee2b871c639059537b30521272f10ca86fdbbbb2b75a8c40cd
+FROM debian:12.15-slim@sha256:3783cc01769c7b2b1b83a5c5ad96c815348e28ed7da68e2e3687004faa906251
 
 WORKDIR /app
 
@@ -7,7 +7,7 @@ SHELL [ "/bin/bash", "-o", "pipefail", "-c" ]
 ENV PYTHONUNBUFFERED=1
 
 # renovate: datasource=github-releases depName=weewx/weewx
-ARG WEEWX_VERSION=v5.2.0
+ARG WEEWX_VERSION=v5.5.0
 
 ARG DEV_PACKAGES=" \
     libfreetype6-dev \
@@ -61,7 +61,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     && apt-get clean && rm -rf /tmp/setup /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # renovate: datasource=github-releases depName=chaunceygardiner/weewx-nws
-ARG WEEWX_NWS_VERSION=v4.5.6
+ARG WEEWX_NWS_VERSION=v4.5.7
 # renovate: datasource=github-tags depName=USA-RedDragon/weewx-prometheus
 ARG WEEWX_PROMETHEUS_VERSION=v1.1.9
 # renovate: datasource=github-releases depName=gjr80/weewx-stackedwindrose
