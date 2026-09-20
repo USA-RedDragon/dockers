@@ -427,4 +427,9 @@ RUN apt-get update && \
 RUN cp /usr/riscv64-linux-gnu/include/gnu/stubs-lp64d.h \
        /opt/zig/lib/libc/include/riscv64-linux-gnu/gnu/stubs-lp64d.h
 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl ca-certificates rclone && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    rclone version | head -1
+
 ENV PATH=/usr/local/bin:$PATH
