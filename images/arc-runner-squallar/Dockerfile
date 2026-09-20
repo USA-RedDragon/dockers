@@ -20,6 +20,7 @@ RUN apt-get update \
         autoconf \
         automake \
         libtool \
+        rclone \
     && rm -rf /var/lib/apt/lists/*
 
 RUN install -d -m 0755 /etc/apt/keyrings \
