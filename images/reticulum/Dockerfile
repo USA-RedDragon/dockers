@@ -1,4 +1,4 @@
-FROM python:3.14.7-alpine3.23@sha256:218761489de417a6eb0808e264cbdd7043ec6659fe5a61898815e9848536541d
+FROM python:3.14.8-alpine3.23@sha256:e8f2d5363ff792d4d9450f177cd7b9717a7915c3b7417d00557bf724e712f78d
 
 # renovate: datasource=github-releases depName=markqvist/Reticulum
 ARG RNS_VERSION=1.5.5
