@@ -123,7 +123,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Lint - Yamllint
-        uses: reviewdog/action-yamllint@290d92c84b22627946efc7fd6f038ade2d2beede # v1.25.0
+        uses: reviewdog/action-yamllint@5dd4640db975e4cac6f4e775a401695bafc28068 # v1.25.1
         with:
           github_token: ${{ secrets.github_token }}
           fail_level: error
@@ -139,7 +139,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Lint - Actionlint
-        uses: reviewdog/action-actionlint@1129829fb3230509a1c9aa4e93cec2b234746a68 # v1.78.0
+        uses: reviewdog/action-actionlint@13465d022aa41c282f730be17574b5ce692d0186 # v1.78.1
         with:
           github_token: ${{ secrets.github_token }}
           fail_level: error
@@ -169,7 +169,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Lint - detect-secrets
-        uses: reviewdog/action-detect-secrets@3bc07a8ce36864e49536f7dba77f7c69ff5219a3 # v0.31.0
+        uses: reviewdog/action-detect-secrets@53195a798553d71f8d0884ab7335aa5ac42e73e9 # v0.31.1
         with:
           github_token: ${{ secrets.github_token }}
           fail_level: error
