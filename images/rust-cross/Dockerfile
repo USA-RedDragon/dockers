@@ -93,7 +93,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends bzip2 rsync xz-
 # renovate: datasource=github-tags depName=alsa-project/alsa-lib
 ARG ALSA_LIB_VERSION=1.2.16
 # renovate: datasource=github-releases depName=eudev-project/eudev
-ARG EUDEV_VERSION=3.2.14
+ARG EUDEV_VERSION=3.2.15
 ARG LINUX_VERSION=4.19.325
 
 RUN set -eux; \
@@ -165,7 +165,7 @@ RUN --mount=type=secret,id=IOS_SDK_URL \
 RUN --mount=type=secret,id=IOS_SIMULATOR_SDK_URL \
     curl -fsSL "$(cat /run/secrets/IOS_SIMULATOR_SDK_URL)" | tar -xj -C /opt/ios-sdk
 
-FROM rust:1.98.1-slim-trixie@sha256:f47a8de237dcbb0b0ce1099901e60a89728e3d51f24e664b40e947171538ade7
+FROM rust:1.99.0-slim-trixie@sha256:01dd4f9c24801cfc8ba9cf8a5dd6dcca451cd17d1ae73574edc22591de6e6816
 
 ARG DEBIAN_FRONTEND=noninteractive
 
