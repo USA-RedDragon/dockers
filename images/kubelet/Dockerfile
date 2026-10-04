@@ -15,7 +15,9 @@ RUN apt-get update \
         libcap2 \
         ethtool \
         iproute2 \
+        iptables \
         nfs-common \
+        nftables \
         socat \
         util-linux \
     && rm -rf /var/lib/apt/lists/*
