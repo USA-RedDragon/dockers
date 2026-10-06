@@ -83,7 +83,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Lint - Markdown
-        uses: reviewdog/action-markdownlint@a223028b797326efe9d3c9b55e24d740480c3352 # v0.31.2
+        uses: reviewdog/action-markdownlint@d6b1ab6a31042054e7848e23358ef7d5e2cc9764 # v0.31.3
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
