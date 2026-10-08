@@ -1,5 +1,5 @@
 cryptography==50.0.2
 pyserial==3.5
 cffi==2.1.1
-pycparser==3.0
+pycparser==3.1
 lxmf @ git+https://github.com/USA-RedDragon/LXMF.git@leak
