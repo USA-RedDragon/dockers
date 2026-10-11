@@ -2,3 +2,4 @@
 .idea/
 /dumpdb
 /restic-wrapper
+/restoredb
