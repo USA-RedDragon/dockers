@@ -10,7 +10,7 @@ import (
 	"syscall"
 
 	"gabe565.com/utils/termx"
-	"github.com/gabe565/docker-restic/internal/xtrace"
+	"github.com/USA-RedDragon/dockers/images/restic/internal/xtrace"
 )
 
 func main() {

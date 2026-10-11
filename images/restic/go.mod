@@ -1,4 +1,4 @@
-module github.com/gabe565/docker-restic
+module github.com/USA-RedDragon/dockers/images/restic
 
 go 1.27.2
 

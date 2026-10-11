@@ -4,10 +4,10 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/gabe565/docker-restic/cmd/dumpdb/mariadb"
-	"github.com/gabe565/docker-restic/cmd/dumpdb/mongodb"
-	"github.com/gabe565/docker-restic/cmd/dumpdb/postgres"
-	"github.com/gabe565/docker-restic/cmd/dumpdb/sqlite"
+	"github.com/USA-RedDragon/dockers/images/restic/cmd/dumpdb/mariadb"
+	"github.com/USA-RedDragon/dockers/images/restic/cmd/dumpdb/mongodb"
+	"github.com/USA-RedDragon/dockers/images/restic/cmd/dumpdb/postgres"
+	"github.com/USA-RedDragon/dockers/images/restic/cmd/dumpdb/sqlite"
 	"github.com/spf13/cobra"
 )
 

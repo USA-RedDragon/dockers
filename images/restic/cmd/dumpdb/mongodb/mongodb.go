@@ -1,8 +1,8 @@
 package mongodb
 
 import (
-	"github.com/gabe565/docker-restic/internal/cobrax"
-	"github.com/gabe565/docker-restic/internal/dumpdb"
+	"github.com/USA-RedDragon/dockers/images/restic/internal/cobrax"
+	"github.com/USA-RedDragon/dockers/images/restic/internal/dumpdb"
 	"github.com/spf13/cobra"
 )
 
