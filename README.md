@@ -9,5 +9,6 @@ This repository contains a collection of Dockerfiles for various projects. The i
 - [E2Guardian](images/e2guardian/README.md)
 - [Nginx RTMP](images/nginx-rtmp/README.md)
 - [Python GIS](images/python-gis/README.md)
+- [Restic](images/restic/README.md)
 - [Weewx](images/weewx/README.md)
 - [WireGuard](images/wireguard/README.md)
