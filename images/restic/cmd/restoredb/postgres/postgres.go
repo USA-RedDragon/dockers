@@ -116,7 +116,8 @@ carry on outside the transaction.`,
 			}
 
 			name := "psql"
-			opts := []string{"-v", "ON_ERROR_STOP=1", "--single-transaction", "--no-psqlrc", "--quiet"}
+			opts := []string{"-v", "ON_ERROR_STOP=1", "--single-transaction", "--no-psqlrc", "--quiet",
+				"--output=/dev/null"}
 			key := ""
 			if more, _ := in.Peek(in.Size()); len(more) > 0 {
 				key = RestrictKey(more)

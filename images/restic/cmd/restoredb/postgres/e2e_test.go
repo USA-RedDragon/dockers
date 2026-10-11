@@ -326,3 +326,51 @@ func TestPostgresDryRunReadsTheWholeDump(t *testing.T) {
 		})
 	}
 }
+
+func TestPostgresPlainRestorePrintsNoQueryResults(t *testing.T) {
+	backup, want := seed(t, "CREATE TABLE s (id serial PRIMARY KEY); INSERT INTO s DEFAULT VALUES;",
+		"--clean", "--if-exists")
+	if !strings.Contains(backup, "set_config(") || !strings.Contains(backup, "setval(") {
+		t.Fatal("the dump runs neither set_config nor setval")
+	}
+	head, rest, ok := strings.Cut(backup, "SET row_security = off;\n")
+	if !ok {
+		t.Fatal("the dump does not set row_security")
+	}
+	for _, tt := range []struct {
+		name       string
+		input      string
+		ok         bool
+		wantStderr string
+	}{
+		{name: "a whole dump", input: backup, ok: true},
+		{name: "a failing statement", input: head + "SET row_security = off;\nSELECT 'shown';\nSELECT 1/0;\n" + rest,
+			wantStderr: "division by zero"},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			before := fingerprint(t)
+			cmd := exec.Command("docker", "exec", "-i", server, "restoredb", "postgres",
+				"-H", "127.0.0.1", "-u", "postgres", "-p", pgPassword, "-d", appDB)
+			cmd.Stdin = io.MultiReader(strings.NewReader(tt.input), pause(2*time.Second))
+			var stdout, stderr bytes.Buffer
+			cmd.Stdout, cmd.Stderr = &stdout, &stderr
+			err := cmd.Run()
+			t.Logf("stderr:\n%s", stderr.String())
+			if (err == nil) != tt.ok {
+				t.Fatalf("err = %v, want success %t", err, tt.ok)
+			}
+			if stdout.Len() > 0 {
+				t.Errorf("stdout = %q, want nothing", stdout.String())
+			}
+			if !strings.Contains(stderr.String(), tt.wantStderr) {
+				t.Errorf("stderr does not have %q", tt.wantStderr)
+			}
+			switch got := fingerprint(t); {
+			case tt.ok && got != want:
+				t.Errorf("app does not match the backup: %s", firstDiff(want, got))
+			case !tt.ok && got != before:
+				t.Errorf("the database changed: %s", firstDiff(before, got))
+			}
+		})
+	}
+}

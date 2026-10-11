@@ -49,25 +49,25 @@ func TestPostgresPicksRestoreToolFromDumpFormat(t *testing.T) {
 		{
 			name:  "plain sql uses psql",
 			stdin: plainDump + plainTrailer,
-			want:  "+ psql -v ON_ERROR_STOP=1 --single-transaction --no-psqlrc --quiet" + conn + "\n",
+			want:  "+ psql -v ON_ERROR_STOP=1 --single-transaction --no-psqlrc --quiet --output=/dev/null" + conn + "\n",
 		},
 		{
 			name:    "input shorter than the magic is plain sql",
 			stdin:   "PGD",
-			want:    "+ psql -v ON_ERROR_STOP=1 --single-transaction --no-psqlrc --quiet" + conn + "\n",
+			want:    "+ psql -v ON_ERROR_STOP=1 --single-transaction --no-psqlrc --quiet --output=/dev/null" + conn + "\n",
 			wantErr: dumpdb.ErrIncomplete,
 		},
 		{
 			name:    "lowercase magic is plain sql",
 			stdin:   "pgdmp",
-			want:    "+ psql -v ON_ERROR_STOP=1 --single-transaction --no-psqlrc --quiet" + conn + "\n",
+			want:    "+ psql -v ON_ERROR_STOP=1 --single-transaction --no-psqlrc --quiet --output=/dev/null" + conn + "\n",
 			wantErr: dumpdb.ErrIncomplete,
 		},
 		{
 			name:  "psql passthrough after separator",
 			stdin: plainDump + plainTrailer,
 			extra: []string{"--", "--echo-errors"},
-			want:  "+ psql -v ON_ERROR_STOP=1 --single-transaction --no-psqlrc --quiet" + conn + " --echo-errors\n",
+			want:  "+ psql -v ON_ERROR_STOP=1 --single-transaction --no-psqlrc --quiet --output=/dev/null" + conn + " --echo-errors\n",
 		},
 		{
 			name:    "empty input is refused",
