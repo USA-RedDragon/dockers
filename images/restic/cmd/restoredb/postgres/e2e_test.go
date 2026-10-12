@@ -308,7 +308,7 @@ func TestPostgresDryRunReadsTheWholeDump(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			before := fingerprint(t)
-			cmd := exec.Command("docker", "exec", "-i", server, "sh", "-c",
+			cmd := exec.Command("docker", "exec", "-i", server, "bash", "-c",
 				"set -o pipefail; cat | restoredb postgres -H 127.0.0.1 -u postgres -p "+pgPassword+
 					" -d "+appDB+" --dry-run")
 			cmd.Stdin = strings.NewReader(tt.input)
