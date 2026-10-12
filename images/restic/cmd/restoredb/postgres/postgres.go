@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"slices"
 	"strings"
 
@@ -98,7 +99,15 @@ them. The COMMIT would end the restore's transaction partway, so those lines
 reach psql as comments, and any other statement that ends, rolls back or
 prepares a transaction is refused before psql runs it. So is any psql
 meta-command but \restrict and \unrestrict, since one such as \connect would
-carry on outside the transaction.`,
+carry on outside the transaction.
+
+A restore run by a user that is not a superuser first asks the database which
+extensions it has and who owns them. The dump's DROP, CREATE and COMMENT for an
+extension the database has and the user cannot drop are skipped, and the
+extension stays as it is; each skipped statement or entry is printed on stderr.
+An extension the dump needs that the database lacks and the user cannot create
+stops the restore before anything is changed: a superuser must create it first.
+A dry run does not connect, so it does not make these checks.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := fs.Resolve(); err != nil {
 				return err
@@ -115,6 +124,28 @@ carry on outside the transaction.`,
 				return ErrEmptyDump
 			}
 
+			conn := []string{
+				"--host=" + host,
+				"--port=" + port,
+				"--username=" + username,
+				"--dbname=" + database,
+			}
+			envs := []string{"PGPASSWORD=" + password}
+			stderr := cmd.ErrOrStderr()
+			custom := IsCustomFormat(head)
+
+			var policy *ExtensionPolicy
+			if !dryRun {
+				super, user, db, exts, err := QueryExtensions(cmd.Context(), conn, envs)
+				if err != nil {
+					cmd.SilenceUsage = true
+					return err
+				}
+				if !super {
+					policy = NewExtensionPolicy(user, db, exts, nil)
+				}
+			}
+
 			name := "psql"
 			opts := []string{"-v", "ON_ERROR_STOP=1", "--single-transaction", "--no-psqlrc", "--quiet",
 				"--output=/dev/null"}
@@ -123,26 +154,52 @@ carry on outside the transaction.`,
 				key = RestrictKey(more)
 			}
 			plain := NewPlainFilter()
+			plain.Extensions = policy
+			plain.Skipped = func(statement, reason string) {
+				_, _ = fmt.Fprintf(stderr, "restoredb: skipping %q: %s\n", statement, reason)
+			}
 			complete := func(tail []byte) bool { return plain.Ended() && PlainDumpComplete(key, tail) }
 			filter := plain.Copy
-			if IsCustomFormat(head) {
+			var stdin io.Reader = in
+			var extra []*os.File
+			if custom {
 				name = "pg_restore"
 				opts = []string{"--clean", "--if-exists", "--no-owner", "--single-transaction"}
 				complete, filter = nil, nil
-			}
-			conn := []string{
-				"--host=" + host,
-				"--port=" + port,
-				"--username=" + username,
-				"--dbname=" + database,
+				if policy != nil {
+					cmd.SilenceUsage = true
+					dump, list, skipped, err := policy.PrepareCustom(cmd.Context(), in, stderr)
+					if err != nil {
+						return err
+					}
+					stdin = dump
+					if list != nil {
+						r, w, err := os.Pipe()
+						if err != nil {
+							return err
+						}
+						defer func() { _ = r.Close() }()
+						go func() {
+							_, _ = w.Write(list)
+							_ = w.Close()
+						}()
+						extra = []*os.File{r}
+						opts = append(opts, "--use-list=/dev/fd/3")
+					}
+					for _, entry := range skipped {
+						ext, _ := tocEntry(entry)
+						_, _ = fmt.Fprintf(stderr, "restoredb: skipping %q: %s\n", entry, policy.reason(ext))
+					}
+				}
 			}
 
 			return dumpdb.RunCmd(cmd, name, slices.Concat(opts, conn, args), &dumpdb.RunOpts{
-				Envs:     []string{"PGPASSWORD=" + password},
+				Envs:     envs,
 				DryRun:   dryRun,
-				Stdin:    in,
+				Stdin:    stdin,
 				Complete: complete,
 				Filter:   filter,
+				Extra:    extra,
 			})
 		},
 	}

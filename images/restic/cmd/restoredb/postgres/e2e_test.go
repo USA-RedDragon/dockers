@@ -141,8 +141,13 @@ func seed(t *testing.T, extra string, args ...string) (backup, backupState strin
 // time restoredb sees the end, as it would in a large dump.
 func restore(t *testing.T, input []byte, args ...string) (string, error) {
 	t.Helper()
+	return restoreAs(t, "postgres", pgPassword, input, args...)
+}
+
+func restoreAs(t *testing.T, user, password string, input []byte, args ...string) (string, error) {
+	t.Helper()
 	cmd := exec.Command("docker", slices.Concat([]string{"exec", "-i", server, "restoredb", "postgres",
-		"-H", "127.0.0.1", "-u", "postgres", "-p", pgPassword, "-d", appDB}, args)...)
+		"-H", "127.0.0.1", "-u", user, "-p", password, "-d", appDB}, args)...)
 	cmd.Stdin = io.MultiReader(bytes.NewReader(input), pause(2*time.Second))
 	var out bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &out, &out

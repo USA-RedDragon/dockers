@@ -42,6 +42,9 @@ type RunOpts struct {
 	// io.Copy. If it fails, the command is killed before it sees the end of its
 	// input.
 	Filter func(dst io.Writer, src io.Reader) error
+
+	// Extra are passed to the command as file descriptors 3 and up.
+	Extra []*os.File
 }
 
 var (
@@ -68,6 +71,7 @@ func RunCmd(cmd *cobra.Command, name string, args []string, opts *RunOpts) error
 	}
 	e.Stdout = cmd.OutOrStdout()
 	e.Stderr = cmd.ErrOrStderr()
+	e.ExtraFiles = opts.Extra
 
 	trace := xtrace.XTraceString(e.Args)
 	for _, v := range opts.Redact {

@@ -25,10 +25,19 @@ var ErrUnsupportedDump = errors.New("the plain dump has something restoredb cann
 // rolls back or prepares a transaction is refused, and so is every psql
 // meta-command but the \restrict and \unrestrict lines pg_dump writes, and the
 // \. that ends COPY data.
+//
+// With Extensions set, a DROP, CREATE or COMMENT ON EXTENSION statement that
+// starts a line between statements is dropped when the policy skips its
+// extension, and stops the restore when the policy finds it missing. Skipped
+// is told about each statement dropped.
 type PlainFilter struct {
+	Extensions *ExtensionPolicy
+	Skipped    func(statement, reason string)
+
 	lex       *lexer
 	inCopy    bool
 	lineStart bool
+	skipping  bool
 }
 
 // NewPlainFilter returns a PlainFilter at the start of a dump.
@@ -98,12 +107,31 @@ func (f *PlainFilter) line(chunk []byte, whole bool) ([]byte, error) {
 			return chunk, nil
 		}
 	}
+	if start && whole && f.lex.idle() && f.Extensions != nil {
+		if name, ok := plainEntry(chunk); ok {
+			switch f.Extensions.action(name) {
+			case extSkip:
+				f.skipping = true
+				if f.Skipped != nil {
+					f.Skipped(string(trimEOL(chunk)), f.Extensions.reason(name))
+				}
+			case extMissing:
+				return nil, f.Extensions.missingError([]string{name})
+			}
+		}
+	}
 	if err := f.lex.feed(chunk); err != nil {
 		return nil, fmt.Errorf("%w; at %.200q", err, chunk)
 	}
 	if f.lineStart && f.lex.copyPending {
 		f.lex.copyPending = false
 		f.inCopy = true
+	}
+	if f.skipping {
+		if f.lineStart && f.lex.idle() {
+			f.skipping = false
+		}
+		return nil, nil
 	}
 	return chunk, nil
 }

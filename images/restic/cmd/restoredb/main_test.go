@@ -26,6 +26,10 @@ const (
 	keylessDump  = "--\n-- PostgreSQL database dump\n--\n\nSET statement_timeout = 0;\n"
 )
 
+// superuserAnswer makes a fake psql answer restoredb's question about the
+// restoring user as a superuser would.
+const superuserAnswer = "case \" $* \" in *\" -At \"*) printf 't\\tapp\\tapp\\n'; exit 0;; esac\n"
+
 func withStdin(s string) *cobra.Command {
 	cmd := New()
 	cmd.SetIn(strings.NewReader(s))
@@ -97,7 +101,7 @@ func TestPostgresPicksRestoreToolFromDumpFormat(t *testing.T) {
 func TestPostgresStreamsWholeDumpToRestoreTool(t *testing.T) {
 	bin := t.TempDir()
 	for _, name := range []string{"psql", "pg_restore"} {
-		script := "#!/bin/sh\nprintf '%s:' " + name + "\nexec cat\n"
+		script := "#!/bin/sh\n" + superuserAnswer + "printf '%s:' " + name + "\nexec cat\n"
 		if err := os.WriteFile(filepath.Join(bin, name), []byte(script), 0o700); err != nil {
 			t.Fatal(err)
 		}
@@ -253,7 +257,7 @@ func TestSqliteRestoresToMissingFile(t *testing.T) {
 func TestPostgresNeverLetsPsqlCommitATruncatedPlainDump(t *testing.T) {
 	bin := t.TempDir()
 	status := filepath.Join(bin, "status")
-	script := "#!/bin/sh\ncat >/dev/null\necho committed >" + status + "\n"
+	script := "#!/bin/sh\n" + superuserAnswer + "cat >/dev/null\necho committed >" + status + "\n"
 	if err := os.WriteFile(filepath.Join(bin, "psql"), []byte(script), 0o700); err != nil {
 		t.Fatal(err)
 	}
@@ -375,6 +379,109 @@ func TestPostgresDryRunReadsItsInput(t *testing.T) {
 			}
 			if !in.done {
 				t.Error("the dry run did not read its input to the end")
+			}
+		})
+	}
+}
+
+// A fake psql answers as app, which owns pg_trgm but not cube, in a database
+// that lacks earthdistance. A fake pg_restore prints its list, its argv and
+// its input.
+func TestPostgresSkipsExtensionsTheUserCannotManage(t *testing.T) {
+	bin := t.TempDir()
+	psql := "#!/bin/sh\ncase \"$*\" in\n" +
+		"*rolsuper*) printf 'f\\tapp\\tappdb\\n' ;;\n" +
+		"*pg_extension*) printf 'cube\\tt\\tpostgres\\tf\\tt\\t\\npg_trgm\\tt\\tapp\\tt\\tt\\t\\n" +
+		"earthdistance\\tf\\t\\tf\\tf\\t\\nhstore\\tf\\t\\tf\\tt\\t\\n' ;;\n" +
+		"*) printf 'psql:'; exec cat ;;\nesac\n"
+	pgRestore := "#!/bin/sh\nfor a; do case \"$a\" in\n" +
+		"--list) head -c 16 >/dev/null; cat \"$TOC\"; exit 0 ;;\n" +
+		"--use-list=*) printf 'list:'; cat \"${a#--use-list=}\" ;;\nesac; done\n" +
+		"printf 'pg_restore:'; exec cat\n"
+	for name, script := range map[string]string{"psql": psql, "pg_restore": pgRestore} {
+		if err := os.WriteFile(filepath.Join(bin, name), []byte(script), 0o700); err != nil {
+			t.Fatal(err)
+		}
+	}
+	t.Setenv("PATH", bin+string(os.PathListSeparator)+os.Getenv("PATH"))
+
+	const toc = "2; 3079 16384 EXTENSION - cube \n3617; 0 0 COMMENT - EXTENSION cube \n" +
+		"4; 3079 16489 EXTENSION - pg_trgm \n3619; 0 0 COMMENT - EXTENSION pg_trgm \n" +
+		"224; 1259 16588 TABLE public t app\n"
+	custom := customDump + strings.Repeat("x", 1<<17)
+	plain := plainDump + "DROP EXTENSION IF EXISTS cube;\nDROP EXTENSION IF EXISTS pg_trgm;\n" +
+		"CREATE EXTENSION IF NOT EXISTS cube WITH SCHEMA public;\nCOMMENT ON EXTENSION cube IS 'cubes';\n" +
+		"CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;\nCOMMENT ON EXTENSION pg_trgm IS 'trigrams';\n" +
+		plainTrailer
+	tests := []struct {
+		name, toc, stdin, want string
+		wantErr                error
+	}{
+		{
+			name:  "custom",
+			toc:   toc,
+			stdin: custom,
+			want: "list:;2; 3079 16384 EXTENSION - cube \n;3617; 0 0 COMMENT - EXTENSION cube \n" +
+				"4; 3079 16489 EXTENSION - pg_trgm \n3619; 0 0 COMMENT - EXTENSION pg_trgm \n" +
+				"224; 1259 16588 TABLE public t app\npg_restore:" + custom,
+		},
+		{
+			name:  "custom, nothing to skip",
+			toc:   "4; 3079 16489 EXTENSION - pg_trgm \n8; 3079 1 EXTENSION - hstore \n",
+			stdin: custom,
+			want:  "pg_restore:" + custom,
+		},
+		{
+			name:    "custom, a missing extension",
+			toc:     toc + "3; 3079 16473 EXTENSION - earthdistance \n",
+			stdin:   custom,
+			wantErr: postgres.ErrMissingExtension,
+		},
+		{
+			name:  "plain",
+			stdin: plain,
+			want: "psql:" + plainDump + "DROP EXTENSION IF EXISTS pg_trgm;\n" +
+				"CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;\nCOMMENT ON EXTENSION pg_trgm IS 'trigrams';\n" +
+				plainTrailer,
+		},
+		{
+			name:    "plain, a missing extension",
+			stdin:   plainDump + "CREATE EXTENSION IF NOT EXISTS earthdistance WITH SCHEMA public;\n" + plainTrailer,
+			wantErr: postgres.ErrMissingExtension,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			testutil.ClearEnv(t)
+			tocFile := filepath.Join(t.TempDir(), "toc")
+			if err := os.WriteFile(tocFile, []byte(tt.toc), 0o600); err != nil {
+				t.Fatal(err)
+			}
+			t.Setenv("TOC", tocFile)
+			var stdout, stderr strings.Builder
+			cmd := withStdin(tt.stdin)
+			cmd.SetArgs([]string{engineCNPG, "-H", "db"})
+			cmd.SetOut(&stdout)
+			cmd.SetErr(&stderr)
+			err := cmd.Execute()
+			t.Logf("stderr:\n%s", stderr.String())
+			if tt.wantErr != nil {
+				if !errors.Is(err, tt.wantErr) {
+					t.Fatalf("err = %v, want %v", err, tt.wantErr)
+				}
+				if !strings.Contains(err.Error(), "CREATE EXTENSION earthdistance") {
+					t.Errorf("the error does not name earthdistance: %v", err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("execute: %v", err)
+			}
+			if stdout.String() != tt.want {
+				t.Errorf("got %q\nwant %q", stdout.String()[:min(stdout.Len(), 400)], tt.want[:min(len(tt.want), 400)])
+			}
+			if strings.Contains(tt.want, ";2;") && !strings.Contains(stderr.String(), "skipping") {
+				t.Errorf("stderr does not say what was skipped")
 			}
 		})
 	}
