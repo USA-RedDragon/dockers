@@ -12,6 +12,7 @@ import (
 
 	"github.com/USA-RedDragon/dockers/images/restic/internal/cobrax"
 	"github.com/USA-RedDragon/dockers/images/restic/internal/dumpdb"
+	"github.com/USA-RedDragon/dockers/images/restic/internal/untouched"
 	"github.com/spf13/cobra"
 )
 
@@ -107,21 +108,28 @@ extension the database has and the user cannot drop are skipped, and the
 extension stays as it is; each skipped statement or entry is printed on stderr.
 An extension the dump needs that the database lacks and the user cannot create
 stops the restore before anything is changed: a superuser must create it first.
-A dry run does not connect, so it does not make these checks.`,
+A dry run does not connect, so it does not make these checks.
+
+restoredb exits 75 when it stops before psql or pg_restore has been given any
+of the dump: an empty or unreadable dump, a database it cannot connect to or
+query, and, for a custom-format dump, one pg_restore cannot list or one that
+needs an extension the user cannot create. A plain dump is checked as psql
+reads it, so a missing extension found there does not exit 75: psql has run
+the statements before it, in the transaction that is then rolled back.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := fs.Resolve(); err != nil {
-				return err
+				return untouched.Wrap(err)
 			}
 
 			in := bufio.NewReader(cmd.InOrStdin())
 			head, err := in.Peek(len(customMagic))
 			if err != nil && !errors.Is(err, io.EOF) {
 				cmd.SilenceUsage = true
-				return fmt.Errorf("read dump: %w", err)
+				return untouched.Wrap(fmt.Errorf("read dump: %w", err))
 			}
 			if len(head) == 0 {
 				cmd.SilenceUsage = true
-				return ErrEmptyDump
+				return untouched.Wrap(ErrEmptyDump)
 			}
 
 			conn := []string{
@@ -139,7 +147,7 @@ A dry run does not connect, so it does not make these checks.`,
 				super, user, db, exts, err := QueryExtensions(cmd.Context(), conn, envs)
 				if err != nil {
 					cmd.SilenceUsage = true
-					return err
+					return untouched.Wrap(err)
 				}
 				if !super {
 					policy = NewExtensionPolicy(user, db, exts, nil)
@@ -170,13 +178,13 @@ A dry run does not connect, so it does not make these checks.`,
 					cmd.SilenceUsage = true
 					dump, list, skipped, err := policy.PrepareCustom(cmd.Context(), in, stderr)
 					if err != nil {
-						return err
+						return untouched.Wrap(err)
 					}
 					stdin = dump
 					if list != nil {
 						r, w, err := os.Pipe()
 						if err != nil {
-							return err
+							return untouched.Wrap(err)
 						}
 						defer func() { _ = r.Close() }()
 						go func() {

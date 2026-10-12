@@ -3,9 +3,13 @@
 package postgres_test
 
 import (
+	"errors"
+	"os/exec"
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/USA-RedDragon/dockers/images/restic/internal/untouched"
 )
 
 const (
@@ -168,6 +172,12 @@ INSERT INTO embedding SELECT g, ARRAY[g, g + 1, g + 2]::real[]::vector FROM gene
 				if !tt.ok {
 					if err == nil {
 						t.Fatal("the restore succeeded")
+					}
+					// A custom dump's list is checked before pg_restore starts; a
+					// plain dump's statements before the missing one reach psql.
+					want := map[string]int{"custom": untouched.ExitCode, "plain": 1}[format]
+					if exitErr, ok := errors.AsType[*exec.ExitError](err); !ok || exitErr.ExitCode() != want {
+						t.Errorf("err = %v, want exit %d", err, want)
 					}
 					named := 0
 					for _, n := range untrusted {

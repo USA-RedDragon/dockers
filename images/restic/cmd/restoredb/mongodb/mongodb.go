@@ -3,6 +3,7 @@ package mongodb
 import (
 	"github.com/USA-RedDragon/dockers/images/restic/internal/cobrax"
 	"github.com/USA-RedDragon/dockers/images/restic/internal/dumpdb"
+	"github.com/USA-RedDragon/dockers/images/restic/internal/untouched"
 	"github.com/spf13/cobra"
 )
 
@@ -16,7 +17,7 @@ func New() *cobra.Command {
 		Short: "Restore a MongoDB database",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := fs.Resolve(); err != nil {
-				return err
+				return untouched.Wrap(err)
 			}
 
 			// --archive with no value reads the dump from stdin, mirroring

@@ -9,6 +9,8 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/USA-RedDragon/dockers/images/restic/internal/untouched"
 )
 
 const (
@@ -218,6 +220,9 @@ func TestRestoreNeverSwapsAfterAFailure(t *testing.T) {
 			}
 			if f.ran("RENAME TABLE `app`") {
 				t.Errorf("swapped after a failure: %q", f.execs)
+			}
+			if got, want := untouched.Is(err), len(f.execs) == 0; got != want {
+				t.Errorf("marked as failing before any write = %t, want %t: %q", got, want, f.execs)
 			}
 			if tt.prepare != f.ran("CREATE DATABASE `app__b2bk_restore`") {
 				t.Errorf("staging created = %t, want %t: %q", !tt.prepare, tt.prepare, f.execs)

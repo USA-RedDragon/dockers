@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/USA-RedDragon/dockers/images/restic/internal/untouched"
 	"github.com/USA-RedDragon/dockers/images/restic/internal/xtrace"
 	"github.com/spf13/cobra"
 )
@@ -96,7 +97,10 @@ func RunCmd(cmd *cobra.Command, name string, args []string, opts *RunOpts) error
 		return runGuarded(e, opts.Complete, filter)
 	}
 
-	return e.Run()
+	if err := e.Start(); err != nil {
+		return untouched.Wrap(err)
+	}
+	return e.Wait()
 }
 
 // drain reads a dry run's input to the end, through filter and complete as a
@@ -119,10 +123,10 @@ func runGuarded(e *exec.Cmd, complete func(tail []byte) bool, filter func(io.Wri
 	e.Stdin = nil
 	pipe, err := e.StdinPipe()
 	if err != nil {
-		return err
+		return untouched.Wrap(err)
 	}
 	if err := e.Start(); err != nil {
-		return err
+		return untouched.Wrap(err)
 	}
 
 	tail := &tailWriter{}

@@ -9,6 +9,8 @@ import (
 	"io"
 	"slices"
 	"strings"
+
+	"github.com/USA-RedDragon/dockers/images/restic/internal/untouched"
 )
 
 const (
@@ -44,12 +46,12 @@ func (r *restore) run(ctx context.Context, dump io.Reader) error {
 	in := bufio.NewReaderSize(dump, 64<<10)
 	if _, err := in.Peek(1); err != nil {
 		if errors.Is(err, io.EOF) {
-			return ErrEmptyDump
+			return untouched.Wrap(ErrEmptyDump)
 		}
-		return fmt.Errorf("read dump: %w", err)
+		return untouched.Wrap(fmt.Errorf("read dump: %w", err))
 	}
 	if err := r.check(ctx); err != nil {
-		return fmt.Errorf("%w; %s was not changed", err, QuoteIdent(r.live))
+		return untouched.Wrap(fmt.Errorf("%w; %s was not changed", err, QuoteIdent(r.live)))
 	}
 	if err := r.prepare(ctx); err != nil {
 		return r.abort(ctx, err)

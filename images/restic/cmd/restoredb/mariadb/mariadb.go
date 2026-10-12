@@ -3,6 +3,7 @@ package mariadb
 import (
 	"github.com/USA-RedDragon/dockers/images/restic/internal/cobrax"
 	"github.com/USA-RedDragon/dockers/images/restic/internal/dumpdb"
+	"github.com/USA-RedDragon/dockers/images/restic/internal/untouched"
 	"github.com/spf13/cobra"
 )
 
@@ -60,7 +61,7 @@ the RENAME TABLE as a prepared statement without running it, and drops the
 staging database again without swapping.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := fs.Resolve(); err != nil {
-				return err
+				return untouched.Wrap(err)
 			}
 			cmd.SilenceUsage = true
 
@@ -75,7 +76,7 @@ staging database again without swapping.`,
 			}
 			r, err := newRestore(db, database, dryRun, dropOld, cmd.ErrOrStderr())
 			if err != nil {
-				return err
+				return untouched.Wrap(err)
 			}
 			return r.run(cmd.Context(), cmd.InOrStdin())
 		},

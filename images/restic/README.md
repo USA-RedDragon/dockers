@@ -31,6 +31,24 @@ The wrapper only changes `backup`, `snapshots` and `forget`. It passes other com
 - `forget` gets `--compact` when stdout is not a terminal.
 - `RESTIC_WRAPPER_DRY_RUN=true` prints the final command line and does not run restic.
 
+## restoredb exit status
+
+`restoredb` exits 75 (`EX_TEMPFAIL`) when one of its checks stops it before the restore starts, so nothing was written
+to the target. These failures exit 75:
+
+- a bad flag or argument
+- an empty or unreadable dump
+- a Postgres server it cannot connect to or query, including a wrong password
+- a custom-format Postgres dump that `pg_restore --list` cannot read, or that needs an extension the user cannot create
+- a MariaDB target it refuses before it creates the staging database
+- an existing SQLite file without `--force`
+- a restore tool that cannot start
+
+Any other failure exits with another status, and the target may have been changed. A failed `psql` or `pg_restore`
+keeps that tool's own status. A plain Postgres dump is checked as `psql` reads it, so a missing extension found there
+does not exit 75. No tool that `restoredb` runs, and no `restic` command, exits 75, so under `set -o pipefail` the
+status of `restic dump ... | restoredb ...` is 75 only when `restoredb` stopped before the restore.
+
 ## Tests
 
 ```sh

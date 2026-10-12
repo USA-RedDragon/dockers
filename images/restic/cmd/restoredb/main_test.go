@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cmp"
 	"errors"
 	"io"
 	"os"
@@ -13,6 +14,7 @@ import (
 	"github.com/USA-RedDragon/dockers/images/restic/cmd/restoredb/sqlite"
 	"github.com/USA-RedDragon/dockers/images/restic/internal/dumpdb"
 	"github.com/USA-RedDragon/dockers/images/restic/internal/testutil"
+	"github.com/USA-RedDragon/dockers/images/restic/internal/untouched"
 	"github.com/spf13/cobra"
 )
 
@@ -482,6 +484,119 @@ func TestPostgresSkipsExtensionsTheUserCannotManage(t *testing.T) {
 			}
 			if strings.Contains(tt.want, ";2;") && !strings.Contains(stderr.String(), "skipping") {
 				t.Errorf("stderr does not say what was skipped")
+			}
+		})
+	}
+}
+
+// Fake tools for TestExitCodeTellsAFailureBeforeAnyWrite. psql answers as a
+// user that is not a superuser, in a database without earthdistance, and fails
+// to connect when PSQL_DOWN is set; run as the restore it records what it was
+// given. pg_restore lists $TOC, or fails to when it is empty, and records what
+// it was given.
+const (
+	exitPsql = "#!/bin/sh\n[ -n \"$PSQL_DOWN\" ] && { echo 'connection refused' >&2; exit 2; }\n" +
+		"case \"$*\" in\n" +
+		"*rolsuper*) printf 'f\\tapp\\tappdb\\n' ;;\n" +
+		"*pg_extension*) printf 'earthdistance\\tf\\t\\tf\\tf\\t\\npg_trgm\\tt\\tapp\\tt\\tt\\t\\n' ;;\n" +
+		"*) cat >\"$WROTE\"; exit \"${PSQL_EXIT:-0}\" ;;\nesac\n"
+	exitPgRestore = "#!/bin/sh\nfor a; do [ \"$a\" = --list ] && { [ -s \"$TOC\" ] || exit 1; cat >/dev/null; " +
+		"cat \"$TOC\"; exit 0; }; done\ncat >\"$WROTE\"; exit \"${PG_RESTORE_EXIT:-0}\"\n"
+)
+
+func TestExitCodeTellsAFailureBeforeAnyWrite(t *testing.T) {
+	bin := t.TempDir()
+	for name, script := range map[string]string{"psql": exitPsql, "pg_restore": exitPgRestore} {
+		if err := os.WriteFile(filepath.Join(bin, name), []byte(script), 0o700); err != nil {
+			t.Fatal(err)
+		}
+	}
+	noRestore := t.TempDir()
+	if err := os.WriteFile(filepath.Join(noRestore, "psql"), []byte(exitPsql), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	path := os.Getenv("PATH")
+	existing := filepath.Join(t.TempDir(), "app.db")
+	if err := os.WriteFile(existing, []byte("existing data"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	const pgTrgm = "4; 3079 16489 EXTENSION - pg_trgm \n"
+	missing := pgTrgm + "3; 3079 16473 EXTENSION - earthdistance \n"
+	custom := customDump + strings.Repeat("x", 1<<12)
+	plain := plainDump + "CREATE TABLE t (v int);\n" + plainTrailer
+	pg := []string{engineCNPG, "-H", "db"}
+
+	tests := []struct {
+		name  string
+		args  []string
+		stdin string
+		env   map[string]string
+		path  string
+		want  int
+		why   string
+	}{
+		{name: "an unknown flag", args: []string{engineCNPG, "-H", "db", "--no-such-flag"}, stdin: custom, want: untouched.ExitCode,
+			why: "unknown flag"},
+		{name: "sqlite without a file", args: []string{"sqlite"}, want: untouched.ExitCode, why: "accepts 1 arg"},
+		{name: "sqlite over a file without --force", args: []string{"sqlite", existing}, stdin: "x",
+			want: untouched.ExitCode, why: "already exists"},
+		{name: "an empty dump", args: pg, want: untouched.ExitCode, why: "no dump"},
+		{name: "a database it cannot connect to", args: pg, stdin: custom,
+			env: map[string]string{"PSQL_DOWN": "1"}, want: untouched.ExitCode, why: "connection refused"},
+		{name: "a custom dump pg_restore cannot list", args: pg, stdin: custom,
+			want: untouched.ExitCode, why: "list the dump"},
+		{name: "a custom dump that needs a missing extension", args: pg, stdin: custom,
+			env: map[string]string{"TOC": missing}, want: untouched.ExitCode, why: "CREATE EXTENSION earthdistance"},
+		{name: "a restore tool that cannot start", args: pg, stdin: custom,
+			env: map[string]string{"TOC": pgTrgm}, path: noRestore, want: untouched.ExitCode,
+			why: "executable file not found"},
+		{name: "a plain dump that needs a missing extension, found as psql reads it", args: pg,
+			stdin: plainDump + "CREATE EXTENSION IF NOT EXISTS earthdistance WITH SCHEMA public;\n" + plainTrailer,
+			want:  1},
+		{name: "a plain dump cut short", args: pg, stdin: plainDump + "CREATE TABLE t (v int);\n",
+			want: 1},
+		{name: "psql failing in the restore", args: pg, stdin: plain,
+			env: map[string]string{"PSQL_EXIT": "3"}, want: 3},
+		{name: "pg_restore failing in the restore", args: pg, stdin: custom,
+			env: map[string]string{"TOC": pgTrgm, "PG_RESTORE_EXIT": "1"}, want: 1},
+		{name: "a custom dump restored", args: pg, stdin: custom,
+			env: map[string]string{"TOC": pgTrgm}, want: 0},
+		{name: "a plain dump restored", args: pg, stdin: plain, want: 0},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			testutil.ClearEnv(t)
+			dir := t.TempDir()
+			wrote := filepath.Join(dir, "wrote")
+			toc := filepath.Join(dir, "toc")
+			if err := os.WriteFile(toc, []byte(tt.env["TOC"]), 0o600); err != nil {
+				t.Fatal(err)
+			}
+			t.Setenv("TOC", toc)
+			t.Setenv("WROTE", wrote)
+			for _, k := range []string{"PSQL_DOWN", "PSQL_EXIT", "PG_RESTORE_EXIT"} {
+				t.Setenv(k, tt.env[k])
+			}
+			t.Setenv("PATH", cmp.Or(tt.path, bin+string(os.PathListSeparator)+path))
+			cmd := withStdin(tt.stdin)
+			cmd.SetArgs(tt.args)
+			cmd.SetOut(io.Discard)
+			cmd.SetErr(io.Discard)
+			cmd.SilenceErrors = true
+			err := cmd.Execute()
+			got := 0
+			if err != nil {
+				got = exitCode(err)
+			}
+			if got != tt.want {
+				t.Errorf("exit %d, want %d (err %v)", got, tt.want, err)
+			}
+			if tt.why != "" && (err == nil || !strings.Contains(err.Error(), tt.why)) {
+				t.Errorf("err = %v, want one that says %q", err, tt.why)
+			}
+			_, statErr := os.Stat(wrote)
+			if gave := statErr == nil; got == untouched.ExitCode && gave {
+				t.Errorf("exit %d, but the restore tool was given the dump", got)
 			}
 		})
 	}

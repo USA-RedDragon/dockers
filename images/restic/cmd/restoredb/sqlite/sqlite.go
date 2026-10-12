@@ -7,6 +7,7 @@ import (
 
 	"github.com/USA-RedDragon/dockers/images/restic/internal/cobrax"
 	"github.com/USA-RedDragon/dockers/images/restic/internal/dumpdb"
+	"github.com/USA-RedDragon/dockers/images/restic/internal/untouched"
 	"github.com/spf13/cobra"
 )
 
@@ -19,10 +20,12 @@ func New() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "sqlite file",
 		Short: "Restore a SQLite database",
-		Args:  cobra.ExactArgs(1),
+		Args: func(cmd *cobra.Command, args []string) error {
+			return untouched.Wrap(cobra.ExactArgs(1)(cmd, args))
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := fs.Resolve(); err != nil {
-				return err
+				return untouched.Wrap(err)
 			}
 
 			path := args[0]
@@ -32,7 +35,7 @@ func New() *cobra.Command {
 			// existing schema, so restoring over a populated file needs --force.
 			if stat, err := os.Stat(path); err == nil && stat.Size() != 0 {
 				if !force {
-					return fmt.Errorf("%w: %s (use --force to replace it)", ErrFileExists, path)
+					return untouched.Wrap(fmt.Errorf("%w: %s (use --force to replace it)", ErrFileExists, path))
 				}
 				if !dryRun {
 					if err := os.Remove(path); err != nil {
@@ -40,7 +43,7 @@ func New() *cobra.Command {
 					}
 				}
 			} else if err != nil && !errors.Is(err, os.ErrNotExist) {
-				return err
+				return untouched.Wrap(err)
 			}
 
 			args = append([]string{
