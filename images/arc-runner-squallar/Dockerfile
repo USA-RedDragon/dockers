@@ -1,7 +1,7 @@
 # Squallar CI runner: arc-runner plus the Rust toolchain, wasm tooling, GPU
 # and audio libs, headless browsers, and the xar/autotools chain that the
 # rustdar workflows (test, web, clippy, build) expect on squallar-runner-set-*.
-FROM ghcr.io/usa-reddragon/arc-runner:2.338.0@sha256:bc551d81c05c15cb1c26bfb77823435a99ac1ffabc4b7719661afdcfb2773b76
+FROM ghcr.io/usa-reddragon/arc-runner:2.338.0@sha256:5f161362fdf4dedaf2af82b92aa747c9aab960effbf83b89c0944a0e9d33448e
 
 ARG TARGETARCH
 ARG DEBIAN_FRONTEND=noninteractive
