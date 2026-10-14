@@ -1,7 +1,7 @@
 FROM alpine:3.24.2@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6 AS build-nginx
 
 # renovate: datasource=git-tags extractVersion=^release-(?<version>.*)$ depName=https://github.com/nginx/nginx.git
-ARG NGINX_VERSION=1.31.6
+ARG NGINX_VERSION=1.31.7
 # renovate: datasource=git-tags extractVersion=^v(?<version>.*)$ depName=https://github.com/arut/nginx-rtmp-module.git
 ARG NGINX_RTMP_VERSION=1.2.2
 
