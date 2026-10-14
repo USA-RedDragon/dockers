@@ -31,7 +31,7 @@ RUN install -d -m 0755 /etc/apt/keyrings \
     && printf 'Package: *\nPin: origin packages.mozilla.org\nPin-Priority: 1000\n' \
         > /etc/apt/preferences.d/mozilla \
     && apt-get update \
-    && apt-get install -y --no-install-recommends --no-install-suggests firefox \
+    && apt-get install -y --no-install-recommends --no-install-suggests firefox libavcodec60 \
     && rm -rf /var/lib/apt/lists/* \
     && firefox --version
 
