@@ -28,7 +28,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # renovate: datasource=node-version depName=node
-ARG NODE_VERSION=24.22.0
+ARG NODE_VERSION=24.22.1
 # renovate: datasource=github-tags depName=aws/aws-cli
 ARG AWSCLI_VERSION=2.38.2
 RUN set -eux; \
