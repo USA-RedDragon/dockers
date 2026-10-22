@@ -55,7 +55,7 @@ RUN if [ "${TARGETARCH}" = "amd64" ]; then \
 USER runner
 
 # renovate: datasource=github-tags depName=rust-lang/rustup
-ARG RUSTUP_VERSION=1.29.1
+ARG RUSTUP_VERSION=1.29.2
 
 # renovate: datasource=github-releases depName=rust-lang/rust
 ARG RUST_VERSION=1.99.1
