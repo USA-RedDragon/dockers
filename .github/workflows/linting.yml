@@ -83,7 +83,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Lint - Markdown
-        uses: reviewdog/action-markdownlint@59696bf7ca9d7428b5cd84a97d0798b5375cb74d # v0.31.6
+        uses: reviewdog/action-markdownlint@0f00f9816d25b024975712a1ad4ea03dbf5848a6 # v0.31.7
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
@@ -123,7 +123,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Lint - Yamllint
-        uses: reviewdog/action-yamllint@3224b47de22a2fd9c8c0fbc120e6d0049d1f5060 # v1.25.2
+        uses: reviewdog/action-yamllint@8f84f0fb670d777d3e584ef50faf60eb61605b2a # v1.25.3
         with:
           github_token: ${{ secrets.github_token }}
           fail_level: error
