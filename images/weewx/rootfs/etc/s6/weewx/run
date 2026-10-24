@@ -1,3 +1,0 @@
-#!/bin/sh
-
-exec su weewx bash -c '/usr/local/bin/weewxd --config ${CONFIG_OVERRIDE:-/etc/weewx/weewx.conf}'
