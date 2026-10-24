@@ -1,4 +1,4 @@
-FROM debian:13.7-slim@sha256:a99cfc517144bc59b1978475ec53b46ecabec7e43635402ee5b77cc54cd1b20a AS toolchain-base
+FROM debian:13.7-slim@sha256:62bd423aeee912639ca8ee681c2b762cb3e25137e0a92b20be455898a9f034ad AS toolchain-base
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -93,7 +93,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends bzip2 rsync xz-
 # renovate: datasource=github-tags depName=alsa-project/alsa-lib
 ARG ALSA_LIB_VERSION=1.2.16
 # renovate: datasource=github-releases depName=eudev-project/eudev
-ARG EUDEV_VERSION=3.2.14
+ARG EUDEV_VERSION=3.2.15
 ARG LINUX_VERSION=4.19.325
 
 RUN set -eux; \
@@ -129,7 +129,7 @@ RUN set -eux; \
     done; \
     rm -rf "$ksrc"
 
-FROM debian:13.7-slim@sha256:a99cfc517144bc59b1978475ec53b46ecabec7e43635402ee5b77cc54cd1b20a AS build-osxcross
+FROM debian:13.7-slim@sha256:62bd423aeee912639ca8ee681c2b762cb3e25137e0a92b20be455898a9f034ad AS build-osxcross
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -165,7 +165,7 @@ RUN --mount=type=secret,id=IOS_SDK_URL \
 RUN --mount=type=secret,id=IOS_SIMULATOR_SDK_URL \
     curl -fsSL "$(cat /run/secrets/IOS_SIMULATOR_SDK_URL)" | tar -xj -C /opt/ios-sdk
 
-FROM rust:1.98.1-slim-trixie@sha256:f47a8de237dcbb0b0ce1099901e60a89728e3d51f24e664b40e947171538ade7
+FROM rust:1.99.1-slim-trixie@sha256:1a939748a7cbab172de91a014e3804a97af1394a8c844faa67fce9401c4e40fb
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -405,7 +405,7 @@ RUN cargo install cargo-ndk --version "${CARGO_NDK_VERSION}" --locked
 # renovate: datasource=github-releases depName=ziglang/zig
 ARG ZIG_VERSION=0.15.1
 # renovate: datasource=crate depName=cargo-zigbuild
-ARG CARGO_ZIGBUILD_VERSION=0.23.4
+ARG CARGO_ZIGBUILD_VERSION=0.24.0
 ARG TARGETARCH
 RUN apt-get update && \
     apt-get install -y --no-install-recommends curl xz-utils && \
