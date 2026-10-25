@@ -50,7 +50,7 @@ RUN \
 FROM alpine:3.24.3@sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a AS build-ffmpeg
 
 # renovate: datasource=git-tags extractVersion=^n(?<version>.*)$ depName=git://git.ffmpeg.org/ffmpeg.git
-ARG FFMPEG_VERSION=7.1.5
+ARG FFMPEG_VERSION=9.0.2
 
 # FFmpeg build dependencies.
 RUN apk add --no-cache \
