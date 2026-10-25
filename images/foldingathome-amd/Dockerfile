@@ -19,6 +19,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         hip-runtime-amd \
         rocm-opencl-runtime \
+    && ln -sf libOpenCL.so.1 /usr/lib/x86_64-linux-gnu/libOpenCL.so \
     && rm -rf /var/lib/apt/lists/*
 
 ENV LD_LIBRARY_PATH=/opt/rocm/lib
