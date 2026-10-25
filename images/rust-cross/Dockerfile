@@ -231,7 +231,7 @@ RUN apt-get update && \
 # used by the x86_64/aarch64-pc-windows-gnullvm targets. One toolchain targets
 # both Windows arches; extracted to a stable /opt/llvm-mingw on PATH.
 # renovate: datasource=github-releases depName=mstorsjo/llvm-mingw
-ARG LLVM_MINGW_VERSION=20260616
+ARG LLVM_MINGW_VERSION=20260826
 ARG TARGETARCH
 RUN apt-get update && \
     apt-get install -y --no-install-recommends curl xz-utils && \
