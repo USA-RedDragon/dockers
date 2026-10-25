@@ -1,4 +1,4 @@
 #!/bin/sh
 
 # renovate: datasource=docker depName=ghcr.io/haveagitgat/tdarr
-export VERSION=2.82.02
+export VERSION=2.96.01
