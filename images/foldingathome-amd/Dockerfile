@@ -2,7 +2,7 @@ FROM ghcr.io/usa-reddragon/foldingathome:v8.5.6
 
 USER root
 
-ARG ROCM_APT_VERSION=7.1.1
+ARG ROCM_APT_VERSION=6.4.4
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -13,8 +13,11 @@ RUN apt-get update \
         | gpg --dearmor -o /etc/apt/keyrings/rocm.gpg \
     && echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/rocm/apt/${ROCM_APT_VERSION}/ jammy main" \
         > /etc/apt/sources.list.d/rocm.list \
+    && printf 'Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600\n' \
+        > /etc/apt/preferences.d/rocm-pin-600 \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
+        hip-runtime-amd \
         rocm-opencl-runtime \
     && rm -rf /var/lib/apt/lists/*
 
