@@ -28,9 +28,9 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # renovate: datasource=node-version depName=node
-ARG NODE_VERSION=24.22.1
+ARG NODE_VERSION=24.22.2
 # renovate: datasource=github-tags depName=aws/aws-cli
-ARG AWSCLI_VERSION=2.38.6
+ARG AWSCLI_VERSION=2.39.0
 RUN set -eux; \
     case "${TARGETARCH}" in \
         amd64) node_arch=x64; aws_arch=x86_64 ;; \
