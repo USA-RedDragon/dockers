@@ -3,47 +3,6 @@
   "extends": [
     "local>USA-RedDragon/renovate-configs"
   ],
-  "customManagers": [
-    {
-      "customType": "regex",
-      "managerFilePatterns": [
-        "/.*Dockerfile$/"
-      ],
-      "matchStrings": [
-        "ARG UCODE_VERSION=(?<currentDigest>.*?)\\n"
-      ],
-      "currentValueTemplate": "master",
-      "depNameTemplate": "ucode",
-      "packageNameTemplate": "https://github.com/jow-/ucode",
-      "datasourceTemplate": "git-refs"
-    },
-    {
-      "customType": "regex",
-      "managerFilePatterns": [
-        "/.*Dockerfile$/"
-      ],
-      "matchStrings": [
-        "ARG OLSRD_VERSION=(?<currentDigest>.*?)\\n"
-      ],
-      "currentValueTemplate": "aredn",
-      "depNameTemplate": "olsrd",
-      "packageNameTemplate": "https://github.com/USA-RedDragon/olsrd",
-      "datasourceTemplate": "git-refs"
-    },
-    {
-      "customType": "regex",
-      "managerFilePatterns": [
-        "/.*Dockerfile$/"
-      ],
-      "matchStrings": [
-        "ARG BABELD_VERSION=(?<currentDigest>.*?)\\n"
-      ],
-      "currentValueTemplate": "main",
-      "depNameTemplate": "babeld",
-      "packageNameTemplate": "https://github.com/USA-RedDragon/babeld",
-      "datasourceTemplate": "git-refs"
-    }
-  ],
   "packageRules": [
     {
       "description": "Deps extracted by regex from .version.sh have nowhere to write a digest; pinning them poisons the shared pin branch",
@@ -61,15 +20,6 @@
         "alpine"
       ],
       "allowedVersions": "<2018.0.0"
-    },
-    {
-      "matchDatasources": [
-        "git-tags"
-      ],
-      "matchPackageNames": [
-        "https://thekelleys.org.uk/git/dnsmasq.git"
-      ],
-      "versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)(?<compatibility>[a-zA-Z]+)?(?<patch>\\d+)?$"
     },
     {
       "matchDatasources": [
