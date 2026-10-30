@@ -17,7 +17,7 @@ concurrency:
 jobs:
   generate-matrix:
     name: Generate job matrices
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     outputs:
       matrix: ${{ steps.all.outputs.matrix || steps.images.outputs.matrix }}
     steps:
@@ -41,7 +41,7 @@ jobs:
           echo "matrix={\"include\":[${include}]}" >> "$GITHUB_OUTPUT"
 
   lowercase-user:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     outputs:
       user: ${{ steps.lowercase-username.outputs.user }}
     steps:
@@ -57,7 +57,7 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
     if: ${{ fromJson(needs.generate-matrix.outputs.matrix).include[0] }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Check for .version.sh under images/${{ matrix.image }}
@@ -103,7 +103,7 @@ jobs:
   docker-results:
     if: always()
     needs: [ docker ]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - run: |
           result="${{ needs.docker.result }}"
