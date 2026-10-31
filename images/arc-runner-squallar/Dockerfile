@@ -87,7 +87,7 @@ RUN set -eux; \
     cargo --version
 
 # renovate: datasource=crate depName=wasm-pack
-ARG WASM_PACK_VERSION=0.15.0
+ARG WASM_PACK_VERSION=0.15.1
 # renovate: datasource=crate versioning=regex:^(?<major>0)\.(?<minor>8)\.(?<patch>\d+)$ depName=cargo-llvm-cov
 ARG CARGO_LLVM_COV_VERSION=0.8.7
 RUN set -eux; \
