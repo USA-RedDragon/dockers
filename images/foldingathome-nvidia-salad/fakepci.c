@@ -120,12 +120,17 @@ static int fake_cl_info(void *dev, unsigned param, size_t size, void *value, siz
 // not one of the two faked functions must reach glibc as a tail call; otherwise a wrapper library's
 // dlsym(RTLD_NEXT, x) would return the wrapper itself and recurse (this crashed fah-client under WSL's libcuda).
 static void *fake_lookup(void *handle, const char *name, dlsym_t real) __attribute__((noinline));
+// Under WSL a later lookup can hand back the wrapper itself; storing that as the real function made fake_cu_attr call
+// itself until the stack overflowed. Only a genuine function is ever stored, and the first one is kept.
 static void *fake_lookup(void *handle, const char *name, dlsym_t real) {
   void *p = real(handle, name);
   if (!p) return p;
-  if (name[0] == 'c' && !strcmp(name, "cuDeviceGetAttribute")) { real_cu_attr = (cu_attr_t)p; return (void *)fake_cu_attr; }
-  real_cl_info = (cl_info_t)p;
-  return (void *)fake_cl_info;
+  if (!strcmp(name, "cuDeviceGetAttribute")) {
+    if (p != (void *)fake_cu_attr && !real_cu_attr) real_cu_attr = (cu_attr_t)p;
+    return real_cu_attr ? (void *)fake_cu_attr : p;
+  }
+  if (p != (void *)fake_cl_info && !real_cl_info) real_cl_info = (cl_info_t)p;
+  return real_cl_info ? (void *)fake_cl_info : p;
 }
 
 void *dlsym(void *handle, const char *name) {
