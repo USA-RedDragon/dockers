@@ -1,6 +1,9 @@
 #!/bin/bash
 export PATH="$PATH:/usr/lib/wsl/lib"
 echo "salad-start: nvidia-smi=$(command -v nvidia-smi || echo missing) pci_nvidia=$(grep -lsx 0x10de /sys/bus/pci/devices/*/vendor | tr '\n' ' ') resolv=$(grep -m1 nameserver /etc/resolv.conf 2>/dev/null)" >&2
+for url in https://api.foldingathome.org/gpus https://s3.mcswain.dev/minio/health/live; do
+  echo "salad-start: probe $url -> $(curl -s -o /dev/null -m 15 -w '%{http_code} %{remote_ip} %{time_total}s' "$url" 2>&1)" >&2
+done
 if { [ -n "$FAH_FAKE_PCI" ] || ! grep -qsx 0x10de /sys/bus/pci/devices/*/vendor; } && command -v nvidia-smi >/dev/null; then
   export FAKE_PCI_ROOT=/tmp/fakepci
   while IFS=', ' read -r bus id; do

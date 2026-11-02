@@ -9,6 +9,12 @@ RUN gcc -O2 -shared -fPIC -o /src/libfakepci.so /src/fakepci.c -ldl
 
 FROM ghcr.io/usa-reddragon/foldingathome-nvidia:v8.5.6 AS base
 
+USER root
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
 # Flatten into new layers so CI's gzip setting applies to every layer; SaladCloud cannot pull zstd layers.
 FROM scratch
 
