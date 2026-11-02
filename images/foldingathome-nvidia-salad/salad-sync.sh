@@ -177,9 +177,18 @@ watch() {
   trap 'kill "$ipid" 2>/dev/null' EXIT
   push; [ $? = 2 ] && exit 2
   last=$(date +%s)
+  local checked=$last owner
   while true; do
     urgent=0
-    read -r -t 600 -u "$events" ev; rc=$?
+    # Saves can be minutes apart, so ownership is checked every minute on its own: a replaced node must stop folding.
+    if [ $(( $(date +%s) - checked )) -ge 60 ]; then
+      checked=$(date +%s)
+      if owner=$(rclone cat "$REMOTE/owner" 2>/dev/null) && [ "$owner" != "$(cat "$OWNER" 2>/dev/null)" ]; then
+        log "another container now owns $REMOTE, stopping saves"
+        exit 2
+      fi
+    fi
+    read -r -t 60 -u "$events" ev; rc=$?
     if [ "$rc" = 0 ]; then
       urgent_event "$ev" && urgent=1
       until=$(( $(date +%s) + 15 ))
