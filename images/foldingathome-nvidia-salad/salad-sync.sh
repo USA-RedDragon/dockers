@@ -24,17 +24,26 @@ restore() {
   fi
 }
 
-push() {
-  mkdir -p "$SNAP" "$DATA/work"
-  # fah-client holds client.db with an exclusive lock, so copy it with its WAL and retry if a checkpoint moved it mid-copy.
-  rm -f "$SNAP"/client.db*
-  for _ in 1 2 3; do
-    before=$(stat -c '%Y %s' "$DATA/client.db" 2>/dev/null) || break
-    cp "$DATA/client.db" "$SNAP/client.db" && { [ ! -f "$DATA/client.db-wal" ] || cp "$DATA/client.db-wal" "$SNAP/client.db-wal"; }
-    [ "$before" = "$(stat -c '%Y %s' "$DATA/client.db")" ] && break
+tree_stamp() { find "$DATA/client.db" "$DATA/client.db-wal" "$DATA/work" -type f ! -name '*.log' ! -name '*.xvg' ! -name 'viewer*' ! -name 'logfile_*' -printf '%p %s %T@\n' 2>/dev/null | sort; }
+
+# Copies the client state to local disk first: the cores append to logs and rewrite checkpoints while rclone uploads, and S3 rejects a file that grows mid-PUT.
+snapshot() {
+  for _ in 1 2 3 4 5; do
+    before=$(tree_stamp)
+    rm -rf "$SNAP" && mkdir -p "$SNAP/work"
+    cp -a "$DATA/work/." "$SNAP/work/" 2>/dev/null
+    for f in client.db client.db-wal; do [ ! -f "$DATA/$f" ] || cp "$DATA/$f" "$SNAP/$f"; done
+    [ "$before" = "$(tree_stamp)" ] && return 0
+    sleep 2
   done
-  rclone sync "$DATA/work" "$REMOTE/work" "${EXCLUDE[@]}" --transfers 4 \
-    && { [ ! -f "$SNAP/client.db" ] || rclone sync "$SNAP" "$REMOTE" --include 'client.db*'; } \
+  return 1
+}
+
+push() {
+  mkdir -p "$DATA/work"
+  snapshot || { log "save skipped, state kept changing"; return 1; }
+  rclone sync "$SNAP/work" "$REMOTE/work" "${EXCLUDE[@]}" --transfers 4 \
+    && rclone sync "$SNAP" "$REMOTE" --include 'client.db*' \
     && log "saved $(date -u +%H:%M:%S)" || log "save failed"
 }
 
