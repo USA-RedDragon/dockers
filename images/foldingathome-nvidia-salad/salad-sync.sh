@@ -13,7 +13,7 @@ EXCLUDE=(--exclude 'viewerFrame*.json' --exclude 'viewerTop.json' --exclude 'log
 
 export RCLONE_CONFIG_S3_TYPE=s3 RCLONE_CONFIG_S3_PROVIDER=Minio RCLONE_CONFIG_S3_ENDPOINT="${FAH_S3_URL:-}"
 export RCLONE_CONFIG_S3_ACCESS_KEY_ID="${FAH_S3_ACCESS_KEY:-}" RCLONE_CONFIG_S3_SECRET_ACCESS_KEY="${FAH_S3_SECRET_KEY:-}"
-export RCLONE_S3_NO_CHECK_BUCKET=true RCLONE_LOG_LEVEL=ERROR
+export RCLONE_S3_NO_CHECK_BUCKET=true RCLONE_LOG_LEVEL=${RCLONE_LOG_LEVEL:-ERROR}
 export RCLONE_CONTIMEOUT=15s RCLONE_TIMEOUT=120s RCLONE_RETRIES=3 RCLONE_LOW_LEVEL_RETRIES=3
 
 log() { echo "salad-sync: $*" >&2; }
@@ -128,8 +128,14 @@ prune() {
 push() {
   enabled || return 0
   [ -f "$RESTORED" ] || { log "save skipped, restore did not complete"; return 1; }
-  exec 9>/tmp/fah-push.lock
-  flock -w 300 9 || { log "save skipped, another save is still running"; return 1; }
+  # The lock lives only in this subshell, so it is released when the save ends.
+  (
+    flock -w 300 9 || { log "save skipped, another save is still running"; exit 1; }
+    push_locked
+  ) 9>/tmp/fah-push.lock
+}
+
+push_locked() {
   local owner cur next
   owner=$(rclone cat "$REMOTE/owner" 2>/dev/null) || { log "save failed, cannot read owner token"; return 1; }
   if [ "$owner" != "$(cat "$OWNER" 2>/dev/null)" ]; then
@@ -142,7 +148,10 @@ push() {
   cur=$(read_current) || { log "save failed, cannot read $REMOTE/current"; return 1; }
   next=a
   [ "$cur" = a ] && next=b
-  if rclone sync "$SNAP" "$REMOTE/slot-$next" "${EXCLUDE[@]}" --transfers 4 && echo "$next" | rclone rcat "$REMOTE/current"; then
+  # Files unchanged since the last save are copied from the other slot inside S3 instead of crossing the node's uplink again.
+  local reuse=()
+  [ -n "$cur" ] && reuse=(--copy-dest "$REMOTE/slot-$cur")
+  if rclone sync "$SNAP" "$REMOTE/slot-$next" "${EXCLUDE[@]}" "${reuse[@]}" --transfers 4 && echo "$next" | rclone rcat "$REMOTE/current"; then
     log "saved $(date -u +%H:%M:%S) to slot-$next"
     if [ -n "$(rclone lsf "$REMOTE/client.db" 2>/dev/null)" ]; then
       rclone purge "$REMOTE/work" 2>/dev/null; rclone delete "$REMOTE" --max-depth 1 --include 'client.db*' 2>/dev/null
@@ -157,8 +166,10 @@ watch() {
   enabled || { log "no S3 settings, not saving state"; exec sleep infinity; }
   mkdir -p "$DATA/work"
   local last=0 ev urgent rc until
-  # A finished unit (results written) or a credited one (folder deleted) is saved at once: a node lost before the next
-  # periodic save would otherwise restore the unit as still running.
+  # A unit resumes from its last checkpoint, so saves follow checkpoints instead of a short timer: a growing trajectory
+  # is re-uploaded whole on every save, and on slow node uplinks frequent saves delayed the checkpoint that matters.
+  # A new unit, a finished one (results written) and a credited one (folder deleted) are saved at once as well.
+  urgent_event() { case "$1" in *ISDIR*|*wuresults*|*wudata_*|*checkpt.crc|*/checkpoint|*checkpointState*|*.cpt) return 0 ;; esac; return 1; }
   local ipid
   exec {events}< <(exec inotifywait -m -r -q -e close_write,moved_to,delete --format '%e %w%f' \
     --exclude '(viewerFrame|viewerTop|logfile_)' "$DATA/work" 2>/dev/null)
@@ -170,18 +181,18 @@ watch() {
     urgent=0
     read -r -t 600 -u "$events" ev; rc=$?
     if [ "$rc" = 0 ]; then
-      case "$ev" in *ISDIR*|*wuresults*) urgent=1 ;; esac
+      urgent_event "$ev" && urgent=1
       until=$(( $(date +%s) + 15 ))
       while [ "$(date +%s)" -lt "$until" ]; do
         read -r -t 10 -u "$events" ev; rc=$?
         [ "$rc" = 0 ] || break
-        case "$ev" in *ISDIR*|*wuresults*) urgent=1 ;; esac
+        urgent_event "$ev" && urgent=1
       done
     fi
     # read returns 1 at end of input (inotifywait died) and more than 128 on timeout.
     [ "$rc" = 1 ] && { log "file watcher stopped"; exit 1; }
     now=$(date +%s)
-    if [ "$urgent" = 1 ] || [ $((now - last)) -ge 30 ]; then
+    if [ "$urgent" = 1 ] || [ $((now - last)) -ge 600 ]; then
       push; [ $? = 2 ] && exit 2
       last=$now
     fi
