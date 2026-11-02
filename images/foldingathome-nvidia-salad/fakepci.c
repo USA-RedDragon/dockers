@@ -7,6 +7,7 @@
 #include <dirent.h>
 #include <dlfcn.h>
 #include <fcntl.h>
+#include <link.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -133,11 +134,22 @@ static void *fake_lookup(void *handle, const char *name, dlsym_t real) {
   return real_cl_info ? (void *)fake_cl_info : p;
 }
 
+// Only lookups made by the fah-client executable itself (cbang is linked into it) get the wrapper. WSL's libcuda
+// forwards cuDeviceGetAttribute by looking the same name up in its backend with dlsym; handing it the wrapper made the
+// wrapper and libcuda call each other until the stack overflowed.
+static int from_executable(void *addr) {
+  Dl_info info;
+  struct link_map *map = 0;
+  if (!dladdr1(addr, &info, (void **)&map, RTLD_DL_LINKMAP) || !map || !map->l_name) return 0;
+  return map->l_name[0] == '\0';
+}
+
 void *dlsym(void *handle, const char *name) {
   dlsym_t real = real_dlsym();
   int bus, slot;
   if (handle != RTLD_NEXT && handle != RTLD_DEFAULT &&
-      (!strcmp(name, "cuDeviceGetAttribute") || !strcmp(name, "clGetDeviceInfo")) && fake_addr(&bus, &slot))
+      (!strcmp(name, "cuDeviceGetAttribute") || !strcmp(name, "clGetDeviceInfo")) && fake_addr(&bus, &slot) &&
+      from_executable(__builtin_return_address(0)))
     return fake_lookup(handle, name, real);
   return real(handle, name);
 }
