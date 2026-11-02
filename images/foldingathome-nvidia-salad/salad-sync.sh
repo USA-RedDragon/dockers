@@ -9,19 +9,29 @@ EXCLUDE=(--exclude 'viewerFrame*.json' --exclude 'viewerTop.json' --exclude 'log
 
 export RCLONE_CONFIG_S3_TYPE=s3 RCLONE_CONFIG_S3_PROVIDER=Minio RCLONE_CONFIG_S3_ENDPOINT="${FAH_S3_URL:-}"
 export RCLONE_CONFIG_S3_ACCESS_KEY_ID="${FAH_S3_ACCESS_KEY:-}" RCLONE_CONFIG_S3_SECRET_ACCESS_KEY="${FAH_S3_SECRET_KEY:-}"
-export RCLONE_S3_NO_CHECK_BUCKET=true
+export RCLONE_S3_NO_CHECK_BUCKET=true RCLONE_LOG_LEVEL=ERROR
 
 log() { echo "salad-sync: $*" >&2; }
 
 enabled() { [ -n "${FAH_S3_URL:-}" ] && [ -n "${FAH_S3_ACCESS_KEY:-}" ] && [ -n "${FAH_S3_SECRET_KEY:-}" ]; }
 
+SLOT_FILE=/tmp/fah-slot
+
+# Saves alternate between slot-a and slot-b and "current" names the last complete one, so a node killed mid-upload never leaves a mixed checkpoint behind.
 restore() {
   enabled || { log "no S3 settings, starting fresh"; return 0; }
-  if rclone lsf "$REMOTE/client.db" >/dev/null 2>&1 && [ -n "$(rclone lsf "$REMOTE/client.db" 2>/dev/null)" ]; then
-    rclone copy "$REMOTE" "$DATA" "${EXCLUDE[@]}" --transfers 8 && log "restored $(find "$DATA/work" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l) unit(s) and client.db from $REMOTE"
+  local cur src
+  cur=$(rclone cat "$REMOTE/current" 2>/dev/null | tr -cd 'ab')
+  if [ -n "$cur" ]; then
+    src="$REMOTE/slot-$cur"
+  elif [ -n "$(rclone lsf "$REMOTE/client.db" 2>/dev/null)" ]; then
+    src="$REMOTE"
   else
-    log "nothing saved at $REMOTE, starting fresh"
+    log "nothing saved at $REMOTE, starting fresh"; return 0
   fi
+  echo "${cur:-a}" > "$SLOT_FILE"
+  rclone copy "$src" "$DATA" "${EXCLUDE[@]}" --exclude '/slot-*/**' --exclude '/current' --transfers 8 \
+    && log "restored $(find "$DATA/work" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l) unit(s) and client.db from $src"
 }
 
 tree_stamp() { find "$DATA/client.db" "$DATA/client.db-wal" "$DATA/work" -type f ! -name '*.log' ! -name '*.xvg' ! -name 'viewer*' ! -name 'logfile_*' -printf '%p %s %T@\n' 2>/dev/null | sort; }
@@ -42,9 +52,17 @@ snapshot() {
 push() {
   mkdir -p "$DATA/work"
   snapshot || { log "save skipped, state kept changing"; return 1; }
-  rclone sync "$SNAP/work" "$REMOTE/work" "${EXCLUDE[@]}" --transfers 4 \
-    && rclone sync "$SNAP" "$REMOTE" --include 'client.db*' \
-    && log "saved $(date -u +%H:%M:%S)" || log "save failed"
+  local next=a
+  [ "$(cat "$SLOT_FILE" 2>/dev/null)" = a ] && next=b
+  if rclone sync "$SNAP" "$REMOTE/slot-$next" "${EXCLUDE[@]}" --transfers 4 && echo "$next" | rclone rcat "$REMOTE/current"; then
+    echo "$next" > "$SLOT_FILE"
+    log "saved $(date -u +%H:%M:%S) to slot-$next"
+    if [ -n "$(rclone lsf "$REMOTE/client.db" 2>/dev/null)" ]; then
+      rclone purge "$REMOTE/work" 2>/dev/null; rclone delete "$REMOTE" --max-depth 1 --include 'client.db*' 2>/dev/null
+    fi
+  else
+    log "save failed"
+  fi
 }
 
 watch() {
