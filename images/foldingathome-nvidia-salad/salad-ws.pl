@@ -35,7 +35,11 @@ sub drain {
 
 my ($s, %g, $buf);
 while (1) {
-  ($s, $buf) = ws();
+  unless (eval { ($s, $buf) = ws(); 1 }) {
+    print STDERR "salad-ws: $@";
+    sleep 3;
+    next;
+  }
   $s->blocking(0);
   $buf .= drain($s, 2);
   last if $mode eq "link" && $buf =~ /"info"/;
