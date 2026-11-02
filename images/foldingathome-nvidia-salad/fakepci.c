@@ -1,4 +1,5 @@
-// LD_PRELOAD shim that redirects reads of /sys/bus/pci/devices to $FAKE_PCI_ROOT.
+// LD_PRELOAD shim that redirects reads of /proc/bus/pci/devices to $FAKE_PCI_PROC
+// (what fah-client 8.5.6 reads) and of /sys/bus/pci/devices to $FAKE_PCI_ROOT (newer cbang).
 // Under WSL2 the GPU is not on a visible PCI bus, so fah-client cannot learn its
 // PCI device ID and never marks it supported. salad-start writes the real IDs,
 // taken from nvidia-smi, into $FAKE_PCI_ROOT before starting the client.
@@ -15,6 +16,8 @@
 static const char prefix[] = "/sys/bus/pci/devices";
 
 static const char *redirect(const char *path, char *buf, size_t len) {
+  const char *proc = getenv("FAKE_PCI_PROC");
+  if (proc && path && !strcmp(path, "/proc/bus/pci/devices")) return proc;
   const char *root = getenv("FAKE_PCI_ROOT");
   size_t n = sizeof(prefix) - 1;
   if (!root || !path || strncmp(path, prefix, n) || (path[n] && path[n] != '/'))

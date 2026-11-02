@@ -12,9 +12,11 @@ if { [ -n "$FAH_FAKE_PCI" ] || ! grep -qsx 0x10de /sys/bus/pci/devices/*/vendor;
     mkdir -p "$FAKE_PCI_ROOT/$addr"
     printf '0x%04x\n' $((id & 0xffff)) > "$FAKE_PCI_ROOT/$addr/vendor"
     printf '0x%04x\n' $(((id >> 16) & 0xffff)) > "$FAKE_PCI_ROOT/$addr/device"
+    b=${addr#*:}; slotfn=${b#*:}; bus=${b%%:*}; slot=${slotfn%.*}; fn=${slotfn#*.}
+    printf '%s%02x\t%04x%04x\t0\n' "$bus" $(( (16#$slot << 3) | fn )) $((id & 0xffff)) $(((id >> 16) & 0xffff)) >> /tmp/fakepci.proc
     echo "salad-start: PCI $addr vendor $(cat "$FAKE_PCI_ROOT/$addr/vendor") device $(cat "$FAKE_PCI_ROOT/$addr/device") from nvidia-smi" >&2
   done < <(nvidia-smi --query-gpu=pci.bus_id,pci.device_id --format=csv,noheader)
-  export LD_PRELOAD=/usr/local/lib/libfakepci.so
+  export FAKE_PCI_PROC=/tmp/fakepci.proc LD_PRELOAD=/usr/local/lib/libfakepci.so
 fi
 args=(--user=USA-RedDragon --team=223518 --cpus=0 --log-to-screen=true)
 [ -n "$FAH_PASSKEY" ] && args+=(--passkey="$FAH_PASSKEY")
