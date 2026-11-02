@@ -49,9 +49,31 @@ snapshot() {
   return 1
 }
 
+# Drops units that belong to an earlier client identity (rows and folders) from the snapshot, so they are not carried
+# from node to node. Skips when the client ID is unknown or no saved unit belongs to it.
+prune() {
+  local id own u dropped=0
+  id=$(tr -cd 'A-Za-z0-9_-' < /tmp/fah-id 2>/dev/null)
+  [ -n "$id" ] && [ -f "$SNAP/client.db" ] || return 0
+  own="$(printf %s "$id" | tr '_-' '/+')="
+  [ "$(sqlite3 "$SNAP/client.db" "SELECT count(*) FROM units WHERE json_extract(value, '\$.data.request.data.id') = '$own'")" -gt 0 ] || return 0
+  sqlite3 "$SNAP/client.db" "DELETE FROM units WHERE json_extract(value, '\$.data.request.data.id') IS NOT NULL AND json_extract(value, '\$.data.request.data.id') != '$own'" || return 0
+  local keep; keep=$(sqlite3 "$SNAP/client.db" "SELECT name FROM units") || return 0
+  for d in "$SNAP/work"/*/; do
+    [ -d "$d" ] || continue
+    u=$(basename "$d")
+    grep -qxF -- "$u" <<<"$keep" || { rm -rf "$d"; dropped=$((dropped + 1)); }
+  done
+  if [ "$dropped" != "$(cat /tmp/fah-pruned 2>/dev/null)" ]; then
+    echo "$dropped" > /tmp/fah-pruned
+    log "not saving $dropped unit folder(s) of earlier identities"
+  fi
+}
+
 push() {
   mkdir -p "$DATA/work"
   snapshot || { log "save skipped, state kept changing"; return 1; }
+  prune
   local next=a
   [ "$(cat "$SLOT_FILE" 2>/dev/null)" = a ] && next=b
   if rclone sync "$SNAP" "$REMOTE/slot-$next" "${EXCLUDE[@]}" --transfers 4 && echo "$next" | rclone rcat "$REMOTE/current"; then
