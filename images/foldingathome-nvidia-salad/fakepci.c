@@ -116,14 +116,25 @@ static int fake_cl_info(void *dev, unsigned param, size_t size, void *value, siz
   return r;
 }
 
+// glibc resolves RTLD_NEXT (and scopes RTLD_DEFAULT) relative to the caller's return address, so every lookup that is
+// not one of the two faked functions must reach glibc as a tail call; otherwise a wrapper library's
+// dlsym(RTLD_NEXT, x) would return the wrapper itself and recurse (this crashed fah-client under WSL's libcuda).
+static void *fake_lookup(void *handle, const char *name, dlsym_t real) __attribute__((noinline));
+static void *fake_lookup(void *handle, const char *name, dlsym_t real) {
+  void *p = real(handle, name);
+  if (!p) return p;
+  if (name[0] == 'c' && !strcmp(name, "cuDeviceGetAttribute")) { real_cu_attr = (cu_attr_t)p; return (void *)fake_cu_attr; }
+  real_cl_info = (cl_info_t)p;
+  return (void *)fake_cl_info;
+}
+
 void *dlsym(void *handle, const char *name) {
-  void *p = real_dlsym()(handle, name);
+  dlsym_t real = real_dlsym();
   int bus, slot;
-  if (p && fake_addr(&bus, &slot)) {
-    if (!strcmp(name, "cuDeviceGetAttribute")) { real_cu_attr = (cu_attr_t)p; return (void *)fake_cu_attr; }
-    if (!strcmp(name, "clGetDeviceInfo")) { real_cl_info = (cl_info_t)p; return (void *)fake_cl_info; }
-  }
-  return p;
+  if (handle != RTLD_NEXT && handle != RTLD_DEFAULT &&
+      (!strcmp(name, "cuDeviceGetAttribute") || !strcmp(name, "clGetDeviceInfo")) && fake_addr(&bus, &slot))
+    return fake_lookup(handle, name, real);
+  return real(handle, name);
 }
 
 int open64(const char *path, int flags, ...) {
