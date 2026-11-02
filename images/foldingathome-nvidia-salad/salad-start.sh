@@ -19,6 +19,16 @@ if { [ -n "$FAH_FAKE_PCI" ] || ! grep -qsx 0x10de /sys/bus/pci/devices/*/vendor;
   export FAKE_PCI_PROC=/tmp/fakepci.proc LD_PRELOAD=/usr/local/lib/libfakepci.so
 fi
 salad-sync restore
+# Units are bound to a GPU by PCI address, which differs between Salad nodes; move restored units onto this node's GPU.
+db=/var/lib/fah-client/client.db
+gpu=$(nvidia-smi --query-gpu=pci.bus_id --format=csv,noheader 2>/dev/null | head -1 | tr 'A-F' 'a-f' | awk -F'[:.]' 'NF >= 4 {printf "gpu:%s:%s:%02x", $2, $3, $4}')
+if [ -f "$db" ] && [ -n "$gpu" ]; then
+  for old in $(sqlite3 "$db" "SELECT value FROM units" | grep -oE 'gpu:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}' | sort -u); do
+    [ "$old" = "$gpu" ] && continue
+    sqlite3 "$db" "UPDATE units SET value = replace(value, '$old', '$gpu')" && echo "salad-start: moved saved units from $old to $gpu" >&2
+  done
+  sqlite3 "$db" "UPDATE groups SET value = json_set(value, '\$.gpus', json('{\"$gpu\":{\"enabled\":true}}'))"
+fi
 args=(--user=USA-RedDragon --team=223518 --cpus=0 --log-to-screen=true)
 [ -n "$FAH_PASSKEY" ] && args+=(--passkey="$FAH_PASSKEY")
 fah-client "${args[@]}" &
