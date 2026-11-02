@@ -21,7 +21,10 @@ fi
 salad-sync restore
 # Units are bound to a GPU by PCI address, which differs between Salad nodes; move restored units onto this node's GPU.
 db=/var/lib/fah-client/client.db
-gpu=$(nvidia-smi --query-gpu=pci.bus_id --format=csv,noheader 2>/dev/null | head -1 | tr 'A-F' 'a-f' | awk -F'[:.]' 'NF >= 4 {printf "gpu:%s:%s:%02x", $2, $3, $4}')
+# cbang names GPUs gpu:BUS:SLOT:FUNC in decimal (%02d), while nvidia-smi prints the PCI address in hex.
+gpu=""
+IFS=':.' read -r _ pbus pslot pfn < <(nvidia-smi --query-gpu=pci.bus_id --format=csv,noheader 2>/dev/null | head -1 | tr -d ' ')
+[ -n "$pfn" ] && gpu=$(printf 'gpu:%02d:%02d:%02d' "$((16#$pbus))" "$((16#$pslot))" "$((16#$pfn))")
 if [ -f "$db" ] && [ -n "$gpu" ]; then
   for old in $(sqlite3 "$db" "SELECT value FROM units" | grep -oE 'gpu:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}' | sort -u); do
     [ "$old" = "$gpu" ] && continue
