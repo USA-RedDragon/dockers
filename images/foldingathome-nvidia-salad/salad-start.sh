@@ -42,31 +42,15 @@ fah-client "${args[@]}" &
 pid=$!
 salad-sync watch &
 for i in $(seq 60); do (exec 3<>/dev/tcp/127.0.0.1/7396) 2>/dev/null && break; sleep 2; done
-perl -MIO::Socket::INET -e '
-  sub ws { my $s = IO::Socket::INET->new("127.0.0.1:7396") or die "connect: $!";
-    print $s "GET /api/websocket HTTP/1.1\r\nHost: 127.0.0.1:7396\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Key: MDEyMzQ1Njc4OWFiY2RlZg==\r\nSec-WebSocket-Version: 13\r\n\r\n";
-    my $h = ""; while ($h !~ /\r\n\r\n/) { sysread($s, $h, 4096, length $h) or die "handshake: $!" }
-    ($s, (split /\r\n\r\n/, $h, 2)[1] // "") }
-  sub send_msg { my ($s, $m) = @_; my $l = length $m; my $k = "abcd";
-    my $h = chr(0x81) . ($l < 126 ? chr(0x80 | $l) : chr(0x80 | 126) . pack("n", $l));
-    print $s $h . $k . substr($m ^ ($k x (int($l / 4) + 1)), 0, $l) }
-  my ($s, %g);
-  # The state frame can arrive in the same read as the handshake reply, so ws() returns those bytes too.
-  while (1) {
-    ($s, my $buf) = ws(); my $t = time;
-    $s->blocking(0); while (time - $t < 2) { my $r; sysread($s, $r, 65536) and $buf .= $r; select(undef, undef, undef, 0.2) }
-    while ($buf =~ /"(gpu:[0-9a-fA-F:]+)"\s*:\s*\{/g) { my $id = $1; my $rest = substr($buf, pos($buf), 600); $rest =~ s/"gpu:.*//s; $g{$id} = 1 if $rest =~ /"supported"\s*:\s*true/ }
-    last if %g; close $s; sleep 3;
-  }
-  $s->blocking(1);
-  my $gpus = join ",", map { "\"$_\":{\"enabled\":true}" } sort keys %g;
-  print STDERR "salad-start: enabling GPUs: ", join(" ", sort keys %g), "\n";
-  send_msg($s, "{\"cmd\":\"config\",\"config\":{\"groups\":{\"\":{\"cpus\":" . ($ENV{FAH_CPUS} || 0) . ",\"gpus\":{$gpus}}}}}"); sleep 2;
-  send_msg($s, "{\"cmd\":\"state\",\"state\":\"" . ($ENV{FAH_STATE} || "fold") . "\"}"); sleep 2;
-  if ($ENV{FAH_ACCOUNT_TOKEN}) {
-    my $name = $ENV{FAH_MACHINE_NAME} || "salad";
-    send_msg($s, "{\"cmd\":\"link\",\"token\":\"$ENV{FAH_ACCOUNT_TOKEN}\",\"name\":\"$name\"}"); sleep 2;
-    print STDERR "salad-start: linked to account as $name\n";
-  }
-'
+salad-ws setup
+if [ -n "$FAH_ACCOUNT_TOKEN" ]; then
+  for try in 1 2 3 4 5; do
+    id=$(cat /tmp/fah-id 2>/dev/null)
+    if [ -n "$id" ] && curl -s -m 15 "https://api.foldingathome.org/machine/$id" | grep -q '"mach_name"'; then
+      echo "salad-start: account link confirmed for $id" >&2; break
+    fi
+    echo "salad-start: account link not confirmed for ${id:-unknown id} (try $try), sending it again" >&2
+    salad-ws link
+  done
+fi
 wait "$pid"

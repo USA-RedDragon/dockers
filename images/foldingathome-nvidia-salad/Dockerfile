@@ -22,6 +22,7 @@ COPY --from=base / /
 COPY --from=fakepci /src/libfakepci.so /usr/local/lib/libfakepci.so
 COPY --chmod=755 salad-start.sh /usr/local/bin/salad-start
 COPY --chmod=755 salad-sync.sh /usr/local/bin/salad-sync
+COPY --chmod=755 salad-ws.pl /usr/local/bin/salad-ws
 
 ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
