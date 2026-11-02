@@ -33,6 +33,9 @@ RUN apt-get update \
         udev \
     && rm -rf /var/lib/apt/lists/*
 
+# fah-client drops its identity and every saved unit when /etc/machine-id changes, and installing systemd makes a new one on every build.
+RUN echo d63e56d48427474083cec9b98646f864 > /etc/machine-id
+
 RUN apt-get update \
     && apt-get install -y --no-install-recommends --no-install-suggests \
         ${BUILD_DEPS} \
