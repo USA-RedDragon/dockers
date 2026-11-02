@@ -18,10 +18,12 @@ if { [ -n "$FAH_FAKE_PCI" ] || ! grep -qsx 0x10de /sys/bus/pci/devices/*/vendor;
   done < <(nvidia-smi --query-gpu=pci.bus_id,pci.device_id --format=csv,noheader)
   export FAKE_PCI_PROC=/tmp/fakepci.proc LD_PRELOAD=/usr/local/lib/libfakepci.so
 fi
+salad-sync restore
 args=(--user=USA-RedDragon --team=223518 --cpus=0 --log-to-screen=true)
 [ -n "$FAH_PASSKEY" ] && args+=(--passkey="$FAH_PASSKEY")
 fah-client "${args[@]}" &
 pid=$!
+salad-sync watch &
 for i in $(seq 60); do (exec 3<>/dev/tcp/127.0.0.1/7396) 2>/dev/null && break; sleep 2; done
 perl -MIO::Socket::INET -e '
   sub ws { my $s = IO::Socket::INET->new("127.0.0.1:7396") or die "connect: $!";
@@ -40,7 +42,12 @@ perl -MIO::Socket::INET -e '
   $s->blocking(1);
   my $gpus = join ",", map { "\"$_\":{\"enabled\":true}" } sort keys %g;
   print STDERR "salad-start: enabling GPUs: ", join(" ", sort keys %g), "\n";
-  send_msg($s, "{\"cmd\":\"config\",\"config\":{\"groups\":{\"\":{\"cpus\":0,\"gpus\":{$gpus}}}}}"); sleep 2;
+  send_msg($s, "{\"cmd\":\"config\",\"config\":{\"groups\":{\"\":{\"cpus\":" . ($ENV{FAH_CPUS} || 0) . ",\"gpus\":{$gpus}}}}}"); sleep 2;
   send_msg($s, "{\"cmd\":\"state\",\"state\":\"" . ($ENV{FAH_STATE} || "fold") . "\"}"); sleep 2;
+  if ($ENV{FAH_ACCOUNT_TOKEN}) {
+    my $name = $ENV{FAH_MACHINE_NAME} || "salad";
+    send_msg($s, "{\"cmd\":\"link\",\"token\":\"$ENV{FAH_ACCOUNT_TOKEN}\",\"name\":\"$name\"}"); sleep 2;
+    print STDERR "salad-start: linked to account as $name\n";
+  }
 '
 wait "$pid"

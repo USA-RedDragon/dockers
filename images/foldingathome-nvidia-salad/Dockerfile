@@ -12,7 +12,7 @@ FROM ghcr.io/usa-reddragon/foldingathome-nvidia:v8.5.6 AS base
 USER root
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends curl \
+    && apt-get install -y --no-install-recommends curl inotify-tools rclone sqlite3 \
     && rm -rf /var/lib/apt/lists/*
 
 # Flatten into new layers so CI's gzip setting applies to every layer; SaladCloud cannot pull zstd layers.
@@ -21,6 +21,7 @@ FROM scratch
 COPY --from=base / /
 COPY --from=fakepci /src/libfakepci.so /usr/local/lib/libfakepci.so
 COPY --chmod=755 salad-start.sh /usr/local/bin/salad-start
+COPY --chmod=755 salad-sync.sh /usr/local/bin/salad-sync
 
 ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
