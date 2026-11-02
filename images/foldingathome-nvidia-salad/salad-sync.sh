@@ -53,7 +53,8 @@ snapshot() {
 # from node to node. Skips when the client ID is unknown or no saved unit belongs to it.
 prune() {
   local id own u dropped=0
-  id=$(tr -cd 'A-Za-z0-9_-' < /tmp/fah-id 2>/dev/null)
+  [ -f /tmp/fah-id ] || return 0
+  id=$(tr -cd 'A-Za-z0-9_-' < /tmp/fah-id)
   [ -n "$id" ] && [ -f "$SNAP/client.db" ] || return 0
   own="$(printf %s "$id" | tr '_-' '/+')="
   [ "$(sqlite3 "$SNAP/client.db" "SELECT count(*) FROM units WHERE json_extract(value, '\$.data.request.data.id') = '$own'")" -gt 0 ] || return 0
@@ -90,15 +91,20 @@ push() {
 watch() {
   enabled || { log "no S3 settings, not saving state"; sleep infinity; }
   while [ ! -d "$DATA/work" ]; do sleep 5; done
-  local last=0
-  inotifywait -m -r -q -e close_write,moved_to,delete --format '%w%f' \
+  local last=0 ev urgent
+  # A finished unit (results written) or a credited one (folder deleted) is saved at once: a node lost before the next
+  # periodic save would otherwise restore the unit as still running.
+  inotifywait -m -r -q -e close_write,moved_to,delete --format '%e %w%f' \
     --exclude '(viewerFrame|viewerTop|logfile_)' "$DATA/work" 2>/dev/null |
   while true; do
-    if read -r -t 600 _; then
-      while read -r -t 10 _; do :; done
+    urgent=0
+    if read -r -t 600 ev; then
+      case "$ev" in *ISDIR*|*wuresults*) urgent=1 ;; esac
+      local until=$(( $(date +%s) + 15 ))
+      while [ "$(date +%s)" -lt "$until" ] && read -r -t 10 ev; do case "$ev" in *ISDIR*|*wuresults*) urgent=1 ;; esac; done
     fi
     now=$(date +%s)
-    if [ $((now - last)) -ge 30 ]; then push; last=$now; fi
+    if [ "$urgent" = 1 ] || [ $((now - last)) -ge 30 ]; then push; last=$now; fi
   done
 }
 
