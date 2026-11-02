@@ -1,4 +1,4 @@
-FROM debian:12.15-slim@sha256:7ff6ba31527b9e336162fa061746c366c4b2032f4d2cff2078bea43f78efe3f8 AS fakepci
+FROM debian:12.15-slim@sha256:99c0b25c46d0214d5a2091092e7908907dcaecd6a962cde0ac700acee222b6f3 AS fakepci
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends gcc libc6-dev \
