@@ -1,49 +1,102 @@
 #!/bin/bash
 # Keeps the client's state in S3 so a replacement node can resume the same units.
-# Usage: salad-sync restore | salad-sync watch
+# Usage: salad-sync restore | salad-sync push | salad-sync watch
+# restore exits non-zero when the saved state cannot be read; the caller must then not start the client.
+# push returns 2 when another container has taken over this state.
 set -u
 DATA=/var/lib/fah-client
 SNAP=/tmp/fah-snap
+RESTORED=/tmp/fah-restored
+OWNER=/tmp/fah-owner
 REMOTE="s3:${FAH_S3_BUCKET:-fah-salad}/${FAH_S3_PREFIX:-default}"
 EXCLUDE=(--exclude 'viewerFrame*.json' --exclude 'viewerTop.json' --exclude 'logfile_*.txt')
 
 export RCLONE_CONFIG_S3_TYPE=s3 RCLONE_CONFIG_S3_PROVIDER=Minio RCLONE_CONFIG_S3_ENDPOINT="${FAH_S3_URL:-}"
 export RCLONE_CONFIG_S3_ACCESS_KEY_ID="${FAH_S3_ACCESS_KEY:-}" RCLONE_CONFIG_S3_SECRET_ACCESS_KEY="${FAH_S3_SECRET_KEY:-}"
 export RCLONE_S3_NO_CHECK_BUCKET=true RCLONE_LOG_LEVEL=ERROR
+export RCLONE_CONTIMEOUT=15s RCLONE_TIMEOUT=120s RCLONE_RETRIES=3 RCLONE_LOW_LEVEL_RETRIES=3
 
 log() { echo "salad-sync: $*" >&2; }
 
 enabled() { [ -n "${FAH_S3_URL:-}" ] && [ -n "${FAH_S3_ACCESS_KEY:-}" ] && [ -n "${FAH_S3_SECRET_KEY:-}" ]; }
 
-SLOT_FILE=/tmp/fah-slot
+# Lists the top of the prefix; fails (instead of returning nothing) when S3 cannot be reached.
+list_top() {
+  local try out
+  for try in 1 2 3 4 5 6; do
+    if out=$(rclone lsf "$REMOTE" --max-depth 1 2>/dev/null); then printf '%s\n' "$out"; return 0; fi
+    log "cannot list $REMOTE (try $try)"
+    sleep $((try * 10))
+  done
+  return 1
+}
+
+# Prints the slot named by "current", or nothing when there is none yet. Fails when it cannot tell.
+read_current() {
+  local top cur
+  top=$(list_top) || return 1
+  grep -qx current <<<"$top" || return 0
+  cur=$(rclone cat "$REMOTE/current" 2>/dev/null | tr -cd 'ab') || return 1
+  [ -n "$cur" ] || return 1
+  echo "$cur"
+}
+
+claim() {
+  cat /proc/sys/kernel/random/uuid > "$OWNER"
+  rclone rcat "$REMOTE/owner" < "$OWNER" || { log "cannot write owner token"; return 1; }
+}
 
 # Saves alternate between slot-a and slot-b and "current" names the last complete one, so a node killed mid-upload never leaves a mixed checkpoint behind.
 restore() {
-  enabled || { log "no S3 settings, starting fresh"; return 0; }
-  local cur src
-  cur=$(rclone cat "$REMOTE/current" 2>/dev/null | tr -cd 'ab')
-  if [ -n "$cur" ]; then
-    src="$REMOTE/slot-$cur"
-  elif [ -n "$(rclone lsf "$REMOTE/client.db" 2>/dev/null)" ]; then
-    src="$REMOTE"
-  else
-    log "nothing saved at $REMOTE, starting fresh"; return 0
+  rm -f "$RESTORED"
+  enabled || { log "no S3 settings, starting fresh"; touch "$RESTORED"; return 0; }
+  if [ -f "$DATA/client.db" ]; then
+    log "local state present (restarted in place), keeping it"
+    claim || return 1
+    touch "$RESTORED"; return 0
   fi
-  echo "${cur:-a}" > "$SLOT_FILE"
-  rclone copy "$src" "$DATA" "${EXCLUDE[@]}" --exclude '/slot-*/**' --exclude '/current' --transfers 8 \
-    && log "restored $(find "$DATA/work" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l) unit(s) and client.db from $src"
+  local top cur src try
+  top=$(list_top) || { log "S3 unreachable, not starting"; return 1; }
+  if grep -qx current <<<"$top"; then
+    cur=$(read_current) && [ -n "$cur" ] || { log "cannot read $REMOTE/current, not starting"; return 1; }
+    src="$REMOTE/slot-$cur"
+  elif grep -qx client.db <<<"$top"; then
+    src="$REMOTE"
+  elif grep -qE '^slot-' <<<"$top"; then
+    log "slots exist but no current pointer at $REMOTE, not starting"; return 1
+  else
+    log "nothing saved at $REMOTE, starting fresh"
+    claim || return 1
+    touch "$RESTORED"; return 0
+  fi
+  for try in 1 2 3; do
+    rm -rf "$DATA/work" "$DATA"/client.db*
+    if rclone copy "$src" "$DATA" "${EXCLUDE[@]}" --exclude '/slot-*/**' --exclude '/current' --exclude '/owner' --transfers 8; then
+      claim || return 1
+      touch "$RESTORED"
+      log "restored $(find "$DATA/work" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l) unit(s) and client.db from $src"
+      return 0
+    fi
+    log "restore from $src failed (try $try)"
+    sleep $((try * 10))
+  done
+  rm -rf "$DATA/work" "$DATA"/client.db*
+  log "restore failed, not starting"
+  return 1
 }
 
 tree_stamp() { find "$DATA/client.db" "$DATA/client.db-wal" "$DATA/work" -type f ! -name '*.log' ! -name '*.xvg' ! -name 'viewer*' ! -name 'logfile_*' -printf '%p %s %T@\n' 2>/dev/null | sort; }
 
 # Copies the client state to local disk first: the cores append to logs and rewrite checkpoints while rclone uploads, and S3 rejects a file that grows mid-PUT.
 snapshot() {
+  local f ok
   for _ in 1 2 3 4 5; do
     before=$(tree_stamp)
-    rm -rf "$SNAP" && mkdir -p "$SNAP/work"
-    cp -a "$DATA/work/." "$SNAP/work/" 2>/dev/null
-    for f in client.db client.db-wal; do [ ! -f "$DATA/$f" ] || cp "$DATA/$f" "$SNAP/$f"; done
-    [ "$before" = "$(tree_stamp)" ] && return 0
+    rm -rf "$SNAP" && mkdir -p "$SNAP/work" || return 1
+    ok=1
+    cp -a "$DATA/work/." "$SNAP/work/" || ok=0
+    for f in client.db client.db-wal; do [ ! -f "$DATA/$f" ] || cp "$DATA/$f" "$SNAP/$f" || ok=0; done
+    [ "$ok" = 1 ] && [ "$before" = "$(tree_stamp)" ] && return 0
     sleep 2
   done
   return 1
@@ -65,46 +118,73 @@ prune() {
     u=$(basename "$d")
     grep -qxF -- "$u" <<<"$keep" || { rm -rf "$d"; dropped=$((dropped + 1)); }
   done
-  if [ "$dropped" != "$(cat /tmp/fah-pruned 2>/dev/null)" ]; then
+  if [ "$dropped" -gt 0 ] && [ "$dropped" != "$(cat /tmp/fah-pruned 2>/dev/null)" ]; then
     echo "$dropped" > /tmp/fah-pruned
     log "not saving $dropped unit folder(s) of earlier identities"
   fi
 }
 
+# One save at a time: the watcher, a final save on SIGTERM and manual saves share the same snapshot folder.
 push() {
+  enabled || return 0
+  [ -f "$RESTORED" ] || { log "save skipped, restore did not complete"; return 1; }
+  exec 9>/tmp/fah-push.lock
+  flock -w 300 9 || { log "save skipped, another save is still running"; return 1; }
+  local owner cur next
+  owner=$(rclone cat "$REMOTE/owner" 2>/dev/null) || { log "save failed, cannot read owner token"; return 1; }
+  if [ "$owner" != "$(cat "$OWNER" 2>/dev/null)" ]; then
+    log "another container now owns $REMOTE, stopping saves"
+    return 2
+  fi
   mkdir -p "$DATA/work"
-  snapshot || { log "save skipped, state kept changing"; return 1; }
+  snapshot || { log "save skipped, could not copy a steady state"; return 1; }
   prune
-  local next=a
-  [ "$(cat "$SLOT_FILE" 2>/dev/null)" = a ] && next=b
+  cur=$(read_current) || { log "save failed, cannot read $REMOTE/current"; return 1; }
+  next=a
+  [ "$cur" = a ] && next=b
   if rclone sync "$SNAP" "$REMOTE/slot-$next" "${EXCLUDE[@]}" --transfers 4 && echo "$next" | rclone rcat "$REMOTE/current"; then
-    echo "$next" > "$SLOT_FILE"
     log "saved $(date -u +%H:%M:%S) to slot-$next"
     if [ -n "$(rclone lsf "$REMOTE/client.db" 2>/dev/null)" ]; then
       rclone purge "$REMOTE/work" 2>/dev/null; rclone delete "$REMOTE" --max-depth 1 --include 'client.db*' 2>/dev/null
     fi
   else
     log "save failed"
+    return 1
   fi
 }
 
 watch() {
-  enabled || { log "no S3 settings, not saving state"; sleep infinity; }
-  while [ ! -d "$DATA/work" ]; do sleep 5; done
-  local last=0 ev urgent
+  enabled || { log "no S3 settings, not saving state"; exec sleep infinity; }
+  mkdir -p "$DATA/work"
+  local last=0 ev urgent rc until
   # A finished unit (results written) or a credited one (folder deleted) is saved at once: a node lost before the next
   # periodic save would otherwise restore the unit as still running.
-  inotifywait -m -r -q -e close_write,moved_to,delete --format '%e %w%f' \
-    --exclude '(viewerFrame|viewerTop|logfile_)' "$DATA/work" 2>/dev/null |
+  local ipid
+  exec {events}< <(exec inotifywait -m -r -q -e close_write,moved_to,delete --format '%e %w%f' \
+    --exclude '(viewerFrame|viewerTop|logfile_)' "$DATA/work" 2>/dev/null)
+  ipid=$!
+  trap 'kill "$ipid" 2>/dev/null' EXIT
+  push; [ $? = 2 ] && exit 2
+  last=$(date +%s)
   while true; do
     urgent=0
-    if read -r -t 600 ev; then
+    read -r -t 600 -u "$events" ev; rc=$?
+    if [ "$rc" = 0 ]; then
       case "$ev" in *ISDIR*|*wuresults*) urgent=1 ;; esac
-      local until=$(( $(date +%s) + 15 ))
-      while [ "$(date +%s)" -lt "$until" ] && read -r -t 10 ev; do case "$ev" in *ISDIR*|*wuresults*) urgent=1 ;; esac; done
+      until=$(( $(date +%s) + 15 ))
+      while [ "$(date +%s)" -lt "$until" ]; do
+        read -r -t 10 -u "$events" ev; rc=$?
+        [ "$rc" = 0 ] || break
+        case "$ev" in *ISDIR*|*wuresults*) urgent=1 ;; esac
+      done
     fi
+    # read returns 1 at end of input (inotifywait died) and more than 128 on timeout.
+    [ "$rc" = 1 ] && { log "file watcher stopped"; exit 1; }
     now=$(date +%s)
-    if [ "$urgent" = 1 ] || [ $((now - last)) -ge 30 ]; then push; last=$now; fi
+    if [ "$urgent" = 1 ] || [ $((now - last)) -ge 30 ]; then
+      push; [ $? = 2 ] && exit 2
+      last=$now
+    fi
   done
 }
 
