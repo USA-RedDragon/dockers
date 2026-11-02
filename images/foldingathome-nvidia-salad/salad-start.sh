@@ -29,6 +29,13 @@ if [ -f "$db" ] && [ -n "$gpu" ]; then
   done
   sqlite3 "$db" "UPDATE groups SET value = json_set(value, '\$.gpus', json('{\"$gpu\":{\"enabled\":true}}'))"
 fi
+# The client makes a new identity, orphaning every saved unit, when /etc/machine-id differs from the one it saved; image rebuilds change that file.
+mid=$(tr -cd '0-9a-f' < /etc/machine-id)
+if [ -f "$db" ] && [ -n "$mid" ]; then
+  saved=$(sqlite3 "$db" "SELECT value FROM config WHERE name = 'machine-id'")
+  [ -n "$saved" ] && [ "$saved" != "$mid" ] && sqlite3 "$db" "UPDATE config SET value = '$mid' WHERE name = 'machine-id'" \
+    && echo "salad-start: kept saved identity across machine-id $saved -> $mid" >&2
+fi
 args=(--user=USA-RedDragon --team=223518 --cpus=0 --log-to-screen=true)
 [ -n "$FAH_PASSKEY" ] && args+=(--passkey="$FAH_PASSKEY")
 fah-client "${args[@]}" &
