@@ -1,4 +1,4 @@
-FROM ghcr.io/bdd/runitor:v1.4.1-alpine@sha256:2b8314456908065f5d79cd25c7c310ddecd52995cea9d2a3526a4b0b19b4dc94 AS runitor
+FROM ghcr.io/bdd/runitor:v1.4.1-alpine@sha256:6615cb301e31efeab3f6084b66972bd66da3fe484356e2c912a3814229b02079 AS runitor
 
 FROM ghcr.io/gabe565/moreutils:0.6.1@sha256:ae74fb352762709efdb79a67d1b51ab78d6fd04b2e39eb6d53e218674e7dc4e5 AS moreutils
 
