@@ -68,6 +68,12 @@ configure() {
     timeout 300 salad-ws link
   done
 }
+# A node that starts while the fleet is winding down finishes what it restored instead of fetching new work.
+if [ "$(salad-sync control)" = finish ]; then
+  export FAH_STATE=finish
+  touch /tmp/fah-finish-sent
+  log "fleet is finishing, completing restored units only"
+fi
 configure &
 cpid=$!
 

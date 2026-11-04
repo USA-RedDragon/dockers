@@ -1,6 +1,6 @@
 #!/bin/bash
 # Keeps the client's state in S3 so a replacement node can resume the same units.
-# Usage: salad-sync restore | salad-sync push | salad-sync watch
+# Usage: salad-sync restore | salad-sync push | salad-sync watch | salad-sync control
 # restore exits non-zero when the saved state cannot be read; the caller must then not start the client.
 # push returns 2 when another container has taken over this state.
 set -u
@@ -39,6 +39,25 @@ read_current() {
   cur=$(rclone cat "$REMOTE/current" 2>/dev/null | tr -cd 'ab') || return 1
   [ -n "$cur" ] || return 1
   echo "$cur"
+}
+
+# Prints the fleet-wide state from "control/state" in the bucket ("finish" winds every node down), or "fold".
+CONTROL="s3:${FAH_S3_BUCKET:-fah-salad}/${FAH_S3_CONTROL:-control/state}"
+control() {
+  local st
+  enabled && st=$(rclone cat "$CONTROL" 2>/dev/null | tr -cd 'a-z') && [ "$st" = finish ] && { echo finish; return; }
+  echo fold
+}
+
+# The client keeps its database locked, so units are counted in the copy the last save took.
+units_left() {
+  local t=/tmp/fah-units.db n
+  rm -f "$t" "$t-wal"
+  cp "$SNAP/client.db" "$t" 2>/dev/null || { echo 1; return; }
+  [ ! -f "$SNAP/client.db-wal" ] || cp "$SNAP/client.db-wal" "$t-wal"
+  n=$(sqlite3 "$t" "SELECT count(*) FROM units" 2>/dev/null) || n=1
+  rm -f "$t" "$t-wal" "$t-shm"
+  echo "${n:-1}"
 }
 
 claim() {
@@ -177,7 +196,7 @@ watch() {
   trap 'kill "$ipid" 2>/dev/null' EXIT
   push; [ $? = 2 ] && exit 2
   last=$(date +%s)
-  local checked=$last owner
+  local checked=$last owner finished_note=0
   while true; do
     urgent=0
     # Saves can be minutes apart, so ownership is checked every minute on its own: a replaced node must stop folding.
@@ -186,6 +205,18 @@ watch() {
       if owner=$(rclone cat "$REMOTE/owner" 2>/dev/null) && [ "$owner" != "$(cat "$OWNER" 2>/dev/null)" ]; then
         log "another container now owns $REMOTE, stopping saves"
         exit 2
+      fi
+      # Finish lets the client complete and upload the units it has and fetch no more, so the group can be stopped
+      # without dropping work.
+      if [ "$(control)" = finish ]; then
+        if [ ! -f /tmp/fah-finish-sent ] && timeout 120 salad-ws finish; then
+          touch /tmp/fah-finish-sent
+          log "finish requested, completing current units"
+        fi
+        if [ -f /tmp/fah-finish-sent ] && [ "$(units_left)" = 0 ] && [ $(( checked - finished_note )) -ge 600 ]; then
+          finished_note=$checked
+          log "finished: no units left"
+        fi
       fi
     fi
     read -r -t 60 -u "$events" ev; rc=$?
