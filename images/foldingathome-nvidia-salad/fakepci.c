@@ -159,8 +159,8 @@ void *dlsym(void *handle, const char *name) {
 // OpenMM reads it back with the reading GPU's count. Resumed on a GPU with fewer SMs, the rest of the file is read out
 // of step, the CPU random generator gets a garbage index, and the core crashes with SIGSEGV about half the time (the
 // unit is dumped). The checkpoint is integrity checked, so it cannot be fixed; instead a FahCore that resumes one is told
-// the SM count that gives the block count the checkpoint was written with. On a bigger GPU the short read would leave
-// some seeds zero, so that direction is matched too; the block count only affects scheduling.
+// the SM count that gives the block count the checkpoint was written with. Only more SMs are ever reported: telling a
+// 4090 it had 66 SMs was followed by CUDA_ERROR_ILLEGAL_ADDRESS 145 steps after the resume.
 static long checkpoint_blocks(void) {
   char args[4096], path[4200], *dir = 0, *suffix = 0;
   FILE *f = fopen("/proc/self/cmdline", "r");
@@ -244,7 +244,7 @@ int cuDeviceGetAttribute(int *value, int attr, int dev) {
     if (blocks < 0) blocks = checkpoint_blocks();
     int per = next(&major, 75, dev) ? 6 : major == 6 ? 4 : 6;
     long sms = blocks / per;
-    if (blocks > 0 && blocks % per == 0 && sms != *value && sms * 4 >= *value && sms <= 4L * *value) {
+    if (blocks > 0 && blocks % per == 0 && sms > *value && sms <= 4L * *value) {
       static int told;
       if (!told++)
         fprintf(stderr, "fakepci: checkpoint was written for %ld thread blocks; reporting %ld SMs instead of %d\n",
