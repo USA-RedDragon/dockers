@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 static const char prefix[] = "/sys/bus/pci/devices";
 
@@ -152,6 +153,107 @@ void *dlsym(void *handle, const char *name) {
       from_executable(__builtin_return_address(0)))
     return fake_lookup(handle, name, real);
   return real(handle, name);
+}
+
+// An OpenMM 8 CUDA checkpoint holds one random seed per GPU thread block (numThreadBlocks: 6 per SM, 4 on Pascal), and
+// OpenMM reads it back with the reading GPU's count. Resumed on a GPU with fewer SMs, the rest of the file is read out
+// of step, the CPU random generator gets a garbage index, and the core crashes with SIGSEGV about half the time (the
+// unit is dumped). The checkpoint is integrity checked, so it cannot be fixed; instead a FahCore that resumes one is told
+// the SM count that gives the block count the checkpoint was written with. On a bigger GPU the short read would leave
+// some seeds zero, so that direction is matched too; the block count only affects scheduling.
+static long checkpoint_blocks(void) {
+  char args[4096], path[4200], *dir = 0, *suffix = 0;
+  FILE *f = fopen("/proc/self/cmdline", "r");
+  if (!f) return 0;
+  size_t n = fread(args, 1, sizeof(args) - 1, f);
+  fclose(f);
+  args[n] = 0;
+  for (char *a = args; a < args + n; a += strlen(a) + 1) {
+    char *v = a + strlen(a) + 1;
+    if (v >= args + n) break;
+    if (!strcmp(a, "-dir")) dir = v;
+    else if (!strcmp(a, "-suffix")) suffix = v;
+  }
+  if (!dir || !suffix || strchr(dir, '/') || strchr(suffix, '/')) return 0;
+  // The core runs from the work folder and then changes into <dir>/<suffix>.
+  char cwd[4096], tail[4200];
+  snprintf(path, sizeof(path), "%s/%s/checkpoint", dir, suffix);
+  snprintf(tail, sizeof(tail), "/%s/%s", dir, suffix);
+  size_t cl = getcwd(cwd, sizeof(cwd)) ? strlen(cwd) : 0, tl = strlen(tail);
+  if (cl >= tl && !strcmp(cwd + cl - tl, tail)) snprintf(path, sizeof(path), "checkpoint");
+  int fd = open(path, O_RDONLY);
+  if (fd < 0) return 0;
+  struct stat st;
+  long blocks = 0;
+  unsigned char h[4096];
+  ssize_t got = fstat(fd, &st) ? -1 : pread(fd, h, sizeof(h), 0);
+  static const char magic[] = "OpenMM Binary Checkpoint\n";
+  size_t o = sizeof(magic);
+  int i32;
+#define TAKE(dst, len) do { if (o + (len) > (size_t)got) goto out; memcpy((dst), h + o, (len)); o += (len); } while (0)
+  if (got < (ssize_t)sizeof(magic) || memcmp(h, magic, sizeof(magic))) goto out;
+  TAKE(&i32, 4);
+  if (i32 != 4 || o + 4 > (size_t)got || memcmp(h + o, "CUDA", 4)) goto out;
+  o += 4;
+  int atoms, params, version, precision;
+  TAKE(&atoms, 4);
+  TAKE(&params, 4);
+  if (atoms <= 0 || params < 0 || params > 100) goto out;
+  for (int p = 0; p < params; p++) {
+    TAKE(&i32, 4);
+    if (i32 < 0 || i32 > 1024) goto out;
+    o += i32 + 8;
+  }
+  TAKE(&version, 4);
+  TAKE(&precision, 4);
+  if (version != 3 || precision < 0 || precision > 2) goto out;
+  o += 8 + 8 + 4;
+  long long padded = 32LL * ((atoms + 31) / 32);
+  static const int bytes[3][3] = {{16, 0, 16}, {16, 16, 32}, {32, 0, 32}};
+  long long rng = o + padded * (bytes[precision][0] + bytes[precision][1] + bytes[precision][2] + 4 + 16) + 72;
+  long long seeds = rng + 4 + padded * 4 * 16;
+  static const int tails[2] = {4 + 1 + 1 + 8 + 156 * 16 + 4, 4 + 1};
+  for (int t = 0; t < 2; t++) {
+    long long left = (long long)st.st_size - tails[t] - seeds;
+    unsigned char init;
+    if (left <= 0 || left % 1024) continue;
+    if (pread(fd, &init, 1, st.st_size - tails[t] + 4) != 1 || (t == 0) != (init != 0)) continue;
+    blocks = left / 1024;
+    break;
+  }
+#undef TAKE
+out:
+  close(fd);
+  return blocks;
+}
+
+int cuDeviceGetAttribute(int *value, int attr, int dev) {
+  extern char *program_invocation_short_name;
+  static cu_attr_t next;
+  static long blocks = -1;
+  static __thread int depth;
+  if (!next) next = (cu_attr_t)real_dlsym()(RTLD_NEXT, "cuDeviceGetAttribute");
+  if (!next) {
+    void *h = dlopen("libcuda.so.1", RTLD_NOW | RTLD_NOLOAD);
+    if (h) next = (cu_attr_t)real_dlsym()(h, "cuDeviceGetAttribute");
+  }
+  if (!next || next == cuDeviceGetAttribute || depth) return 999;
+  depth++;
+  int r = next(value, attr, dev), major;
+  if (!r && attr == 16 && value && *value > 0 && !strncmp(program_invocation_short_name, "FahCore_", 8)) {
+    if (blocks < 0) blocks = checkpoint_blocks();
+    int per = next(&major, 75, dev) ? 6 : major == 6 ? 4 : 6;
+    long sms = blocks / per;
+    if (blocks > 0 && blocks % per == 0 && sms != *value && sms * 4 >= *value && sms <= 4L * *value) {
+      static int told;
+      if (!told++)
+        fprintf(stderr, "fakepci: checkpoint was written for %ld thread blocks; reporting %ld SMs instead of %d\n",
+                blocks, sms, *value);
+      *value = (int)sms;
+    }
+  }
+  depth--;
+  return r;
 }
 
 int open64(const char *path, int flags, ...) {
