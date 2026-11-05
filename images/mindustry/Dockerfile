@@ -10,7 +10,7 @@ RUN apk add --no-cache --virtual .build-deps \
         -o /mindustry-server.jar \
     && apk del .build-deps
 
-FROM amazoncorretto:25.0.5-alpine3.22@sha256:775fda8fc10aa8593c4added5cdd43af6d5504f35ff22f130b0505956c6b9ed6
+FROM amazoncorretto:25.0.5-alpine3.22@sha256:48ff5d4fe0d022962409e216e5d181894e84010d004b6898e9cc074524f409db
 
 COPY --from=downloader /mindustry-server.jar /mindustry-server.jar
 
