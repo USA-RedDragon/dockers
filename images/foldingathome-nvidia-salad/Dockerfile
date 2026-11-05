@@ -7,7 +7,7 @@ RUN apt-get update \
 COPY fakepci.c /src/fakepci.c
 RUN gcc -O2 -shared -fPIC -o /src/libfakepci.so /src/fakepci.c -ldl
 
-FROM ghcr.io/usa-reddragon/foldingathome-nvidia:v8.5.6 AS base
+FROM ghcr.io/usa-reddragon/foldingathome-nvidia:v8.5.6@sha256:908c45da1e15b2a7d891eecb8c2f6718ebed508faca8cda5a0d22a7ecf63c357 AS base
 
 USER root
 

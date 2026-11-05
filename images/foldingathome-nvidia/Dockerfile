@@ -1,4 +1,4 @@
-FROM ghcr.io/usa-reddragon/foldingathome:v8.5.6
+FROM ghcr.io/usa-reddragon/foldingathome:v8.5.6@sha256:9153f61b05f1570f62865aa77feff48c3df8bb9d91859c03921aaf6e0a10a6bb
 
 USER root
 
