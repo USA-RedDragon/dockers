@@ -2,7 +2,7 @@ FROM ghcr.io/bdd/runitor:v1.4.1-alpine@sha256:6615cb301e31efeab3f6084b66972bd66d
 
 FROM ghcr.io/gabe565/moreutils:0.6.1@sha256:ae74fb352762709efdb79a67d1b51ab78d6fd04b2e39eb6d53e218674e7dc4e5 AS moreutils
 
-FROM --platform=$BUILDPLATFORM golang:1.27.3-alpine@sha256:fa4881266890ef051f0ce63afdfaccb69bbe8186084387f4fafd60d7ecbabc71 AS go-deps
+FROM --platform=$BUILDPLATFORM golang:1.27.3-alpine@sha256:dbaa054703263d06c8b49576667418473b6231f8c0fa69dee103207fdb8e3654 AS go-deps
 WORKDIR /app
 
 COPY go.mod go.sum ./
