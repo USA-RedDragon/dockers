@@ -94,6 +94,18 @@ restore() {
       claim || return 1
       touch "$RESTORED"
       log "restored $(find "$DATA/work" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l) unit(s) and client.db from $src"
+      # The client never compacts its database and every save uploads it whole, so it is compacted here, before the client
+      # starts. A slow save widens the window in which a node can be replaced with only a stale save behind it.
+      if [ -f "$DATA/client.db" ]; then
+        local before after
+        before=$(stat -c %s "$DATA/client.db")
+        if sqlite3 "$DATA/client.db" "VACUUM" 2>/dev/null; then
+          after=$(stat -c %s "$DATA/client.db")
+          log "compacted client.db from $((before / 1048576)) MiB to $((after / 1048576)) MiB"
+        else
+          log "could not compact client.db, starting with it as restored"
+        fi
+      fi
       return 0
     fi
     log "restore from $src failed (try $try)"
@@ -171,7 +183,7 @@ push_locked() {
   local reuse=()
   [ -n "$cur" ] && reuse=(--copy-dest "$REMOTE/slot-$cur")
   if rclone sync "$SNAP" "$REMOTE/slot-$next" "${EXCLUDE[@]}" "${reuse[@]}" --transfers 4 && echo "$next" | rclone rcat "$REMOTE/current"; then
-    log "saved $(date -u +%H:%M:%S) to slot-$next"
+    log "saved $(date -u +%H:%M:%S) to slot-$next${SAVE_REASON:+ after $SAVE_REASON}"
     if [ -n "$(rclone lsf "$REMOTE/client.db" 2>/dev/null)" ]; then
       rclone purge "$REMOTE/work" 2>/dev/null; rclone delete "$REMOTE" --max-depth 1 --include 'client.db*' 2>/dev/null
     fi
@@ -188,7 +200,7 @@ watch() {
   # A unit resumes from its last checkpoint, so saves follow checkpoints instead of a short timer: a growing trajectory
   # is re-uploaded whole on every save, and on slow node uplinks frequent saves delayed the checkpoint that matters.
   # A new unit, a finished one (results written) and a credited one (folder deleted) are saved at once as well.
-  urgent_event() { case "$1" in *ISDIR*|*wuresults*|*wudata_*|*checkpt.crc|*/checkpoint|*checkpointState*|*.cpt) return 0 ;; esac; return 1; }
+  urgent_event() { case "$1" in *ISDIR*|*wuresults*|*wudata_*|*/checkpoint|*checkpointState*|*.cpt) return 0 ;; esac; return 1; }
   local ipid
   exec {events}< <(exec inotifywait -m -r -q -e close_write,moved_to,delete --format '%e %w%f' \
     --exclude '(viewerFrame|viewerTop|logfile_)' "$DATA/work" 2>/dev/null)
@@ -221,19 +233,21 @@ watch() {
     fi
     read -r -t 60 -u "$events" ev; rc=$?
     if [ "$rc" = 0 ]; then
-      urgent_event "$ev" && urgent=1
+      urgent_event "$ev" && { urgent=1; SAVE_REASON="$ev"; }
       until=$(( $(date +%s) + 15 ))
       while [ "$(date +%s)" -lt "$until" ]; do
         read -r -t 10 -u "$events" ev; rc=$?
         [ "$rc" = 0 ] || break
-        urgent_event "$ev" && urgent=1
+        urgent_event "$ev" && { [ "$urgent" = 1 ] || SAVE_REASON="$ev"; urgent=1; }
       done
     fi
     # read returns 1 at end of input (inotifywait died) and more than 128 on timeout.
     [ "$rc" = 1 ] && { log "file watcher stopped"; exit 1; }
     now=$(date +%s)
     if [ "$urgent" = 1 ] || [ $((now - last)) -ge 600 ]; then
+      [ "$urgent" = 1 ] || SAVE_REASON="timer"
       push; [ $? = 2 ] && exit 2
+      SAVE_REASON=
       last=$now
     fi
   done
