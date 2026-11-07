@@ -1,4 +1,4 @@
-FROM alpine:3.24.3@sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a AS builder
+FROM alpine:3.24.4@sha256:93b41ef40b1677fce8fcc64ff4af09daddfacf5040afde618bc46c1e2d1cc7d4 AS builder
 
 # renovate: datasource=gitlab-tags depName=free-astro/siril
 ARG SIRIL_VERSION=1.4.5
@@ -64,7 +64,7 @@ RUN scanelf --needed --nobanner --format '%n#p' --recursive /out/usr \
           done > /out/runtime-deps \
     && cat /out/runtime-deps
 
-FROM alpine:3.24.3@sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a
+FROM alpine:3.24.4@sha256:93b41ef40b1677fce8fcc64ff4af09daddfacf5040afde618bc46c1e2d1cc7d4
 
 COPY --from=builder /out/runtime-deps /tmp/runtime-deps
 RUN apk add --no-cache ca-certificates $(cat /tmp/runtime-deps) \
