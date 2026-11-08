@@ -40,6 +40,14 @@ if [ -f "$db" ]; then
   if [ -n "$mid" ] && [ -n "$saved" ] && [ "$saved" != "$mid" ]; then
     sqlite3 "$db" "UPDATE config SET value = '$mid' WHERE name = 'machine-id'" && log "kept saved identity across machine-id $saved -> $mid"
   fi
+  # fah-client pauses a group by itself after more than 4 units fail (a broken GPU) and saves that pause, so every later
+  # node would sit idle. A new node clears it; a pause without such a failure streak is the user's and is kept.
+  failed=$(sqlite3 "$db" "SELECT count(*) FROM (SELECT json_extract(value, '\$.result') r FROM wu_log ORDER BY ts DESC LIMIT 5) WHERE r != 'credited'")
+  paused=$(sqlite3 "$db" "SELECT json_extract(value, '\$.paused') FROM groups WHERE name = ''")
+  if [ "$failed" = 5 ] && [ "$paused" = 1 ]; then
+    sqlite3 "$db" "UPDATE groups SET value = json_set(value, '\$.paused', json('false')) WHERE name = ''" &&
+      log "cleared the pause the client set after 5 failed units on a previous node"
+  fi
   # Change times saved on a node whose clock ran ahead would make this client ignore config and state commands.
   sqlite3 "$db" "DELETE FROM config WHERE name LIKE 'change-time-%'"
 fi
