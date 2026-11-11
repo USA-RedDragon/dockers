@@ -4,5 +4,5 @@ python-awips==23.4.3
 numpy==2.5.4
 Cartopy==0.26.0
 MetPy==1.7.1
-pyshp==3.1.6
+pyshp==3.1.8
 descartes==1.1.0
