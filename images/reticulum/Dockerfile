@@ -1,7 +1,7 @@
-FROM python:3.14.8-alpine3.23@sha256:e7cff362a12454395f8dc99607c21a602ea880cdce03538877b90c2ba932b16f
+FROM python:3.15.2-alpine3.23@sha256:32f06114a111c2467804d06194c5584f16804a78cfaf427fb1fcbb0b3391d0f1
 
 # renovate: datasource=github-releases depName=markqvist/Reticulum
-ARG RNS_VERSION=1.5.5
+ARG RNS_VERSION=1.6.0
 
 RUN apk add --no-cache git
 
