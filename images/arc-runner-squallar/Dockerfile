@@ -1,7 +1,7 @@
 # Squallar CI runner: arc-runner plus the Rust toolchain, wasm tooling, GPU
 # and audio libs, headless browsers, and the xar/autotools chain that the
 # rustdar workflows (test, web, clippy, build) expect on squallar-runner-set-*.
-FROM ghcr.io/usa-reddragon/arc-runner:2.338.2@sha256:b99b60720e0819834710d59586eaf784b8577a7a9b798ddd2e91f9496df22b94
+FROM ghcr.io/usa-reddragon/arc-runner:2.338.2@sha256:3a973394da680f1fd06178ab43ce50a0eb5650f7a43835e0d029b4c8800d1c8b
 
 ARG TARGETARCH
 ARG DEBIAN_FRONTEND=noninteractive
@@ -58,7 +58,7 @@ USER runner
 ARG RUSTUP_VERSION=1.29.3
 
 # renovate: datasource=github-releases depName=rust-lang/rust
-ARG RUST_VERSION=1.99.1
+ARG RUST_VERSION=1.100.0
 ARG RUST_NIGHTLY=nightly-2026-08-15
 
 ENV RUSTUP_HOME=/home/runner/.rustup \
