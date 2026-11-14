@@ -1,4 +1,4 @@
-FROM debian:13.7-slim@sha256:a99cfc517144bc59b1978475ec53b46ecabec7e43635402ee5b77cc54cd1b20a AS toolchain-base
+FROM debian:13.7-slim@sha256:a72b4433de1cf7d6bae0c4cee74d0547f58601a643b3375f070c51600d63b6b2 AS toolchain-base
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -93,7 +93,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends bzip2 rsync xz-
 # renovate: datasource=github-tags depName=alsa-project/alsa-lib
 ARG ALSA_LIB_VERSION=1.2.16
 # renovate: datasource=github-releases depName=eudev-project/eudev
-ARG EUDEV_VERSION=3.2.14
+ARG EUDEV_VERSION=3.3.0
 ARG LINUX_VERSION=4.19.325
 
 RUN set -eux; \
@@ -129,7 +129,7 @@ RUN set -eux; \
     done; \
     rm -rf "$ksrc"
 
-FROM debian:13.7-slim@sha256:a99cfc517144bc59b1978475ec53b46ecabec7e43635402ee5b77cc54cd1b20a AS build-osxcross
+FROM debian:13.7-slim@sha256:a72b4433de1cf7d6bae0c4cee74d0547f58601a643b3375f070c51600d63b6b2 AS build-osxcross
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -165,7 +165,7 @@ RUN --mount=type=secret,id=IOS_SDK_URL \
 RUN --mount=type=secret,id=IOS_SIMULATOR_SDK_URL \
     curl -fsSL "$(cat /run/secrets/IOS_SIMULATOR_SDK_URL)" | tar -xj -C /opt/ios-sdk
 
-FROM rust:1.98.1-slim-trixie@sha256:f47a8de237dcbb0b0ce1099901e60a89728e3d51f24e664b40e947171538ade7
+FROM rust:1.100.0-slim-trixie@sha256:e9d95b74296f7126a83ae3d041aeaba1ff4c478f13abc5cc034fcf7c131c3d4a
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -395,7 +395,7 @@ RUN apt-get update && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # renovate: datasource=crate depName=wasm-pack
-ARG WASM_PACK_VERSION=0.15.0
+ARG WASM_PACK_VERSION=0.15.1
 RUN cargo install wasm-pack --version "${WASM_PACK_VERSION}" --locked
 
 # renovate: datasource=crate depName=cargo-ndk
@@ -405,7 +405,7 @@ RUN cargo install cargo-ndk --version "${CARGO_NDK_VERSION}" --locked
 # renovate: datasource=github-releases depName=ziglang/zig
 ARG ZIG_VERSION=0.15.1
 # renovate: datasource=crate depName=cargo-zigbuild
-ARG CARGO_ZIGBUILD_VERSION=0.23.4
+ARG CARGO_ZIGBUILD_VERSION=0.24.1
 ARG TARGETARCH
 RUN apt-get update && \
     apt-get install -y --no-install-recommends curl xz-utils && \
