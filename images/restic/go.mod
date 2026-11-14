@@ -1,6 +1,6 @@
 module github.com/USA-RedDragon/dockers/images/restic
 
-go 1.27.3
+go 1.27.4
 
 require (
 	gabe565.com/utils v0.0.0-20260511235214-4059440fa83b
