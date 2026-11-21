@@ -229,6 +229,9 @@ watch() {
           finished_note=$checked
           log "finished: no units left"
         fi
+      elif [ -f /tmp/fah-finish-sent ] && timeout 120 salad-ws fold; then
+        rm -f /tmp/fah-finish-sent
+        log "control is back to fold, folding resumed"
       fi
     fi
     read -r -t 60 -u "$events" ev; rc=$?

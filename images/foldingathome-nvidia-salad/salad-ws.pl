@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# Configures the local fah-client over its websocket. Usage: salad-ws setup | salad-ws link | salad-ws finish
+# Configures the local fah-client over its websocket. Usage: salad-ws setup | salad-ws link | salad-ws finish | salad-ws fold
 # setup waits for a supported GPU, enables it, sets cpus and state, and links the account; link only re-sends the link;
 # finish sets the finish state.
 # Writes the client ID to /tmp/fah-id.
@@ -43,7 +43,7 @@ while (1) {
   }
   $s->blocking(0);
   $buf .= drain($s, 2);
-  last if ($mode eq "link" || $mode eq "finish") && $buf =~ /"info"/;
+  last if ($mode eq "link" || $mode eq "finish" || $mode eq "fold") && $buf =~ /"info"/;
   while ($buf =~ /"(gpu:[0-9a-fA-F:]+)"\s*:\s*\{/g) {
     my $id = $1;
     my $rest = substr($buf, pos($buf), 600);
@@ -68,8 +68,8 @@ if ($mode eq "setup") {
   send_msg($s, "{\"cmd\":\"config\",\"config\":{\"groups\":{\"\":{\"cpus\":" . ($ENV{FAH_CPUS} || 0) . ",\"gpus\":{$gpus}}}}}");
   send_msg($s, "{\"cmd\":\"state\",\"state\":\"" . ($ENV{FAH_STATE} || "fold") . "\"}");
 }
-if ($mode eq "finish") {
-  send_msg($s, "{\"cmd\":\"state\",\"state\":\"finish\"}");
+if ($mode eq "finish" || $mode eq "fold") {
+  send_msg($s, "{\"cmd\":\"state\",\"state\":\"$mode\"}");
   $s->blocking(0);
   drain($s, 10);
   close $s;
