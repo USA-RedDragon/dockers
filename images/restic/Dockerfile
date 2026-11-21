@@ -2,7 +2,7 @@ FROM ghcr.io/bdd/runitor:v1.4.1-alpine@sha256:6615cb301e31efeab3f6084b66972bd66d
 
 FROM ghcr.io/gabe565/moreutils:0.6.1@sha256:ae74fb352762709efdb79a67d1b51ab78d6fd04b2e39eb6d53e218674e7dc4e5 AS moreutils
 
-FROM --platform=$BUILDPLATFORM golang:1.27.4-alpine@sha256:0a5f7fe796599ff487605987432e7619ae45beeb2fba4c2ce0b907879932aebf AS go-deps
+FROM --platform=$BUILDPLATFORM golang:1.27.4-alpine@sha256:70bd7ddea8b6cbe5d6943cde279d6b67feb10cc924fb9100d1d8757c1575b280 AS go-deps
 WORKDIR /app
 
 COPY go.mod go.sum ./
@@ -31,7 +31,7 @@ COPY cmd/restoredb cmd/restoredb
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     go build -ldflags='-w -s' -trimpath ./cmd/restoredb
 
-FROM restic/restic:0.19.1@sha256:136600b6ff6843d61d355f7f71f460a166429f35de6fd11b568fece3c9a4d510
+FROM restic/restic:0.20.0@sha256:93999df80d4ac6cb148e82d2ef1fe6a81996f17ff535e772723538211b31555a
 RUN test -f /usr/bin/restic
 
 RUN apk add --no-cache bash postgresql-client mariadb-client mongodb-tools sqlite

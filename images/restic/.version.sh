@@ -1,3 +1,3 @@
 #!/bin/sh
 # renovate: datasource=docker depName=restic/restic
-export VERSION=0.19.1
+export VERSION=0.20.0
