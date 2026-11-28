@@ -1,7 +1,7 @@
 FROM alpine:3.24.4@sha256:f59abe656b692d901e184be3445e084786602108599d2a51d229c0f5a48c71bf AS builder
 
 # renovate: datasource=github-tags depName=kubernetes/kubernetes
-ARG KUBELET_VERSION=v1.37.2
+ARG KUBELET_VERSION=v1.37.3
 ARG TARGETARCH
 ARG KUBELET_URL=https://dl.k8s.io/release/${KUBELET_VERSION}/bin/linux/${TARGETARCH}/kubelet
 
