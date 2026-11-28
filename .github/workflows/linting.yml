@@ -83,7 +83,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Lint - Markdown
-        uses: reviewdog/action-markdownlint@584c3e89347d0b16ede47c73ae199550a02b1b37 # v0.33.1
+        uses: reviewdog/action-markdownlint@16a84e29a125f2c98b1ce4bd8436ff8ffdd9da1c # v0.34.1
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
@@ -154,7 +154,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Lint - Misspell
-        uses: reviewdog/action-misspell@c846b6b0996029d2d39540c8ffebebbd957072db # v1.31.0
+        uses: reviewdog/action-misspell@ebdfc4655a67997a255a63b9e4b71abf32c98e6b # v1.31.1
         with:
           github_token: ${{ secrets.github_token }}
           fail_level: error
