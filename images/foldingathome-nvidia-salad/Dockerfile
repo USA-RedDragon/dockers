@@ -1,4 +1,4 @@
-FROM debian:12.15-slim@sha256:734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc AS fakepci
+FROM debian:12.15-slim@sha256:e67eeead736ff7bbe258ef088bff683635c561b1fcfefad0806c1df4ab49ce0e AS fakepci
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends gcc libc6-dev \
@@ -7,7 +7,7 @@ RUN apt-get update \
 COPY fakepci.c /src/fakepci.c
 RUN gcc -O2 -shared -fPIC -o /src/libfakepci.so /src/fakepci.c -ldl
 
-FROM ghcr.io/usa-reddragon/foldingathome-nvidia:v8.5.6@sha256:b1168ebacef232a6266dbf25e7802a75e6e01a2ca2e2d8ef1f7349e8a389c186 AS base
+FROM ghcr.io/usa-reddragon/foldingathome-nvidia:v8.5.6@sha256:b9bde61ccac7ac9cb5c85b7343d7d866103189c401bcc7c1ef87a2e7f4d17540 AS base
 
 USER root
 
